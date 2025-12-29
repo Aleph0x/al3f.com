@@ -52,9 +52,6 @@ body {
     font-family: serif;
     background-color: $background-color;
     color: $text-color;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     padding: $content-padding;
     text-align: center;
 }
@@ -110,14 +107,14 @@ header#site-banner {
 
 
 .toc {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 250px;
-    height: 100vh;
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
+    width: 100%;
+    max-height: calc(100vh - 3rem);
     background-color: $background-color;
     color: $text-color;
-    padding: 1rem;
+    padding: 1.25rem;
     overflow-y: auto;
     border-right: 2px solid $accent-color;
     font-family: monospace;
@@ -212,7 +209,13 @@ cite {
 /*======================*/
 
 main {
-    max-width: $content-max-width;
+    display: grid;
+    grid-template-columns: minmax(240px, 280px) minmax(0, $content-max-width);
+    gap: 2.5rem;
+    align-items: start;
+    justify-content: center;
+    max-width: calc(#{$content-max-width} + 340px);
+    width: 100%;
     margin: 0 auto;
     padding: 2rem;
     text-align: left;
@@ -249,6 +252,16 @@ main {
         text-align: justify;
         hyphens: auto;
     }
+}
+
+main > .toc {
+    grid-column: 1;
+}
+
+main > article {
+    grid-column: 2;
+    max-width: $content-max-width;
+    width: 100%;
 }
 
 /* =========================*/
@@ -678,14 +691,14 @@ table {
 }
 
 
-@media (max-width: 1350px) {
-    .toc {
-        position: relative;
-        width: 100%;
-        height: auto;
-        max-height: 300px;
-        border-right: none;
-        border-bottom: 2px solid $accent-color;
-        overflow-y: auto;
-    }
-}
+// @media (max-width: 1350px) {
+//     .toc {
+//         position: relative;
+//         width: 100%;
+//         height: auto;
+//         max-height: 300px;
+//         border-right: none;
+//         border-bottom: 2px solid $accent-color;
+//         overflow-y: auto;
+//     }
+// }
