@@ -26,6 +26,19 @@
     </section>
 
     <main>
+        <aside class="toc">
+            <h2>Recent Updates</h2>
+            <ul>
+
+            {% for domain, articles in categorized_articles.items() %}
+                {% for article in articles %}
+                <li>
+                    <a href="{{ article.url }}">{{ article.title }}|{{ article.last_modified }}</a>
+                </li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </aside>
         <section class="articles-list">
             {% if categorized_articles %}
             {% for domain, articles in categorized_articles.items() %}

@@ -347,6 +347,22 @@ footer {
 /*    ARTICLES LIST     */
 /*======================*/
 
+.layout--section {
+    display: grid;
+    grid-template-columns: minmax(0, $content-max-width);
+    justify-content: center;
+    max-width: 100%;
+    padding: 2rem;
+}
+
+
+.articles-list {
+  grid-column: 2;
+  max-width: $content-max-width;
+  width: 100%;
+  margin: 0 auto;
+}
+
 .articles-list {
     max-width: $content-max-width;
     margin: 2rem auto;
