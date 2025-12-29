@@ -1,9 +1,6 @@
 ---
 title: Known Issues
 description: "Issue Tracker
-
-
-"
 division: ["Writing"]
 domain: "Meta"
 worked: "0.0h"

@@ -1,0 +1,33 @@
+@use "./variables" as *;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: serif;
+    background-color: $background-color;
+    color: $text-color;
+    padding: $content-padding;
+    text-align: center;
+}
+
+a {
+    color: $link-color;
+    text-decoration: none;
+    border-bottom: 1px dotted $text-color;
+    transition: color 0.2s, background-color 0.2s;
+
+    &:hover {
+        color: $link-hover-color;
+        background-color: $link-hover-bg-color;
+    }
+
+    &:visited {
+        color: $link-visited-color;
+        text-decoration: none;
+
+    }
+}

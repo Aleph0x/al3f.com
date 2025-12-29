@@ -1,0 +1,56 @@
+@use "sass:color";
+@use "./variables" as *;
+
+.external-links {
+    max-width: 110ch;
+    margin: 3rem auto;
+    padding: 1.5rem;
+    border-top: 1px solid $accent-color;
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: $text-color;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    ol {
+        list-style: decimal;
+        padding-left: 2.5rem;
+        font-size: 1.6rem;
+        line-height: 1.85;
+        text-align: justify;
+        hyphens: auto;
+
+        li {
+            margin-bottom: 1.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid $accent-color;
+            transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
+
+            &:hover {
+                border-left: 2px solid $link-hover-color;
+                background: color.scale($background-color, $lightness: 10%);
+            }
+
+            a {
+                color: $link-color;
+                text-decoration: none;
+                border-bottom: 1px dotted $text-color;
+                font-weight: bold;
+                transition: color 0.2s, background-color 0.2s;
+
+                &:hover {
+                    color: $link-hover-color;
+                    background-color: $link-hover-bg-color;
+                }
+
+                &:visited {
+                    color: $link-visited-color;
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+}

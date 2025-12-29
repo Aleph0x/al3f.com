@@ -1,0 +1,29 @@
+@use "sass:color";
+@use "./variables" as *;
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    background-color: $background-color;
+    color: $text-color;
+    border: 1px solid $accent-color;
+
+    thead {
+        background-color: color.scale($background-color, $lightness: 10%);
+        text-transform: lowercase;
+    }
+
+    th,
+    td {
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 1px solid $accent-color;
+    }
+
+    tr:hover {
+        background-color: color.scale($background-color, $lightness: 5%);
+    }
+}

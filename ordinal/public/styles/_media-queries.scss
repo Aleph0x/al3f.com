@@ -1,0 +1,95 @@
+
+@use "./variables" as *;
+@use "sass:color";
+
+@media (max-width: 1100px) {
+    main {
+        display: block;
+        max-width: 100%;
+        padding: 1.5rem;
+    }
+
+    .toc {
+        position: relative;
+        top: auto;
+        max-height: none;
+        border-right: none;
+        border-bottom: 2px solid $accent-color;
+        margin-bottom: 1.5rem;
+        width: 100%;
+    }
+
+    main > article {
+        max-width: $content-max-width;
+        width: 100%;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+
+    main p,
+    .footnotes ol li {
+        font-size: 1.3rem;
+        line-height: 2;
+        margin-bottom: 2rem;
+        word-spacing: normal;
+        text-indent: 0.3rem;
+        hyphens: none;
+        text-align: left;
+    }
+
+
+}
+
+@media (max-width: 768px) {
+    .article-columns {
+        flex-direction: column;
+    }
+
+    .article-entry {
+        flex: 1 1 100%;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+
+    body,
+    main {
+        max-width: 100%;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-details {
+        padding: 1.5rem 0;
+    }
+
+    .page-title {
+        font-size: 3rem;
+    }
+
+    .page-description {
+        font-size: 1.4rem;
+    }
+
+    .page-meta {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
+
+// @media (max-width: 1350px) {
+//     .toc {
+//         position: relative;
+//         width: 100%;
+//         height: auto;
+//         max-height: 300px;
+//         border-right: none;
+//         border-bottom: 2px solid $accent-color;
+//         overflow-y: auto;
+//     }
+// }

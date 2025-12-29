@@ -1,0 +1,86 @@
+@use "./variables" as *;
+
+/*==========================*/
+/*     TABLE OF CONTENTS    */
+/*==========================*/
+
+
+.toc {
+    position: sticky;
+    top: 1.5rem;
+    align-self: start;
+    width: 100%;
+    max-height: calc(100vh - 3rem);
+    background-color: $background-color;
+    color: $text-color;
+    padding: 1.25rem;
+    overflow-y: auto;
+    border-right: 2px solid $accent-color;
+    font-family: monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+
+    h2 {
+        font-size: 1rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 0.8rem;
+        border-bottom: 1px solid $accent-color;
+        padding-bottom: 0.5rem;
+    }
+
+    ul {
+        list-style: none;
+        padding-left: 0;
+
+        .toc-item {
+            display: block;
+            padding: 0.2rem 0;
+            transition: background 0.2s ease-in-out;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            a {
+                color: $text-color;
+                text-decoration: none;
+                display: block;
+                padding: 0.2rem 0.5rem;
+                transition: color 0.2s;
+
+                &:hover {
+                    color: $link-hover-color;
+                }
+
+                &:visited {
+                    color: $link-visited-color;
+                    text-decoration: none;
+                }
+            }
+
+            &.toc-level-1 {
+                font-weight: bold;
+                padding-left: 0rem;
+            }
+
+            &.toc-level-2 {
+                padding-left: 1rem;
+            }
+
+            &.toc-level-3 {
+                padding-left: 2rem;
+            }
+
+            &.toc-level-4 {
+                padding-left: 3rem;
+            }
+        }
+    }
+
+    .toc-empty {
+        font-style: italic;
+        color: $accent-color;
+        text-align: center;
+    }
+}
