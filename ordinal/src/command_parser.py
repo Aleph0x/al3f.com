@@ -21,7 +21,23 @@ def parse_commands(parser):
     generate_parser.add_argument(
         "--category", choices=categories + ["all"], default="all", help="Category to generate."
     )
-    generate_parser.set_defaults(func=lambda args: generate_static_site(args.category))
+    generate_parser.add_argument(
+        "--commit", action="store_true", help="Record acknowledged changes to the revisions database."
+    )
+    generate_parser.add_argument(
+        "--commit-all",
+        action="store_true",
+        help="Bundle all detected changes under a single shared summary.",
+    )
+    generate_parser.add_argument(
+        "--summary",
+        type=str,
+        default=None,
+        help="Optional summary to use for commits (shared when --commit-all is set).",
+    )
+    generate_parser.set_defaults(
+        func=lambda args: generate_static_site(args.category, args.commit, args.commit_all, args.summary)
+    )
 
     cleanup_parser = subparsers.add_parser("cleanup", help="Remove orphaned files.")
     cleanup_parser.set_defaults(func=lambda args: cleanup_orphans())

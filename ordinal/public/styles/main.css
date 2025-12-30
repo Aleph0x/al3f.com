@@ -573,6 +573,11 @@ table tr:hover {
     gap: 1rem;
   }
 }
+@media (max-width: 1100px) {
+  .media-panel .media-rail {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
 body.theme-aleph {
   background: #000000;
   color: #ffffff;
@@ -794,6 +799,9 @@ body.theme-aleph {
   padding: 1.35rem;
   background: rgb(7.65, 7.65, 7.65);
   width: 100%;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
 .panel .panel-head {
   margin-bottom: 1rem;
@@ -801,6 +809,43 @@ body.theme-aleph {
 .panel .panel-head h3 {
   font-size: 1.4rem;
   letter-spacing: 0.05em;
+}
+
+.has-grid {
+  position: relative;
+  isolation: isolate;
+  --grid-spacing: 120px;
+  --grid-line: rgba(255, 255, 255, 0.08);
+  --grid-dot: rgba(255, 255, 255, 0.22);
+  --grid-opacity: 0.14;
+}
+.has-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px), radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 0);
+  background-size: var(--grid-spacing) var(--grid-spacing);
+  mix-blend-mode: screen;
+  opacity: var(--grid-opacity);
+  pointer-events: none;
+  z-index: 0;
+}
+.has-grid > * {
+  position: relative;
+  z-index: 1;
+}
+.has-grid.grid-loose {
+  --grid-spacing: 140px;
+  --grid-opacity: 0.1;
+}
+.has-grid.grid-regular {
+  --grid-spacing: 110px;
+  --grid-opacity: 0.14;
+}
+.has-grid.grid-tight {
+  --grid-spacing: 70px;
+  --grid-opacity: 0.18;
+  --grid-line: rgba(255, 255, 255, 0.12);
 }
 
 .panel-ghost {
@@ -853,56 +898,59 @@ body.theme-aleph {
   font-size: 0.8rem;
 }
 
-.gallery-strip .gallery-rail {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(180px, 200px);
-  gap: 0.85rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  justify-content: flex-start;
+.media-panel .panel-head.compact {
+  margin-bottom: 0.5rem;
 }
 
-.gallery-card {
+.media-panel .media-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.media-rail-card {
   border: 1px solid #aaaaaa;
-  padding: 0.75rem;
   background: rgb(5.1, 5.1, 5.1);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  text-align: left;
 }
-.gallery-card .frame {
-  aspect-ratio: 4/3;
-  border: 1px dashed #aaaaaa;
-  display: grid;
-  place-items: center;
-  color: #aaaaaa;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-}
-.gallery-card .caption {
-  margin-top: 0.4rem;
-  text-align: left;
-}
-.gallery-card .caption .label {
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  color: #aaaaaa;
-}
-.gallery-card .caption .title {
-  font-size: 0.9rem;
-  line-height: 1.3;
+.media-rail-card .media-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  word-break: break-word;
-  text-align: left;
 }
-.gallery-card .caption .title a {
+.media-rail-card .media-thumb img,
+.media-rail-card .media-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.media-rail-card .media-thumb video {
+  background: #000;
+}
+.media-rail-card .media-caption {
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  flex-wrap: wrap;
+}
+.media-rail-card .media-caption .chip {
+  background: transparent;
+  border-color: #ffffff;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+.media-rail-card .media-caption .media-links {
+  display: inline-flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.media-rail-card .media-caption .media-links a {
   font-weight: 600;
-  display: inline-block;
-  max-width: 100%;
 }
 
 .domains .domain-grid {
@@ -1050,17 +1098,17 @@ body.theme-aleph {
 
 .activity-graph {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14px, 14px));
-  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(8px, 8px));
+  gap: 2px;
   align-content: start;
-  padding: 0.75rem;
+  padding: 0.5rem 0;
   border: 1px solid #aaaaaa;
   background: rgb(10.2, 10.2, 10.2);
   width: 100%;
 }
 .activity-graph .cell {
-  width: 14px;
-  height: 14px;
+  width: 8px;
+  height: 8px;
   border: 1px solid rgb(38.25, 38.25, 38.25);
   background: rgb(20.4, 20.4, 20.4);
 }
@@ -1119,7 +1167,7 @@ body.theme-aleph {
 }
 .section-table .grid {
   display: grid;
-  grid-template-columns: 1.2fr 2fr 1.4fr 1.1fr 0.8fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.25rem;
   align-items: center;
 }

@@ -40,7 +40,9 @@ function setupSectionFilter() {
 function setupChangelogFilter() {
   const input = document.getElementById("changelog-filter");
   const select = document.getElementById("changelog-action");
-  const entries = Array.from(document.querySelectorAll(".changelog ul li"));
+  const entries = Array.from(
+    document.querySelectorAll(".changelog-table .table-row, .changelog ul li")
+  );
   if (!input || !select || entries.length === 0) return;
 
   const apply = () => {

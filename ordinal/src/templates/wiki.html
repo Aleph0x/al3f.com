@@ -36,6 +36,7 @@
     <main class="layout-shell wiki-layout">
         <section class="panel">
             <div class="page-details">
+                {% include "_fingerprint_banner.html" %}
                 <h2 class="page-title">{{ title }}</h2>
                 <p class="page-description">{{ description }}</p>
                 <div class="page-meta">
@@ -113,15 +114,26 @@
         {% if page_changelog %}
         <section class="panel changelog-panel">
             <h2>Changelog</h2>
-            <ul>
-                {% for entry in page_changelog %}
-                <li>
-                    <span class="chip">{{ entry.action }}</span>
-                    <span class="meta">{{ entry.timestamp }}</span>
-                    <span class="path"><a href="{{ entry.url }}">{{ entry.path }}</a></span>
-                </li>
-                {% endfor %}
-            </ul>
+            <div class="section-table">
+                <div class="table-head grid">
+                    <span>Hash</span>
+                    <span>Summary</span>
+                    <span>Date</span>
+                    <span>Time</span>
+                </div>
+                <div class="table-body changelog-table">
+                    {% for entry in page_changelog %}
+                    {% set dt_parts = entry.timestamp.split('T') %}
+                    {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                    <div class="table-row grid" data-action="commit" data-path="{{ entry.hash | lower }}">
+                        <span class="cell domain">{{ entry.hash }}</span>
+                        <span class="cell division">{{ entry.summary }}</span>
+                        <span class="cell modified">{{ dt_parts[0] }}</span>
+                        <span class="cell modified">{{ time_part }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </section>
         {% endif %}
     </main>

@@ -32,10 +32,9 @@
     </header>
 
     <main class="layout-shell">
-        <section id="latest" class="panel latest-grid">
+        <section id="latest" class="panel latest-grid has-grid grid-loose">
             <div class="panel-head">
-                <p class="eyebrow">Latest Drops</p>
-                <h3>Fresh entries across the archive</h3>
+                <h3>Recent Entries</h3>
                 <div class="filter-row">
                     <input id="latest-filter" type="search" placeholder="Filter latest by title or domain">
                 </div>
@@ -54,30 +53,40 @@
             </div>
         </section>
 
-        <section class="panel gallery-strip">
-            <div class="panel-head">
-                <p class="eyebrow">Media</p>
-                <h3>Frames, captures, stills</h3>
+        <section class="panel media-panel has-grid grid-loose">
+            <div class="panel-head compact">
+                <h3>Recent Media</h3>
             </div>
-            <div class="gallery-rail">
-                {% for article in recent_articles %}
-                <div class="gallery-card">
-                    <div class="frame placeholder">
-                        <span>{{ article.title[0:1] }}</span>
+            <div class="media-rail">
+                {% for media in recent_media %}
+                <figure class="media-rail-card">
+                    <div class="media-thumb">
+                        {% if media.type == "video" %}
+                        <video src="{{ media.url }}" muted playsinline controls></video>
+                        {% else %}
+                        <img src="{{ media.url }}" alt="{{ media.title }}">
+                        {% endif %}
                     </div>
-                    <div class="caption">
-                        <p class="label">{{ article.domain }}</p>
-                        <p class="title"><a href="{{ article.url }}">{{ article.title }}</a></p>
-                    </div>
-                </div>
+                    <figcaption class="media-caption">
+                        <span class="chip">{{ media.type }}</span>
+                        <span class="media-links">
+                            {% if media.articles %}
+                                {% for art in media.articles %}
+                                <a href="{{ art.url }}">{{ art.title }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {{ media.title }}
+                            {% endif %}
+                        </span>
+                    </figcaption>
+                </figure>
                 {% endfor %}
             </div>
         </section>
 
-        <section class="panel domains">
+        <section class="panel domains has-grid grid-regular">
             <div class="panel-head">
-                <p class="eyebrow">Domains</p>
-                <h3>Navigate by domain</h3>
+                <h3>Domains</h3>
             </div>
             <div class="domain-grid">
                 {% for domain, articles in categorized_articles.items() %}
@@ -96,40 +105,44 @@
             </div>
         </section>
 
-        <section class="panel activity-panel">
+        <section class="panel activity-panel has-grid grid-tight">
             <div class="panel-head">
                 <p class="eyebrow">Activity</p>
-                <h3>Recent site changes</h3>
-                <div class="filter-row">
+                <h3>Site changes</h3>
+                <div class="filter-row mission-filter">
                     <input id="changelog-filter" type="search" placeholder="Search changelog">
                     <select id="changelog-action">
                         <option value="all">All</option>
-                        <option value="created">Created</option>
-                        <option value="modified">Modified</option>
-                        <option value="deleted">Deleted</option>
+                        <option value="commit" selected>Commits</option>
                     </select>
                 </div>
             </div>
-            <div class="activity-graph" title="Changes over the last 30 days">
+            <div class="activity-graph" title="Changes over the last year">
                 {% for day in activity_graph %}
                 <span class="cell level-{{ day.level }}" title="{{ day.date }} — {{ day.count }} change(s)"></span>
                 {% endfor %}
             </div>
-            <p class="activity-info" id="activity-info">Hover a cell to see the date and count.</p>
-            <div class="changelog">
-                <div class="changelog-head">
-                    <p class="eyebrow">Changelog</p>
-                    <p class="meta-line">Latest modifications, creations, deletions</p>
+            <div class="section-table activity-table">
+                <div class="table-head grid">
+                    <span>Slug</span>
+                    <span>Hash</span>
+                    <span>Summary</span>
+                    <span>Date</span>
+                    <span>Time</span>
                 </div>
-                <ul>
+                <div class="table-body changelog-table">
                     {% for entry in changelog %}
-                    <li data-action="{{ entry.action }}" data-path="{{ entry.path | lower }}">
-                        <span class="chip">{{ entry.action }}</span>
-                        <span class="meta">{{ entry.timestamp }}</span>
-                        <span class="path"><a href="{{ entry.url }}">{{ entry.path }}</a></span>
-                    </li>
+                    {% set dt_parts = entry.timestamp.split('T') %}
+                    {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                    <div class="table-row grid" data-action="commit" data-path="{{ entry.slug | lower }}">
+                        <span class="cell domain">{{ entry.slug }}</span>
+                        <span class="cell title">{{ entry.hash }}</span>
+                        <span class="cell division">{{ entry.summary }}</span>
+                        <span class="cell modified">{{ dt_parts[0] }}</span>
+                        <span class="cell modified">{{ time_part }}</span>
+                    </div>
                     {% endfor %}
-                </ul>
+                </div>
             </div>
         </section>
     </main>

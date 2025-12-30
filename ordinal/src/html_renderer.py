@@ -8,6 +8,16 @@ from src.markdown_parser import parse_frontmatter, parse_related, parse_footnote
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import subprocess
 from collections import defaultdict
+from src.revisions import (
+    init_db,
+    compute_fingerprint,
+    insert_commit,
+    get_entry_fingerprint,
+    get_changelog,
+    get_global_changelog,
+    get_article_cache,
+    list_articles,
+)
 
 
 logger = setup_logger("html_renderer", "logs/html_renderer.log")
@@ -65,15 +75,24 @@ def get_articles_list() -> dict:
                 md_fp = os.path.join(articles_dir, file)
                 parsed_data = parse_frontmatter(md_fp)
                 frontmatter = parsed_data.get("frontmatter", {})
+                content = parsed_data.get("content", "")
 
                 title = frontmatter.get("title", file.replace(".md", "").replace("-", " ").title())
                 last_modified = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 domain = frontmatter.get("domain", "Miscellaneous")
                 division = frontmatter.get("division", [])
                 url = f"/articles/{file.replace('.md', '.html')}"
+                header_image = derive_header_image(frontmatter, content)
 
                 categorized_articles[domain].append(
-                    {"title": title, "url": url, "last_modified": last_modified, "domain": domain, "division": division}
+                    {
+                        "title": title,
+                        "url": url,
+                        "last_modified": last_modified,
+                        "domain": domain,
+                        "division": division,
+                        "header_image": header_image,
+                    }
                 )
 
     return {
@@ -112,9 +131,10 @@ def scan_content_files() -> dict:
 
 def scan_public_files() -> dict:
     public_files = {}
+    valid_assets = (".html", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".mp4", ".avif", ".bmp")
     for root, _, files in os.walk(public_dir):
         for file in files:
-            if file.endswith(".html"):
+            if file.endswith(valid_assets):
                 fp = os.path.join(root, file)
                 rel = os.path.relpath(fp, public_dir)
                 public_files[rel] = os.path.getmtime(fp)
@@ -178,7 +198,7 @@ def update_activity_log() -> tuple[list[dict], list[dict]]:
     return get_activity_graph(log_fp), get_recent_events(log_fp)
 
 
-def get_activity_graph(log_fp: str, days: int = 30) -> list[dict]:
+def get_activity_graph(log_fp: str, days: int = 365) -> list[dict]:
     log = load_json(log_fp, [])
     today = datetime.utcnow().date()
     window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
@@ -205,7 +225,39 @@ def get_activity_graph(log_fp: str, days: int = 30) -> list[dict]:
             return 3
         return 4
 
-    return [{"date": day, "count": counts[day], "level": level(counts[day])} for day in counts]
+    return [{"date": str(day), "count": counts[day], "level": level(counts[day])} for day in counts]
+
+
+def get_commit_activity(entries: list[dict], days: int = 365) -> list[dict]:
+    """
+    Build a contribution-style graph from commit timestamps.
+    """
+    today = datetime.utcnow().date()
+    window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    counts = {d.isoformat(): 0 for d in window}
+
+    for entry in entries:
+        ts = entry.get("timestamp")
+        try:
+            dt = datetime.fromisoformat(ts)
+            day = dt.date().isoformat()
+            if day in counts:
+                counts[day] += 1
+        except Exception:
+            continue
+
+    def level(count: int) -> int:
+        if count == 0:
+            return 0
+        if count == 1:
+            return 1
+        if count <= 3:
+            return 2
+        if count <= 6:
+            return 3
+        return 4
+
+    return [{"date": d, "count": counts[d], "level": level(counts[d])} for d in counts]
 
 
 def get_recent_events(log_fp: str, limit: int = 20) -> list[dict]:
@@ -215,6 +267,42 @@ def get_recent_events(log_fp: str, limit: int = 20) -> list[dict]:
     except Exception:
         pass
     return log[:limit]
+
+
+def load_markdown_inventory() -> list[dict]:
+    inventory = []
+    for root, _, files in os.walk(content_dir):
+        for file in files:
+            if file.endswith(".md"):
+                fp = os.path.join(root, file)
+                try:
+                    parsed = parse_frontmatter(fp)
+                    frontmatter = parsed.get("frontmatter", {})
+                    for k, v in list(frontmatter.items()):
+                        if isinstance(v, (datetime,)):
+                            frontmatter[k] = v.isoformat()
+                        else:
+                            try:
+                                import datetime as _dt
+                                if isinstance(v, (_dt.date, _dt.datetime)):
+                                    frontmatter[k] = str(v)
+                            except Exception:
+                                pass
+                    content = parsed.get("content", "")
+                    rel = os.path.relpath(fp, content_dir)
+                    parts = rel.split(os.sep)
+                    url = "/" + "/".join(parts).replace(".md", ".html")
+                    inventory.append(
+                        {
+                            "title": frontmatter.get("title", os.path.splitext(file)[0]),
+                            "url": url,
+                            "frontmatter": frontmatter,
+                            "content": content,
+                        }
+                    )
+                except Exception:
+                    continue
+    return inventory
 
 
 def get_page_changelog(log_fp: str, page_path: str, limit: int = 20) -> list[dict]:
@@ -252,7 +340,94 @@ def get_recent_articles(max_items: int = 6) -> list[dict]:
     return flattened[:max_items]
 
 
-def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: dict) -> None:
+def get_recent_media(max_items: int = 12) -> list[dict]:
+    media_items = []
+    image_root = os.path.join(content_dir, "images")
+    video_root = os.path.join(content_dir, "videos")
+    valid_images = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".avif", ".bmp")
+    valid_videos = (".mp4",)
+
+    for root, _, files in os.walk(image_root):
+        for file in files:
+            if file.lower().endswith(valid_images):
+                fp = os.path.join(root, file)
+                rel = os.path.relpath(fp, image_root)
+                media_items.append(
+                    {
+                        "url": f"images/{rel}".replace("\\", "/"),
+                        "type": "image",
+                        "title": os.path.splitext(file)[0].replace("-", " ").title(),
+                        "timestamp": os.path.getmtime(fp),
+                        "basename": file,
+                    }
+                )
+
+    for root, _, files in os.walk(video_root):
+        for file in files:
+            if file.lower().endswith(valid_videos):
+                fp = os.path.join(root, file)
+                rel = os.path.relpath(fp, video_root)
+                media_items.append(
+                    {
+                        "url": f"videos/{rel}".replace("\\", "/"),
+                        "type": "video",
+                        "title": os.path.splitext(file)[0].replace("-", " ").title(),
+                        "timestamp": os.path.getmtime(fp),
+                        "basename": file,
+                    }
+                )
+
+    media_items.sort(key=lambda x: x["timestamp"], reverse=True)
+    inventory = load_markdown_inventory()
+
+    for item in media_items:
+        item["articles"] = []
+        base = item.get("basename", "")
+        for md in inventory:
+            text = (md.get("content", "") or "") + json.dumps(md.get("frontmatter", {}))
+            if base and base in text:
+                item["articles"].append({"title": md.get("title"), "url": md.get("url")})
+        if not item["articles"]:
+            # fallback: not found, leave empty
+            item["articles"] = []
+
+    media_items = [m for m in media_items if m.get("articles")]
+    return media_items[:max_items]
+
+
+def derive_header_image(frontmatter: dict, content: str) -> str | None:
+    if "header_image" in frontmatter and frontmatter.get("header_image"):
+        return frontmatter.get("header_image")
+
+    media = parse_first_media(content)
+    if not media:
+        return None
+    path = media
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    ext = os.path.splitext(path)[1].lower()
+    if ext in [".mp4"]:
+        return f"videos/{os.path.basename(path)}"
+    return f"images/{os.path.basename(path)}"
+
+
+def parse_first_media(content: str) -> str | None:
+    import re
+
+    match = re.search(r"!\[[^\]]*?\]\(([^)]+)\)", content)
+    if match:
+        return match.group(1)
+    return None
+
+
+def process_file(
+    md_fp: str,
+    output_fp: str,
+    default_template: str,
+    backlinks: dict,
+    commit: bool = False,
+    commit_context: dict | None = None,
+) -> None:
     try:
         logger.info(f"Processing file: {md_fp}")
 
@@ -266,6 +441,50 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
 
         # Overwrite last_modified to current UTC time for accurate surface
         frontmatter["last_modified"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+        slug = os.path.relpath(md_fp, content_dir).replace(os.sep, "/").replace(".md", "")
+        fingerprint = compute_fingerprint(md_fp)
+        entry_fingerprint = get_entry_fingerprint(slug) or fingerprint
+
+        if commit:
+            try:
+                latest = get_article_cache(slug)
+                latest_hash = latest["last_hash"] if latest else None
+                if latest_hash != fingerprint:
+                    summary_val = None
+                    if commit_context and commit_context.get("bundle"):
+                        summary_val = commit_context.get("shared_summary")
+                        if not summary_val:
+                            prompt = commit_context.get("summary_prompt") or f"Summary for bundle ({fingerprint}): "
+                            summary_val = ""
+                            while not summary_val.strip():
+                                summary_val = input(prompt).strip()
+                            commit_context["shared_summary"] = summary_val
+                    else:
+                        summary_val = ""
+                        while not summary_val.strip():
+                            summary_val = input(f"Summary for {slug} ({fingerprint}): ").strip()
+                    parent_hash = latest_hash
+                    word_count = len(raw_content.split())
+                    worked_hours = (
+                        float(frontmatter["worked"])
+                        if "worked" in frontmatter and str(frontmatter["worked"]).replace(".", "", 1).isdigit()
+                        else 0.0
+                    )
+                    insert_commit(
+                        slug=slug,
+                        hash_val=fingerprint,
+                        summary=summary_val,
+                        frontmatter=frontmatter,
+                        word_count=word_count,
+                        worked_hours=worked_hours,
+                        parent_hash=parent_hash,
+                    )
+                    if commit_context is not None:
+                        commit_context["commits"] = commit_context.get("commits", 0) + 1
+                    entry_fingerprint = fingerprint
+            except Exception as err:
+                logger.error(f"Error during commit flow for {md_fp}: {err}")
 
         logger.info("Parsing footnotes.")
         footnotes_content, footnotes = parse_footnotes(raw_content)
@@ -289,9 +508,13 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
         elif not isinstance(tags, list):
             tags = []
 
+        header_image = derive_header_image(frontmatter, raw_content)
+
         context = {
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
+            "entry_fingerprint": entry_fingerprint,
+            "entry_revisions_url": f"/revisions/{slug}.html",
             "page_meta": [
                 {"label": "Domain", "value": frontmatter.get("domain", "N/A")},
                 {"label": "Modified", "value": frontmatter.get("last_modified", "N/A")},
@@ -312,7 +535,7 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
             "backlinks": backlinks.get(os.path.splitext(os.path.basename(md_fp))[0], []),
             "external_links": parsed_data.get("external_links", []),
             "related_articles": related,
-            "hero_image": frontmatter.get("hero_image"),
+            "hero_image": header_image,
             "hero_video": frontmatter.get("hero_video"),
             "poster": frontmatter.get("poster"),
             "gallery": gallery,
@@ -321,10 +544,7 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
             "location": frontmatter.get("location"),
             "reading_time": frontmatter.get("reading_time"),
             "frontmatter": frontmatter,
-            "page_changelog": get_page_changelog(
-                os.path.join(logs_dir, "activity_log.json"),
-                os.path.relpath(output_fp, public_dir),
-            ),
+            "page_changelog": get_changelog(slug),
         }
 
         if template_name == "section.html":
@@ -333,8 +553,10 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
             context["recent_articles"] = get_recent_articles()
             context["categorized_articles"] = get_articles_list()
             context["categories"] = get_categories()
-            context["activity_graph"] = get_activity_graph(os.path.join(logs_dir, "activity_log.json"))
-            context["changelog"] = get_recent_events(os.path.join(logs_dir, "activity_log.json"))
+            global_changes = get_global_changelog(limit=200)
+            context["activity_graph"] = get_commit_activity(global_changes, days=365)
+            context["changelog"] = global_changes
+            context["recent_media"] = get_recent_media()
 
         rendered_html = render_template_context(template_name, context)
         ensure_directory(os.path.dirname(output_fp))
@@ -347,23 +569,25 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
         logger.error(f"Error processing file {md_fp}: {err}")
 
 
-def generate_static_site(category="all"):
+def generate_static_site(category="all", commit: bool = False, commit_all: bool = False, summary: str | None = None):
     try:
         logger.info("Starting site generation.")
         categories = get_categories()
         backlinks = {}
+        init_db()
+        commit_context = {"bundle": commit_all, "shared_summary": summary, "commits": 0}
 
         logger.info("Checking and generating missing markdown files.")
         generate_missing()
 
-        process_index(content_dir, public_dir, backlinks)
+        process_index(content_dir, public_dir, backlinks, commit, commit_context)
 
         if category == "all":
             for cat in categories:
-                process_category(cat, content_dir, public_dir, backlinks)
+                process_category(cat, content_dir, public_dir, backlinks, commit, commit_context)
         else:
             if category in categories:
-                process_category(category, content_dir, public_dir, backlinks)
+                process_category(category, content_dir, public_dir, backlinks, commit, commit_context)
             else:
                 logger.error(f"Invalid category: {category}")
         logger.info("Copying all necessary static files.")
@@ -373,12 +597,28 @@ def generate_static_site(category="all"):
         compile_scss()
         logger.info("Updating activity log based on generated HTML changes.")
         update_activity_log()
+        try:
+            generate_revision_pages()
+        except Exception as err:
+            logger.error(f"Error generating revision pages: {err}")
+
+        if commit and commit_context.get("commits", 0) == 0:
+            msg = "No content changes detected; no commits recorded."
+            print(msg)
+            logger.info(msg)
 
     except Exception as err:
         logger.error(f"Error generating static site: {err}", exc_info=True)
 
 
-def process_category(category: str, content_dir: str, public_dir: str, backlinks: dict) -> None:
+def process_category(
+    category: str,
+    content_dir: str,
+    public_dir: str,
+    backlinks: dict,
+    commit: bool = False,
+    commit_context: dict | None = None,
+) -> None:
     try:
         logger.info(f"Processing category: {category}")
         category_dir = os.path.join(content_dir, category)
@@ -394,12 +634,18 @@ def process_category(category: str, content_dir: str, public_dir: str, backlinks
                 output_fp = os.path.join(output_dir, file.replace(".md", ".html"))
 
                 default_template = f"{category}.html"
-                process_file(md_fp, output_fp, default_template, backlinks)
+                process_file(md_fp, output_fp, default_template, backlinks, commit, commit_context)
     except Exception as err:
         logger.error(f"Error processing category `{category}`: {err}", exc_info=True)
 
 
-def process_index(content_dir: str, public_dir: str, backlinks: dict) -> None:
+def process_index(
+    content_dir: str,
+    public_dir: str,
+    backlinks: dict,
+    commit: bool = False,
+    commit_context: dict | None = None,
+) -> None:
     try:
         logger.info("Processing `index.md`.")
         index_md_fp = os.path.join(content_dir, "index.md")
@@ -409,7 +655,49 @@ def process_index(content_dir: str, public_dir: str, backlinks: dict) -> None:
             logger.error(f"`index.md` file does not exist at: {index_md_fp}")
             return
 
-        process_file(index_md_fp, index_output_fp, "index.html", backlinks)
+        process_file(index_md_fp, index_output_fp, "index.html", backlinks, commit, commit_context)
         logger.info(f"Processed `index.md` into {index_output_fp}")
     except Exception as err:
         logger.error(f"Error processing `index.md`: {err}")
+
+
+def generate_revision_pages() -> None:
+    """
+    Render global and per-article revision pages from the revisions database.
+    """
+    try:
+        logger.info("Generating revision pages.")
+        revisions_dir = os.path.join(public_dir, "revisions")
+        ensure_directory(revisions_dir)
+
+        global_changelog = get_global_changelog(limit=500)
+        # Global activity page
+        rendered_global = render_template_context(
+            "revisions_index.html",
+            {
+                "global_changelog": global_changelog,
+            },
+        )
+        with open(os.path.join(revisions_dir, "index.html"), "w", encoding="utf-8") as f:
+            f.write(rendered_global)
+
+        # Per-article pages
+        for article in list_articles():
+            slug = article.get("slug")
+            if not slug:
+                continue
+            page_changelog = get_changelog(slug)
+            context = {
+                "title": article.get("title") or slug,
+                "description": "Revision history",
+                "entry_fingerprint": article.get("last_hash"),
+                "page_changelog": page_changelog,
+            }
+            rendered_article = render_template_context("revisions_article.html", context)
+            dest_fp = os.path.join(revisions_dir, f"{slug}.html")
+            ensure_directory(os.path.dirname(dest_fp))
+            with open(dest_fp, "w", encoding="utf-8") as f:
+                f.write(rendered_article)
+        logger.info("Finished generating revision pages.")
+    except Exception as err:
+        logger.error(f"Error in generate_revision_pages: {err}", exc_info=True)
