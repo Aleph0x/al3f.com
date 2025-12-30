@@ -47,9 +47,6 @@ header#site-banner nav ul li a {
   padding: 0.5rem 1rem;
 }
 
-/*==========================*/
-/*     TABLE OF CONTENTS    */
-/*==========================*/
 .toc {
   position: sticky;
   top: 1.5rem;
@@ -171,7 +168,7 @@ main h3 {
 main p {
   font-size: 1.6rem;
   line-height: 2;
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
   word-spacing: 0.05rem;
   text-indent: 2rem;
   text-align: justify;
@@ -188,9 +185,6 @@ main > article {
   width: 100%;
 }
 
-/* =========================*/
-/*          FOOTER          */
-/* =========================*/
 footer {
   text-align: center;
   margin-top: 2rem;
@@ -220,9 +214,6 @@ footer {
   border-bottom: 1px dotted #ffffff;
 }
 
-/*=================*/
-/*    FOOTNOTES    */
-/*=================*/
 .footnotes {
   max-width: 110ch;
   margin: 3rem auto;
@@ -255,9 +246,6 @@ footer {
   font-weight: bold;
 }
 
-/*======================*/
-/*    ARTICLES LIST     */
-/*======================*/
 .layout--section {
   display: grid;
   grid-template-columns: minmax(0, 110ch);
@@ -327,7 +315,7 @@ figure {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 1.5rem 0;
+  margin: 1.1rem 0;
   text-align: center;
 }
 figure img {
@@ -337,10 +325,17 @@ figure img {
   margin: 0;
   padding: 0;
 }
+figure video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0;
+  padding: 0;
+}
 figure figcaption {
   font-size: 0.9rem;
   color: #aaaaaa;
-  margin-top: 0.3rem;
+  margin-top: 0;
   line-height: 1.2;
 }
 

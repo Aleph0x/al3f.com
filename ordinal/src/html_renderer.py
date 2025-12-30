@@ -1,7 +1,7 @@
 import os
 import shutil
 from src.base_utils import content_dir, public_dir, setup_logger, ensure_directory
-from src.file_manager import get_categories, generate_missing, merge_image_dir
+from src.file_manager import get_categories, generate_missing, merge_image_dir, merge_video_dir
 from src.markdown_parser import parse_frontmatter, parse_related, parse_footnotes, parse_articles
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import subprocess
@@ -165,6 +165,7 @@ def generate_static_site(category="all"):
         logger.info("Copying all necessary static files.")
         copy_static_files()
         merge_image_dir()
+        merge_video_dir()
         compile_scss()
 
     except Exception as err:

@@ -22,7 +22,9 @@ def snapshot_site(public_dir: str, snapshots_dir: str = snapshots_dir) -> None:
                         os.path.join(root, file),
                         os.path.join(snapshot_dir, snapshot_file),
                     )
-                    logger.info(f"Snapshot created: {rel_fp} -> {os.path.join(snapshot_dir, snapshot_file)}")
+                    logger.info(
+                        f"Snapshot created: {rel_fp} -> {os.path.join(snapshot_dir, snapshot_file)}"
+                    )
     except Exception as err:
         logger.error(f"Error creating site snapshot: {err}")
 
@@ -32,7 +34,9 @@ def snapshot_category(public_dir: str, snapshots_dir: str, category: str) -> Non
         category_dir = os.path.join(public_dir, category)
 
         if not os.path.exists(category_dir):
-            logger.error(f"Category `{category}` does not exist in the public directory.")
+            logger.error(
+                f"Category `{category}` does not exist in the public directory."
+            )
             return
 
         category_snapshot_dir = os.path.join(snapshots_dir, category)
@@ -44,7 +48,9 @@ def snapshot_category(public_dir: str, snapshots_dir: str, category: str) -> Non
             for file in files:
                 if file.endswith(".html"):
                     rel_fp = os.path.relpath(os.path.join(root, file), category_dir)
-                    snapshot_fp = os.path.join(category_snapshot_dir, f"{rel_fp}_{timestamp}.html")
+                    snapshot_fp = os.path.join(
+                        category_snapshot_dir, f"{rel_fp}_{timestamp}.html"
+                    )
                     ensure_directory(os.path.dirname(snapshot_fp))
                     shutil.copy2(os.path.join(root, file), snapshot_fp)
                     logger.info(f"Snapshot created: {rel_fp} -> {snapshot_fp}")
@@ -53,14 +59,20 @@ def snapshot_category(public_dir: str, snapshots_dir: str, category: str) -> Non
         if snapshot_count == 0:
             logger.warning(f"No HTML files found for category `{category}`.")
         else:
-            logger.info(f"Snapshot created for {snapshot_count} file(s) in category `{category}`.")
+            logger.info(
+                f"Snapshot created for {snapshot_count} file(s) in category `{category}`."
+            )
     except Exception as err:
         logger.error(f"Error creating snapshot for category `{category}`: {err}")
 
 
-def restore_site(category: Optional[str] = None, snapshot: Optional[str] = None) -> None:
+def restore_site(
+    category: Optional[str] = None, snapshot: Optional[str] = None
+) -> None:
     try:
-        source_dir = os.path.join(snapshots_dir, category) if category else snapshots_dir
+        source_dir = (
+            os.path.join(snapshots_dir, category) if category else snapshots_dir
+        )
         target_dir = os.path.join(public_dir, category) if category else public_dir
 
         if not os.path.exists(source_dir):
@@ -92,7 +104,11 @@ def restore_site(category: Optional[str] = None, snapshot: Optional[str] = None)
 
             try:
                 user_input = (
-                    input("Enter the number of the snapshot to restore (or 'cancel' to exit): ").strip().lower()
+                    input(
+                        "Enter the number of the snapshot to restore (or 'cancel' to exit): "
+                    )
+                    .strip()
+                    .lower()
                 )
 
                 if user_input == "cancel":
@@ -108,12 +124,18 @@ def restore_site(category: Optional[str] = None, snapshot: Optional[str] = None)
                 logger.warning("Invalid input. Restoration aborted.")
                 return
 
+        if snapshot is None:
+            logger.warning("No snapshot selected. Restoration aborted.")
+            return
+
         restored_files = 0
         for file in snapshots:
             if snapshot in file:
                 try:
                     rel_fp = os.path.relpath(file, source_dir)
-                    restore_fp = os.path.join(target_dir, rel_fp.split("_")[0] + ".html")
+                    restore_fp = os.path.join(
+                        target_dir, rel_fp.split("_")[0] + ".html"
+                    )
                     ensure_directory(os.path.dirname(restore_fp))
                     shutil.copy2(file, restore_fp)
                     logger.info(f"Restored: {file} -> {restore_fp}")
@@ -133,7 +155,9 @@ def cleanup_snapshots(snapshots_dir: str = snapshots_dir) -> None:
     try:
         if not os.path.exists(snapshots_dir):
             print("No snapshots available to delete.")
-            logger.warning("Snapshots directory does not exist. No snapshots to delete.")
+            logger.warning(
+                "Snapshots directory does not exist. No snapshots to delete."
+            )
             return
 
         snapshots = [
@@ -156,13 +180,19 @@ def cleanup_snapshots(snapshots_dir: str = snapshots_dir) -> None:
             snapshot_dict[i] = snapshot
 
         user_input = (
-            input("Enter the numbers of the snapshots to delete (comma separated), or 'all' to delete all: ")
+            input(
+                "Enter the numbers of the snapshots to delete (comma separated), or 'all' to delete all: "
+            )
             .strip()
             .lower()
         )
 
         if user_input == "all":
-            confirmation = input("Are you sure you want to delete all snapshots? (yes/no): ").strip().lower()
+            confirmation = (
+                input("Are you sure you want to delete all snapshots? (yes/no): ")
+                .strip()
+                .lower()
+            )
             if confirmation not in ["yes", "y"]:
                 print("Deletion aborted.")
                 logger.info("Deletion aborted by user.")
@@ -178,7 +208,9 @@ def cleanup_snapshots(snapshots_dir: str = snapshots_dir) -> None:
         else:
             try:
                 indices = [int(x.strip()) for x in user_input.split(",")]
-                selected_snapshots = [snapshot_dict[i] for i in indices if i in snapshot_dict]
+                selected_snapshots = [
+                    snapshot_dict[i] for i in indices if i in snapshot_dict
+                ]
                 if not selected_snapshots:
                     raise ValueError("Invalid selection.")
             except (ValueError, KeyError):
@@ -187,7 +219,9 @@ def cleanup_snapshots(snapshots_dir: str = snapshots_dir) -> None:
                 return
 
             confirmation = (
-                input(f"Are you sure you want to delete {len(selected_snapshots)} selected snapshots? (yes/no): ")
+                input(
+                    f"Are you sure you want to delete {len(selected_snapshots)} selected snapshots? (yes/no): "
+                )
                 .strip()
                 .lower()
             )
