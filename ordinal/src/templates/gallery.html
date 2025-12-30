@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ description }}">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <script src="../main.js" defer></script>
+</head>
+<body class="theme-aleph">
+    <header class="masthead compact">
+        <div class="brand">
+            <div class="brand-mark small">
+                <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
+            </div>
+            <div class="brand-text">
+                <p class="eyebrow">Gallery</p>
+                <h1>{{ title }}</h1>
+                <p class="tagline">{{ description }}</p>
+            </div>
+        </div>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
+        </nav>
+    </header>
+
+    <main class="layout-shell">
+        <section class="panel article-body">
+            <div class="meta-bar">
+                {% for meta in page_meta %}
+                <span class="chip">{{ meta.label }}: {{ meta.value }}</span>
+                {% endfor %}
+                {% if location %}
+                <span class="chip">Location: {{ location }}</span>
+                {% endif %}
+            </div>
+
+            {% for article in articles %}
+            <article class="prose">
+                <header>{{ article.header | safe }}</header>
+                <section>
+                    {% for section in article.sections %}
+                    <p>{{ section | safe }}</p>
+                    {% endfor %}
+                </section>
+            </article>
+            {% endfor %}
+        </section>
+
+        {% if gallery %}
+        <section class="panel gallery-grid">
+            <div class="panel-head">
+                <p class="eyebrow">Images</p>
+                <h3>Selected frames</h3>
+            </div>
+            <div class="grid">
+                {% for item in gallery %}
+                <figure>
+                    <img src="{{ item }}" alt="{{ title }} frame">
+                </figure>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if footnotes %}
+        <section class="panel footnotes">
+            <h2>Footnotes</h2>
+            <ol>
+                {% for key, text in footnotes.items() %}
+                <li id="footnote-{{ key }}">
+                    {{ text }}
+                    <a href="#ref-{{ key }}" class="footnote-backlink">↩</a>
+                </li>
+                {% endfor %}
+            </ol>
+        </section>
+        {% endif %}
+
+        {% if related_articles %}
+        <section class="panel related-articles">
+            <h2>Related</h2>
+            <ul>
+                {% for article in related_articles %}
+                <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if page_changelog %}
+        <section class="panel changelog-panel">
+            <h2>Changelog</h2>
+            <ul>
+                {% for entry in page_changelog %}
+                <li>
+                    <span class="chip">{{ entry.action }}</span>
+                    <span class="meta">{{ entry.timestamp }}</span>
+                    <span class="path"><a href="{{ entry.url }}">{{ entry.path }}</a></span>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
+    </footer>
+</body>
+</html>

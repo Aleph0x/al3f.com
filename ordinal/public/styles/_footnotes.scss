@@ -16,13 +16,13 @@
         padding-left: 2.5rem;
         font-size: 1.6rem;
         line-height: $content-line-height;
-        text-align: justify;
+        text-align: left;
         hyphens: auto;
 
         li {
             margin-bottom: 1.75rem;
             padding: 0.5rem 1rem;
-            text-indent: 2.5rem;
+            text-indent: 0;
             border-left: 2px solid $accent-color;
 
             &:hover {

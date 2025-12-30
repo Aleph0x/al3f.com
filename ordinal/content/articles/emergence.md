@@ -8,7 +8,7 @@ created: 2025-02-01 01:02:35
 last_modified: 2025-02-01 01:02:35
 template: "wiki.html"
 ---
-
+AFaSF
 ## Emergence
 These are some old notes I took for entries on Emergence I originally wrote in 2021. It started off as an essay for college. As of 2/2/2025, I’m reviewing these entries before publishing them, but this serves as a summary.
 

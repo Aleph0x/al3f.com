@@ -7,262 +7,195 @@
     <meta name="description" content="All Entries">
     <title>Entries</title>
     <link rel="stylesheet" href="../styles/main.css">
+    <script src="../main.js" defer></script>
 </head>
 
-<body>
-    <header id="site-banner">
-        <img src="../images/aleph-no-background-web256x256.png" alt="An abstract Hebrew Alef">
-        <nav>
-            <ul>
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="/articles/articles.html">Entries</a></li>
-            </ul>
+<body class="theme-aleph">
+    <header class="masthead">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
+            </div>
+            <div class="brand-text">
+                <p class="eyebrow">Aleph Null</p>
+                <h1>Entries</h1>
+                <p class="tagline">All Entries</p>
+            </div>
+        </div>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
         </nav>
+        <div class="now-line">
+            <span class="dot"></span>
+            <span class="now-label">Now</span>
+            <span class="now-text">Building, documenting, collecting signals.</span>
+        </div>
     </header>
 
-    <section class="page-details">
-        <h1 class="page-title">Entries</h1>
-        <p class="page-description">All Entries</p>
-    </section>
+    <main class="layout-shell section-layout">
+        <section class="panel">
+            <div class="page-details">
+                <h1 class="page-title">Entries</h1>
+                <p class="page-description">All Entries</p>
+            </div>
 
-    <main>
-        <aside class="toc">
-            <h2>Recent Updates</h2>
-            <ul>
+            <div class="filter-row mission-filter">
+                <input id="section-filter" type="search" placeholder="Filter by title or domain">
+                <div class="summary">
+                    <span class="chip">Entries: 42</span>
+                    <span class="chip">Domains: 6</span>
+                </div>
+            </div>
 
-            
-                
-                <li>
-                    <a href="/articles/local-instances.html">Scene Local Instances|2025-12-30</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/ordinal.html">Ordinal|2025-11-16 12:52:12</a>
-                </li>
-                
-                
-                
-                <li>
-                    <a href="/articles/places.html">Places|2025-12-30 09:48:12</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/tasks.html">Tasks|2025-08-11 12:53:12</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/known-issues.html">Known Issues|2025-02-02 05:23:58</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/creations.html">Creations|2025-01-31 00:48:12</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/articles.html">Entries|2025-01-30 11:06:37</a>
-                </li>
-                
-                
-                
-                <li>
-                    <a href="/articles/chernobyl.html">Chernobyl|2025-11-25</a>
-                </li>
-                
-                
-                
-                <li>
-                    <a href="/articles/emergence.html">Emergence|2025-02-01 01:02:35</a>
-                </li>
-                
-                
-                
-                <li>
-                    <a href="/articles/merveilles.html">Merveilles|2025-12-26 13:56:12</a>
-                </li>
-                
-                
-                
-                <li>
-                    <a href="/articles/london.html">London|2025-12-30 09:48:39</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/malta.html">Malta|2025-12-30 09:48:39</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/ukraine.html">Ukraine|2025-12-30 09:48:39</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/tokyo.html">Tokyo|2025-12-30 09:48:39</a>
-                </li>
-                
-                <li>
-                    <a href="/articles/italy.html">Italy|2025-12-30 09:48:39</a>
-                </li>
-                
-                
-            </ul>
-        </aside>
-        <section class="articles-list">
-            
-            
-            <h2 class="category-title">Development</h2>
-            <div class="article-columns">
-                
-                <div class="article-entry">
-                    <a href="/articles/local-instances.html" class="article-title">Scene Local Instances</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30</p>
-                        <p><strong>Division:</strong> Code</p>
-                    </div>
+            <div class="section-table">
+                <div class="table-head grid">
+                    <span>Domain</span>
+                    <span>Title</span>
+                    <span>Division</span>
+                    <span>Last Modified</span>
+                    <span>Link</span>
                 </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/ordinal.html" class="article-title">Ordinal</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-11-16 12:52:12</p>
-                        <p><strong>Division:</strong> Code</p>
-                    </div>
+                <div class="table-body">
+                    
+                        
+                        <div class="table-row grid section-card" data-title="scene local instances" data-domain="development">
+                            <span class="cell domain">Development</span>
+                            <span class="cell title"><a href="/articles/local-instances.html">Scene Local Instances</a></span>
+                            <span class="cell division">Code</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/local-instances.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="ordinal" data-domain="development">
+                            <span class="cell domain">Development</span>
+                            <span class="cell title"><a href="/articles/ordinal.html">Ordinal</a></span>
+                            <span class="cell division">Code</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/ordinal.html">open</a></span>
+                        </div>
+                        
+                    
+                        
+                        <div class="table-row grid section-card" data-title="places" data-domain="meta">
+                            <span class="cell domain">Meta</span>
+                            <span class="cell title"><a href="/articles/places.html">Places</a></span>
+                            <span class="cell division">Meta</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/places.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="known issues" data-domain="meta">
+                            <span class="cell domain">Meta</span>
+                            <span class="cell title"><a href="/articles/known-issues.html">Known Issues</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/known-issues.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="creations" data-domain="meta">
+                            <span class="cell domain">Meta</span>
+                            <span class="cell title"><a href="/articles/creations.html">Creations</a></span>
+                            <span class="cell division">Meta</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/creations.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="entries" data-domain="meta">
+                            <span class="cell domain">Meta</span>
+                            <span class="cell title"><a href="/articles/articles.html">Entries</a></span>
+                            <span class="cell division">Meta</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/articles.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="tasks" data-domain="meta">
+                            <span class="cell domain">Meta</span>
+                            <span class="cell title"><a href="/articles/tasks.html">Tasks</a></span>
+                            <span class="cell division">Meta</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/tasks.html">open</a></span>
+                        </div>
+                        
+                    
+                        
+                        <div class="table-row grid section-card" data-title="chernobyl" data-domain="places">
+                            <span class="cell domain">Places</span>
+                            <span class="cell title"><a href="/articles/chernobyl.html">Chernobyl</a></span>
+                            <span class="cell division">Travel</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/chernobyl.html">open</a></span>
+                        </div>
+                        
+                    
+                        
+                        <div class="table-row grid section-card" data-title="emergence" data-domain="research">
+                            <span class="cell domain">Research</span>
+                            <span class="cell title"><a href="/articles/emergence.html">Emergence</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/emergence.html">open</a></span>
+                        </div>
+                        
+                    
+                        
+                        <div class="table-row grid section-card" data-title="merveilles" data-domain="social">
+                            <span class="cell domain">Social</span>
+                            <span class="cell title"><a href="/articles/merveilles.html">Merveilles</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/merveilles.html">open</a></span>
+                        </div>
+                        
+                    
+                        
+                        <div class="table-row grid section-card" data-title="london" data-domain="unknown">
+                            <span class="cell domain">Unknown</span>
+                            <span class="cell title"><a href="/articles/london.html">London</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/london.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="malta" data-domain="unknown">
+                            <span class="cell domain">Unknown</span>
+                            <span class="cell title"><a href="/articles/malta.html">Malta</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/malta.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="ukraine" data-domain="unknown">
+                            <span class="cell domain">Unknown</span>
+                            <span class="cell title"><a href="/articles/ukraine.html">Ukraine</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/ukraine.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="tokyo" data-domain="unknown">
+                            <span class="cell domain">Unknown</span>
+                            <span class="cell title"><a href="/articles/tokyo.html">Tokyo</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/tokyo.html">open</a></span>
+                        </div>
+                        
+                        <div class="table-row grid section-card" data-title="italy" data-domain="unknown">
+                            <span class="cell domain">Unknown</span>
+                            <span class="cell title"><a href="/articles/italy.html">Italy</a></span>
+                            <span class="cell division">Writing</span>
+                            <span class="cell modified">2025-12-30 22:17:24</span>
+                            <span class="cell link"><a href="/articles/italy.html">open</a></span>
+                        </div>
+                        
+                    
                 </div>
-                
             </div>
-            
-            <h2 class="category-title">Meta</h2>
-            <div class="article-columns">
-                
-                <div class="article-entry">
-                    <a href="/articles/places.html" class="article-title">Places</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30 09:48:12</p>
-                        <p><strong>Division:</strong> Meta</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/tasks.html" class="article-title">Tasks</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-08-11 12:53:12</p>
-                        <p><strong>Division:</strong> Meta</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/known-issues.html" class="article-title">Known Issues</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-02-02 05:23:58</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/creations.html" class="article-title">Creations</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-01-31 00:48:12</p>
-                        <p><strong>Division:</strong> Meta</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/articles.html" class="article-title">Entries</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-01-30 11:06:37</p>
-                        <p><strong>Division:</strong> Meta</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <h2 class="category-title">Places</h2>
-            <div class="article-columns">
-                
-                <div class="article-entry">
-                    <a href="/articles/chernobyl.html" class="article-title">Chernobyl</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-11-25</p>
-                        <p><strong>Division:</strong> Travel</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <h2 class="category-title">Research</h2>
-            <div class="article-columns">
-                
-                <div class="article-entry">
-                    <a href="/articles/emergence.html" class="article-title">Emergence</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-02-01 01:02:35</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <h2 class="category-title">Social</h2>
-            <div class="article-columns">
-                
-                <div class="article-entry">
-                    <a href="/articles/merveilles.html" class="article-title">Merveilles</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-26 13:56:12</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-            <h2 class="category-title">Unknown</h2>
-            <div class="article-columns">
-                
-                <div class="article-entry">
-                    <a href="/articles/london.html" class="article-title">London</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30 09:48:39</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/malta.html" class="article-title">Malta</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30 09:48:39</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/ukraine.html" class="article-title">Ukraine</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30 09:48:39</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/tokyo.html" class="article-title">Tokyo</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30 09:48:39</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-                <div class="article-entry">
-                    <a href="/articles/italy.html" class="article-title">Italy</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> 2025-12-30 09:48:39</p>
-                        <p><strong>Division:</strong> Writing</p>
-                    </div>
-                </div>
-                
-            </div>
-            
-            
         </section>
     </main>
-    <footer>
-        <p>&copy; 2025 Aleph.</p>
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
     </footer>
 </body>
 

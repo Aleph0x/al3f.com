@@ -7,61 +7,73 @@
     <meta name="description" content="{{ description }}">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="../styles/main.css">
+    <script src="../main.js" defer></script>
 </head>
 
-<body>
-    <header id="site-banner">
-        <img src="../images/aleph-no-background-web256x256.png" alt="An abstract Hebrew Alef">
-        <nav>
-            <ul>
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="/articles/articles.html">Entries</a></li>
-            </ul>
+<body class="theme-aleph">
+    <header class="masthead">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
+            </div>
+            <div class="brand-text">
+                <p class="eyebrow">Aleph Null</p>
+                <h1>{{ title }}</h1>
+                <p class="tagline">{{ description }}</p>
+            </div>
+        </div>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
         </nav>
+        <div class="now-line">
+            <span class="dot"></span>
+            <span class="now-label">Now</span>
+            <span class="now-text">Building, documenting, collecting signals.</span>
+        </div>
     </header>
 
-    <section class="page-details">
-        <h1 class="page-title">{{ title }}</h1>
-        <p class="page-description">{{ description }}</p>
-    </section>
-
-    <main>
-        <aside class="toc">
-            <h2>Recent Updates</h2>
-            <ul>
-
-            {% for domain, articles in categorized_articles.items() %}
-                {% for article in articles %}
-                <li>
-                    <a href="{{ article.url }}">{{ article.title }}|{{ article.last_modified }}</a>
-                </li>
-                {% endfor %}
-                {% endfor %}
-            </ul>
-        </aside>
-        <section class="articles-list">
-            {% if categorized_articles %}
-            {% for domain, articles in categorized_articles.items() %}
-            <h2 class="category-title">{{ domain }}</h2>
-            <div class="article-columns">
-                {% for article in articles %}
-                <div class="article-entry">
-                    <a href="{{ article.url }}" class="article-title">{{ article.title }}</a>
-                    <div class="article-meta">
-                        <p><strong>Updated:</strong> {{ article.last_modified }}</p>
-                        <p><strong>Division:</strong> {{ article.division | join(', ') }}</p>
-                    </div>
-                </div>
-                {% endfor %}
+    <main class="layout-shell section-layout">
+        <section class="panel">
+            <div class="page-details">
+                <h1 class="page-title">{{ title }}</h1>
+                <p class="page-description">{{ description }}</p>
             </div>
-            {% endfor %}
-            {% else %}
-            <p>No articles found.</p>
-            {% endif %}
+
+            <div class="filter-row mission-filter">
+                <input id="section-filter" type="search" placeholder="Filter by title or domain">
+                <div class="summary">
+                    <span class="chip">Entries: {{ categorized_articles|map('count')|sum }}</span>
+                    <span class="chip">Domains: {{ categorized_articles|length }}</span>
+                </div>
+            </div>
+
+            <div class="section-table">
+                <div class="table-head grid">
+                    <span>Domain</span>
+                    <span>Title</span>
+                    <span>Division</span>
+                    <span>Last Modified</span>
+                    <span>Link</span>
+                </div>
+                <div class="table-body">
+                    {% for domain, articles in categorized_articles.items() %}
+                        {% for article in articles %}
+                        <div class="table-row grid section-card" data-title="{{ article.title | lower }}" data-domain="{{ domain | lower }}">
+                            <span class="cell domain">{{ domain }}</span>
+                            <span class="cell title"><a href="{{ article.url }}">{{ article.title }}</a></span>
+                            <span class="cell division">{{ article.division | join(', ') }}</span>
+                            <span class="cell modified">{{ article.last_modified }}</span>
+                            <span class="cell link"><a href="{{ article.url }}">open</a></span>
+                        </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
         </section>
     </main>
-    <footer>
-        <p>&copy; 2025 Aleph.</p>
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
     </footer>
 </body>
 

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ description }}">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <script src="../main.js" defer></script>
+</head>
+<body class="theme-aleph">
+    <header class="masthead compact">
+        <div class="brand">
+            <div class="brand-mark small">
+                <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
+            </div>
+            <div class="brand-text">
+                <p class="eyebrow">Dev Log</p>
+                <h1>{{ title }}</h1>
+                <p class="tagline">{{ description }}</p>
+            </div>
+        </div>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
+        </nav>
+    </header>
+
+    <main class="layout-shell">
+        <section class="hero-slab article-hero">
+            {% if hero_video %}
+            <div class="hero-media">
+                <video src="{{ hero_video }}" {% if poster %}poster="{{ poster }}"{% endif %} controls></video>
+            </div>
+            {% elif hero_image %}
+            <div class="hero-media">
+                <img src="{{ hero_image }}" alt="{{ title }}">
+            </div>
+            {% endif %}
+            <div class="hero-copy">
+                <p class="eyebrow">Build</p>
+                <h2>{{ title }}</h2>
+                <p class="lede">{{ description }}</p>
+                <div class="meta-bar">
+                    {% for meta in page_meta %}
+                    <span class="chip">{{ meta.label }}: {{ meta.value }}</span>
+                    {% endfor %}
+                    {% if reading_time %}
+                    <span class="chip">Read: {{ reading_time }}</span>
+                    {% endif %}
+                    {% if series %}
+                    <span class="chip">Series: {{ series }}</span>
+                    {% endif %}
+                    {% if location %}
+                    <span class="chip">Location: {{ location }}</span>
+                    {% endif %}
+                </div>
+                {% if tags %}
+                <div class="tag-row">
+                    {% for tag in tags %}
+                    <span class="pill pill-ghost">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="panel article-body">
+            {% if toc %}
+            <aside class="toc-inline">
+                <p class="eyebrow">Outline</p>
+                <ul>
+                    {% for item in toc %}
+                    <li class="toc-item toc-level-{{ item.level }}">
+                        <a href="#{{ item.anchor }}">{{ item.text }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </aside>
+            {% endif %}
+
+            {% for article in articles %}
+            <article class="prose">
+                <header>{{ article.header | safe }}</header>
+                <section>
+                    {% for section in article.sections %}
+                    <p>{{ section | safe }}</p>
+                    {% endfor %}
+                </section>
+            </article>
+            {% endfor %}
+        </section>
+
+        {% if gallery %}
+        <section class="panel gallery-grid">
+            <div class="panel-head">
+                <p class="eyebrow">Gallery</p>
+                <h3>Frames from this build</h3>
+            </div>
+            <div class="grid">
+                {% for item in gallery %}
+                <figure>
+                    <img src="{{ item }}" alt="{{ title }} frame">
+                </figure>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if footnotes %}
+        <section class="panel footnotes">
+            <h2>Footnotes</h2>
+            <ol>
+                {% for key, text in footnotes.items() %}
+                <li id="footnote-{{ key }}">
+                    {{ text }}
+                    <a href="#ref-{{ key }}" class="footnote-backlink">↩</a>
+                </li>
+                {% endfor %}
+            </ol>
+        </section>
+        {% endif %}
+
+        {% if related_articles %}
+        <section class="panel related-articles">
+            <h2>Related</h2>
+            <ul>
+                {% for article in related_articles %}
+                <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if page_changelog %}
+        <section class="panel changelog-panel">
+            <h2>Changelog</h2>
+            <ul>
+                {% for entry in page_changelog %}
+                <li>
+                    <span class="chip">{{ entry.action }}</span>
+                    <span class="meta">{{ entry.timestamp }}</span>
+                    <span class="path"><a href="{{ entry.url }}">{{ entry.path }}</a></span>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
+    </footer>
+</body>
+</html>

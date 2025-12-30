@@ -1,182 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Formless and Empty">
     <title>The Infinite Archive</title>
     <link rel="stylesheet" href="./styles/main.css">
+    <script src="./main.js" defer></script>
 </head>
-
-<body>
-    <header id="site-banner">
-        <img src="./images/aleph-no-background-web256x256.png" alt="An image of an abstract Hebrew Alef">
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="articles/articles.html">Entries</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <section class="page-details">
-        <h2 class="page-title">The Infinite Archive</h2>
-        <p class="page-description">Formless and Empty</p>
-        <div class="page-meta">
-            <div class="meta-section">
-                
-                <div class="meta-item">
-                    <span class="label">Domain:</span> Meta
-                </div>
-                
-                <div class="meta-item">
-                    <span class="label">Division:</span> Writing
-                </div>
-                
+<body class="theme-aleph">
+    <header class="masthead">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="./images/aleph-no-background-web256x256.png" alt="Aleph symbol">
             </div>
-            <div class="meta-section">
-                
-                <div class="meta-item">
-                    <span class="label">Modified:</span> 2025-12-29
-                </div>
-                
-                <div class="meta-item">
-                    <span class="label">Worked:</span> 8.5h
-                </div>
-                
+            <div class="brand-text">
+                <p class="eyebrow">Aleph Null</p>
+                <h1>The Infinite Archive</h1>
+                <p class="tagline">Formless and Empty</p>
             </div>
         </div>
-    </section>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
+        </nav>
+        <div class="now-line">
+            <span class="dot"></span>
+            <span class="now-label">Now</span>
+            <span class="now-text">Building, documenting, collecting signals.</span>
+        </div>
+    </header>
 
-    <main>
-        <aside class="toc">
-            
-            <h2>Outline</h2>
-            <ul>
+    <main class="layout-shell">
+        <section id="latest" class="panel latest-grid">
+            <div class="panel-head">
+                <p class="eyebrow">Latest Drops</p>
+                <h3>Fresh entries across the archive</h3>
+                <div class="filter-row">
+                    <input id="latest-filter" type="search" placeholder="Filter latest by title or domain">
+                </div>
+            </div>
+            <div class="card-grid">
                 
-                <li class="toc-item toc-level-2">
-                    <a href="#introduction">Introduction</a>
-                </li>
+                <article class="card" data-title="scene local instances" data-domain="development">
+                    <div class="card-top">
+                        <span class="chip">Development</span>
+                        <span class="meta">2025-12-30 22:17:24</span>
+                    </div>
+                    <h4><a href="/articles/local-instances.html">Scene Local Instances</a></h4>
+                    <p class="meta-line">Code</p>
+                </article>
                 
-                <li class="toc-item toc-level-2">
-                    <a href="#about-me">About Me</a>
-                </li>
+                <article class="card" data-title="ordinal" data-domain="development">
+                    <div class="card-top">
+                        <span class="chip">Development</span>
+                        <span class="meta">2025-12-30 22:17:24</span>
+                    </div>
+                    <h4><a href="/articles/ordinal.html">Ordinal</a></h4>
+                    <p class="meta-line">Code</p>
+                </article>
                 
-                <li class="toc-item toc-level-3">
-                    <a href="#professional-experience">Professional Experience</a>
-                </li>
+                <article class="card" data-title="places" data-domain="meta">
+                    <div class="card-top">
+                        <span class="chip">Meta</span>
+                        <span class="meta">2025-12-30 22:17:24</span>
+                    </div>
+                    <h4><a href="/articles/places.html">Places</a></h4>
+                    <p class="meta-line">Meta</p>
+                </article>
                 
-                <li class="toc-item toc-level-3">
-                    <a href="#tools-i-use">Tools I Use</a>
-                </li>
+                <article class="card" data-title="known issues" data-domain="meta">
+                    <div class="card-top">
+                        <span class="chip">Meta</span>
+                        <span class="meta">2025-12-30 22:17:24</span>
+                    </div>
+                    <h4><a href="/articles/known-issues.html">Known Issues</a></h4>
+                    <p class="meta-line">Writing</p>
+                </article>
                 
-                <li class="toc-item toc-level-2">
-                    <a href="#closing">Closing</a>
-                </li>
+                <article class="card" data-title="creations" data-domain="meta">
+                    <div class="card-top">
+                        <span class="chip">Meta</span>
+                        <span class="meta">2025-12-30 22:17:24</span>
+                    </div>
+                    <h4><a href="/articles/creations.html">Creations</a></h4>
+                    <p class="meta-line">Meta</p>
+                </article>
                 
-            </ul>
-            
+                <article class="card" data-title="entries" data-domain="meta">
+                    <div class="card-top">
+                        <span class="chip">Meta</span>
+                        <span class="meta">2025-12-30 22:17:24</span>
+                    </div>
+                    <h4><a href="/articles/articles.html">Entries</a></h4>
+                    <p class="meta-line">Meta</p>
+                </article>
+                
+            </div>
+        </section>
 
-        </aside>
+        <section class="panel gallery-strip">
+            <div class="panel-head">
+                <p class="eyebrow">Media</p>
+                <h3>Frames, captures, stills</h3>
+            </div>
+            <div class="gallery-rail">
+                
+                <div class="gallery-card">
+                    <div class="frame placeholder">
+                        <span>S</span>
+                    </div>
+                    <div class="caption">
+                        <p class="label">Development</p>
+                        <p class="title"><a href="/articles/local-instances.html">Scene Local Instances</a></p>
+                    </div>
+                </div>
+                
+                <div class="gallery-card">
+                    <div class="frame placeholder">
+                        <span>O</span>
+                    </div>
+                    <div class="caption">
+                        <p class="label">Development</p>
+                        <p class="title"><a href="/articles/ordinal.html">Ordinal</a></p>
+                    </div>
+                </div>
+                
+                <div class="gallery-card">
+                    <div class="frame placeholder">
+                        <span>P</span>
+                    </div>
+                    <div class="caption">
+                        <p class="label">Meta</p>
+                        <p class="title"><a href="/articles/places.html">Places</a></p>
+                    </div>
+                </div>
+                
+                <div class="gallery-card">
+                    <div class="frame placeholder">
+                        <span>K</span>
+                    </div>
+                    <div class="caption">
+                        <p class="label">Meta</p>
+                        <p class="title"><a href="/articles/known-issues.html">Known Issues</a></p>
+                    </div>
+                </div>
+                
+                <div class="gallery-card">
+                    <div class="frame placeholder">
+                        <span>C</span>
+                    </div>
+                    <div class="caption">
+                        <p class="label">Meta</p>
+                        <p class="title"><a href="/articles/creations.html">Creations</a></p>
+                    </div>
+                </div>
+                
+                <div class="gallery-card">
+                    <div class="frame placeholder">
+                        <span>E</span>
+                    </div>
+                    <div class="caption">
+                        <p class="label">Meta</p>
+                        <p class="title"><a href="/articles/articles.html">Entries</a></p>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
 
-        
-        <article>
-            <header>
-                <h2 id="introduction">Introduction</h2>
-            </header>
-            <section>
+        <section class="panel domains">
+            <div class="panel-head">
+                <p class="eyebrow">Domains</p>
+                <h3>Navigate by domain</h3>
+            </div>
+            <div class="domain-grid">
                 
-                <p>This space is an archive of my <a href="/articles/creations.html">creations</a>, the <a href="/articles/places.html">places</a> I've been, and the experiences that have shaped me. It's a home for reflections, creative experiments, and curated notes.</p>
+                <div class="domain-card">
+                    <div class="card-top">
+                        <span class="chip">Development</span>
+                        <span class="meta">2 entries</span>
+                    </div>
+                    <ul>
+                        
+                        <li><a href="/articles/local-instances.html">Scene Local Instances</a></li>
+                        
+                        <li><a href="/articles/ordinal.html">Ordinal</a></li>
+                        
+                    </ul>
+                </div>
                 
-            </section>
-        </article>
-        
-        <article>
-            <header>
-                <h2 id="about-me">About Me</h2>
-            </header>
-            <section>
+                <div class="domain-card">
+                    <div class="card-top">
+                        <span class="chip">Meta</span>
+                        <span class="meta">5 entries</span>
+                    </div>
+                    <ul>
+                        
+                        <li><a href="/articles/places.html">Places</a></li>
+                        
+                        <li><a href="/articles/known-issues.html">Known Issues</a></li>
+                        
+                        <li><a href="/articles/creations.html">Creations</a></li>
+                        
+                        <li><a href="/articles/articles.html">Entries</a></li>
+                        
+                    </ul>
+                </div>
                 
-                <p>I'm Aleph, a software engineer exploring system design, game development, and environmental design. I'm fascinated by <a href="/articles/emergence.html">emergence</a>, both in how it unfolds within technical systems and how communities form, adapt, and grow as ecosystems around the things they build together.</p>
+                <div class="domain-card">
+                    <div class="card-top">
+                        <span class="chip">Places</span>
+                        <span class="meta">1 entries</span>
+                    </div>
+                    <ul>
+                        
+                        <li><a href="/articles/chernobyl.html">Chernobyl</a></li>
+                        
+                    </ul>
+                </div>
                 
-                <p>In my free time, I primarily work with Python and have built a range of tools and small systems. These include <a href="https://github.com/LiminalCrab/auger" target="_blank">Auger</a>, an RSS feed aggregator for the <a href="https://github.com/XXIIVV/Webring/" target="_blank">Merveilles Webring Project</a>, and <a href="https://github.com/LiminalCrab/starlamp_base" target="_blank">Starlamp</a>, a Django based portfolio management tool. I have also explored C through projects like <a href="https://github.com/LiminalCrab/Apsis" target="_blank">Apsis</a>, an experiment in building a global metronome for networked music performance using SDL, and <a href="https://github.com/LiminalCrab/sidg64" target="_blank">Sidg64</a>,an early attempt at a Snowflake style ID generator for PostgreSQL that gave me hands on experience working with libpq-fe. My first website, <a href="https://github.com/LiminalCrab/sudogami" target="_blank">sudogami</a>, was initially written in C as a fork of <a href="https://100r.co/site/home.html" target="_blank">Hundred Rabbit</a>'s static site generator, before later being migrated to the <a href="https://www.11ty.dev/" target="_blank">11ty</a> JavaScript framework.</p>
+                <div class="domain-card">
+                    <div class="card-top">
+                        <span class="chip">Research</span>
+                        <span class="meta">1 entries</span>
+                    </div>
+                    <ul>
+                        
+                        <li><a href="/articles/emergence.html">Emergence</a></li>
+                        
+                    </ul>
+                </div>
                 
-                <p>Lately, I've been working in S&box, Facepunch's open source game engine, designing and implementing an editor side Local Instance system. The goal is to make level design less repetitious by allowing designers to author a single mesh structure and reuse it across a scene, with changes made to one copy automatically propagating to all others while each placement retains its own transform and local edits. In parallel, I've been developing a game and contributing bug fixes to the engine, using active game development to identify missing features and edge cases in the tooling.</p>
+                <div class="domain-card">
+                    <div class="card-top">
+                        <span class="chip">Social</span>
+                        <span class="meta">1 entries</span>
+                    </div>
+                    <ul>
+                        
+                        <li><a href="/articles/merveilles.html">Merveilles</a></li>
+                        
+                    </ul>
+                </div>
                 
-                <p>This website is generated by <a href="/articles/ordinal.html">Ordinal</a>, a static site generator I built in Python. Inspired by Wikipedia and other knowledge wikis, it's designed to let relationships between pages emerge naturally over time. Content is written in Markdown and rendered into an interconnected set of pages using simple templates.</p>
+                <div class="domain-card">
+                    <div class="card-top">
+                        <span class="chip">Unknown</span>
+                        <span class="meta">5 entries</span>
+                    </div>
+                    <ul>
+                        
+                        <li><a href="/articles/london.html">London</a></li>
+                        
+                        <li><a href="/articles/malta.html">Malta</a></li>
+                        
+                        <li><a href="/articles/ukraine.html">Ukraine</a></li>
+                        
+                        <li><a href="/articles/tokyo.html">Tokyo</a></li>
+                        
+                    </ul>
+                </div>
                 
-                <p>Ordinal grew out of years of accumulated journal entries and notes written in a wiki style, moving through tools like Vimwiki, Dendron, and later Obsidian.</p>
+            </div>
+        </section>
+
+        <section class="panel activity-panel">
+            <div class="panel-head">
+                <p class="eyebrow">Activity</p>
+                <h3>Recent site changes</h3>
+                <div class="filter-row">
+                    <input id="changelog-filter" type="search" placeholder="Search changelog">
+                    <select id="changelog-action">
+                        <option value="all">All</option>
+                        <option value="created">Created</option>
+                        <option value="modified">Modified</option>
+                        <option value="deleted">Deleted</option>
+                    </select>
+                </div>
+            </div>
+            <div class="activity-graph" title="Changes over the last 30 days">
                 
-                <p><h3 id="professional-experience">Professional Experience</h3></p>
+                <span class="cell level-0" title="2025-12-01 — 0 change(s)"></span>
                 
-                <p>Professionally, I've worked in IT Operations and DevOps within large enterprise environments, focusing on building and maintaining reliable systems at scale. Alongside day to day engineering work, I regularly served as an incident commander during production outages, coordinating response efforts, triaging failures, and guiding systems back to a stable state under real time pressure.</p>
+                <span class="cell level-0" title="2025-12-02 — 0 change(s)"></span>
                 
-                <p>My work has centered on automation and observability, using Python for tooling, Ansible for orchestration, and Prometheus and Grafana to monitor and reason about system health over time. I've implemented and maintained CI/CD pipelines using Jenkins and Bitbucket, deployed containerized services with Docker, Podman, and Kubernetes, and defined infrastructure through Terraform while enforcing infrastructure as code practices with Puppet. Much of this work involved reducing operational friction, improving failure visibility, and making complex systems easier to debug, maintain, and evolve.</p>
+                <span class="cell level-0" title="2025-12-03 — 0 change(s)"></span>
                 
-                <p>Beyond enterprise work, I've contributed to smaller, experimental projects. I maintained web infrastructure and developed asset pipelines for <a href="https://evil-algorithm.com/" target="_blank">Evil-Algorithm</a>, a VFX studio founded by <a href="https://www.davidkarlak.com/" target="_blank">David Karlack</a> and <a href="https://www.imdb.com/name/nm3862741/" target="_blank">Leri Greer</a> focused on immersive world design. My role involved building workflows that streamlined integration between third-party tools and internal systems, prioritizing flexibility and iteration over rigid process.</p>
+                <span class="cell level-0" title="2025-12-04 — 0 change(s)"></span>
                 
-                <p><h3 id="tools-i-use">Tools I Use</h3></p>
+                <span class="cell level-0" title="2025-12-05 — 0 change(s)"></span>
                 
-                <p>My tooling reflects the kind of work I do. I primarily use VS Code for programming, with Visual Studio when deeper IDE support is needed. For image editing, I use Affinity Photo as a replacement for Photoshop, and Inkscape for 2D vector work.</p>
+                <span class="cell level-0" title="2025-12-06 — 0 change(s)"></span>
                 
-                <p>Blender is my primary tool for 3D modeling. I've used Substance Designer for texture creation, but I tend to prefer handcrafted textures over purely procedural approaches, especially when visual intent matters more than perfect consistency.</p>
+                <span class="cell level-0" title="2025-12-07 — 0 change(s)"></span>
                 
-                <p>Across all of these tools, I value clarity and control over abstraction. I tend to favor workflows that make structure visible and easy to reason about.</p>
+                <span class="cell level-0" title="2025-12-08 — 0 change(s)"></span>
                 
-            </section>
-        </article>
-        
-        <article>
-            <header>
-                <h2 id="closing">Closing</h2>
-            </header>
-            <section>
+                <span class="cell level-0" title="2025-12-09 — 0 change(s)"></span>
                 
-                <p>Over time, I'll be adding more to this site as I go through past entries. Most were written for myself, never with an audience in mind. Some are exceptionally well-written pieces, carefully structured and thought out, while others are scattered thoughts or quick notes. They can be opinionated, and I don't always agree with them anymore, but each one served a purpose at some point.</p>
+                <span class="cell level-0" title="2025-12-10 — 0 change(s)"></span>
                 
-            </section>
-        </article>
-        
+                <span class="cell level-0" title="2025-12-11 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-12 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-13 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-14 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-15 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-16 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-17 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-18 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-19 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-20 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-21 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-22 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-23 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-24 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-25 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-26 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-27 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-28 — 0 change(s)"></span>
+                
+                <span class="cell level-0" title="2025-12-29 — 0 change(s)"></span>
+                
+                <span class="cell level-4" title="2025-12-30 — 256 change(s)"></span>
+                
+            </div>
+            <p class="activity-info" id="activity-info">Hover a cell to see the date and count.</p>
+            <div class="changelog">
+                <div class="changelog-head">
+                    <p class="eyebrow">Changelog</p>
+                    <p class="meta-line">Latest modifications, creations, deletions</p>
+                </div>
+                <ul>
+                    
+                    <li data-action="deleted" data-path="articles/ordinal.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223922</span>
+                        <span class="path"><a href="/articles/ordinal.md">articles/ordinal.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/tasks.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223921</span>
+                        <span class="path"><a href="/articles/tasks.md">articles/tasks.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/merveilles.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223920</span>
+                        <span class="path"><a href="/articles/merveilles.md">articles/merveilles.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/italy.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223919</span>
+                        <span class="path"><a href="/articles/italy.md">articles/italy.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/tokyo.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223918</span>
+                        <span class="path"><a href="/articles/tokyo.md">articles/tokyo.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/articles.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223917</span>
+                        <span class="path"><a href="/articles/articles.md">articles/articles.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/creations.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223916</span>
+                        <span class="path"><a href="/articles/creations.md">articles/creations.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/local-instances.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223915</span>
+                        <span class="path"><a href="/articles/local-instances.md">articles/local-instances.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/known-issues.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223914</span>
+                        <span class="path"><a href="/articles/known-issues.md">articles/known-issues.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/places.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223913</span>
+                        <span class="path"><a href="/articles/places.md">articles/places.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/emergence.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223912</span>
+                        <span class="path"><a href="/articles/emergence.md">articles/emergence.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/ukraine.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223911</span>
+                        <span class="path"><a href="/articles/ukraine.md">articles/ukraine.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/chernobyl.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223910</span>
+                        <span class="path"><a href="/articles/chernobyl.md">articles/chernobyl.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/malta.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223909</span>
+                        <span class="path"><a href="/articles/malta.md">articles/malta.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="articles/london.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223908</span>
+                        <span class="path"><a href="/articles/london.md">articles/london.md</a></span>
+                    </li>
+                    
+                    <li data-action="deleted" data-path="index.md">
+                        <span class="chip">deleted</span>
+                        <span class="meta">2025-12-30T21:37:58.223905</span>
+                        <span class="path"><a href="/index.md">index.md</a></span>
+                    </li>
+                    
+                    <li data-action="created" data-path="index.md">
+                        <span class="chip">created</span>
+                        <span class="meta">2025-12-30T21:28:06.190952</span>
+                        <span class="path"><a href="">index.md</a></span>
+                    </li>
+                    
+                    <li data-action="created" data-path="articles/london.md">
+                        <span class="chip">created</span>
+                        <span class="meta">2025-12-30T21:28:06.190952</span>
+                        <span class="path"><a href="">articles/london.md</a></span>
+                    </li>
+                    
+                    <li data-action="created" data-path="articles/malta.md">
+                        <span class="chip">created</span>
+                        <span class="meta">2025-12-30T21:28:06.190952</span>
+                        <span class="path"><a href="">articles/malta.md</a></span>
+                    </li>
+                    
+                    <li data-action="created" data-path="articles/chernobyl.md">
+                        <span class="chip">created</span>
+                        <span class="meta">2025-12-30T21:28:06.190952</span>
+                        <span class="path"><a href="">articles/chernobyl.md</a></span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </section>
     </main>
 
-    
-
-
-    
-    <section class="related-articles">
-        <h2>Backlinks</h2>
-        <ul>
-            
-        </ul>
-
-        <h2>Related Articles</h2>
-        <ul>
-            
-            <li><a href="/index.html">The Infinite Archive</a></li>
-            
-            <li><a href="/articles/places.html">Places</a></li>
-            
-            <li><a href="/articles/known-issues.html">Known Issues</a></li>
-            
-            <li><a href="/articles/creations.html">Creations</a></li>
-            
-            <li><a href="/articles/articles.html">Entries</a></li>
-            
-            <li><a href="/articles/tasks.html">Tasks</a></li>
-            
-        </ul>
-    </section>
-    
-
-    
-
-    <footer>
-        <p>&copy; 2025 Aleph.</p>
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
     </footer>
 </body>
-
 </html>

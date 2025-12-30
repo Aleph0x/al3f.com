@@ -1,6 +1,8 @@
 import os
 import shutil
-from src.base_utils import content_dir, public_dir, setup_logger, ensure_directory
+import json
+from datetime import datetime, timedelta
+from src.base_utils import content_dir, public_dir, setup_logger, ensure_directory, logs_dir
 from src.file_manager import get_categories, generate_missing, merge_image_dir, merge_video_dir
 from src.markdown_parser import parse_frontmatter, parse_related, parse_footnotes, parse_articles
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
@@ -65,7 +67,7 @@ def get_articles_list() -> dict:
                 frontmatter = parsed_data.get("frontmatter", {})
 
                 title = frontmatter.get("title", file.replace(".md", "").replace("-", " ").title())
-                last_modified = frontmatter.get("last_modified", "Unknown")
+                last_modified = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 domain = frontmatter.get("domain", "Miscellaneous")
                 division = frontmatter.get("division", [])
                 url = f"/articles/{file.replace('.md', '.html')}"
@@ -80,6 +82,176 @@ def get_articles_list() -> dict:
     }
 
 
+def load_json(fp: str, default):
+    try:
+        with open(fp, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+
+def save_json(fp: str, data) -> None:
+    try:
+        ensure_directory(os.path.dirname(fp))
+        with open(fp, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as err:
+        logger.error(f"Error writing json to {fp}: {err}")
+
+
+def scan_content_files() -> dict:
+    content_files = {}
+    for root, _, files in os.walk(content_dir):
+        for file in files:
+            if file.endswith(".md"):
+                fp = os.path.join(root, file)
+                rel = os.path.relpath(fp, content_dir)
+                content_files[rel] = os.path.getmtime(fp)
+    return content_files
+
+
+def scan_public_files() -> dict:
+    public_files = {}
+    for root, _, files in os.walk(public_dir):
+        for file in files:
+            if file.endswith(".html"):
+                fp = os.path.join(root, file)
+                rel = os.path.relpath(fp, public_dir)
+                public_files[rel] = os.path.getmtime(fp)
+    return public_files
+
+
+def update_activity_log() -> tuple[list[dict], list[dict]]:
+    """
+    Track created/modified/deleted generated HTML files and record events.
+    Returns (activity_graph_data, changelog) for convenience.
+    """
+    state_fp = os.path.join(logs_dir, "activity_state.json")
+    log_fp = os.path.join(logs_dir, "activity_log.json")
+
+    previous = load_json(state_fp, {})
+    current = scan_public_files()
+
+    events = []
+
+    for path, mtime in current.items():
+        if path not in previous:
+            ts = datetime.fromtimestamp(mtime).isoformat()
+            events.append(
+                {
+                    "path": path,
+                    "url": f"/{path.replace(os.sep, '/')}",
+                    "action": "created",
+                    "timestamp": ts,
+                }
+            )
+        elif previous[path] != mtime:
+            ts = datetime.fromtimestamp(mtime).isoformat()
+            events.append(
+                {
+                    "path": path,
+                    "url": f"/{path.replace(os.sep, '/')}",
+                    "action": "modified",
+                    "timestamp": ts,
+                }
+            )
+
+    for path in previous:
+        if path not in current:
+            ts = datetime.utcnow().isoformat()
+            events.append(
+                {
+                    "path": path,
+                    "url": f"/{path.replace(os.sep, '/')}",
+                    "action": "deleted",
+                    "timestamp": ts,
+                }
+            )
+
+    if events:
+        existing_log = load_json(log_fp, [])
+        existing_log.extend(events)
+        save_json(log_fp, existing_log)
+
+    save_json(state_fp, current)
+
+    return get_activity_graph(log_fp), get_recent_events(log_fp)
+
+
+def get_activity_graph(log_fp: str, days: int = 30) -> list[dict]:
+    log = load_json(log_fp, [])
+    today = datetime.utcnow().date()
+    window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    counts = {d.isoformat(): 0 for d in window}
+
+    for entry in log:
+        ts = entry.get("timestamp")
+        try:
+            dt = datetime.fromisoformat(ts)
+            day = dt.date().isoformat()
+            if day in counts:
+                counts[day] += 1
+        except Exception:
+            continue
+
+    def level(count: int) -> int:
+        if count == 0:
+            return 0
+        if count == 1:
+            return 1
+        if count <= 3:
+            return 2
+        if count <= 6:
+            return 3
+        return 4
+
+    return [{"date": day, "count": counts[day], "level": level(counts[day])} for day in counts]
+
+
+def get_recent_events(log_fp: str, limit: int = 20) -> list[dict]:
+    log = load_json(log_fp, [])
+    try:
+        log.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    except Exception:
+        pass
+    return log[:limit]
+
+
+def get_page_changelog(log_fp: str, page_path: str, limit: int = 20) -> list[dict]:
+    """
+    Filter activity log entries for a specific generated HTML path (public-relative).
+    """
+    log = load_json(log_fp, [])
+    normalized = page_path.lstrip("/").replace("\\", "/")
+    filtered = [entry for entry in log if entry.get("path", "").replace("\\", "/") == normalized]
+    try:
+        filtered.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    except Exception:
+        pass
+    return filtered[:limit]
+
+
+def get_recent_articles(max_items: int = 6) -> list[dict]:
+    """
+    Flatten articles across domains and return the latest items by last_modified.
+    """
+    flattened = []
+    categorized = get_articles_list()
+
+    for _, articles in categorized.items():
+        flattened.extend(articles)
+
+    try:
+        flattened.sort(
+            key=lambda x: datetime.fromisoformat(str(x.get("last_modified", "1970-01-01"))),
+            reverse=True,
+        )
+    except Exception:
+        flattened.sort(key=lambda x: x.get("last_modified", ""), reverse=True)
+
+    return flattened[:max_items]
+
+
 def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: dict) -> None:
     try:
         logger.info(f"Processing file: {md_fp}")
@@ -92,6 +264,9 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
         frontmatter = parsed_data.get("frontmatter", {})
         raw_content = parsed_data.get("content", "")
 
+        # Overwrite last_modified to current UTC time for accurate surface
+        frontmatter["last_modified"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
         logger.info("Parsing footnotes.")
         footnotes_content, footnotes = parse_footnotes(raw_content)
 
@@ -103,6 +278,16 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
 
         template_name = frontmatter.get("template", default_template)
         logger.info(f"Using template: {template_name} for {md_fp}")
+
+        gallery = frontmatter.get("gallery", [])
+        if not isinstance(gallery, list):
+            gallery = []
+
+        tags = frontmatter.get("tags", [])
+        if isinstance(tags, str):
+            tags = [tags]
+        elif not isinstance(tags, list):
+            tags = []
 
         context = {
             "title": frontmatter.get("title", "Untitled"),
@@ -127,10 +312,29 @@ def process_file(md_fp: str, output_fp: str, default_template: str, backlinks: d
             "backlinks": backlinks.get(os.path.splitext(os.path.basename(md_fp))[0], []),
             "external_links": parsed_data.get("external_links", []),
             "related_articles": related,
+            "hero_image": frontmatter.get("hero_image"),
+            "hero_video": frontmatter.get("hero_video"),
+            "poster": frontmatter.get("poster"),
+            "gallery": gallery,
+            "tags": tags,
+            "series": frontmatter.get("series"),
+            "location": frontmatter.get("location"),
+            "reading_time": frontmatter.get("reading_time"),
+            "frontmatter": frontmatter,
+            "page_changelog": get_page_changelog(
+                os.path.join(logs_dir, "activity_log.json"),
+                os.path.relpath(output_fp, public_dir),
+            ),
         }
 
         if template_name == "section.html":
             context["categorized_articles"] = get_articles_list()
+        if template_name == "index.html":
+            context["recent_articles"] = get_recent_articles()
+            context["categorized_articles"] = get_articles_list()
+            context["categories"] = get_categories()
+            context["activity_graph"] = get_activity_graph(os.path.join(logs_dir, "activity_log.json"))
+            context["changelog"] = get_recent_events(os.path.join(logs_dir, "activity_log.json"))
 
         rendered_html = render_template_context(template_name, context)
         ensure_directory(os.path.dirname(output_fp))
@@ -167,6 +371,8 @@ def generate_static_site(category="all"):
         merge_image_dir()
         merge_video_dir()
         compile_scss()
+        logger.info("Updating activity log based on generated HTML changes.")
+        update_activity_log()
 
     except Exception as err:
         logger.error(f"Error generating static site: {err}", exc_info=True)
