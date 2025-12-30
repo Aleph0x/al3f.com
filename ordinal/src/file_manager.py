@@ -244,3 +244,29 @@ def merge_image_dir() -> None:
                 logger.info(f"Copied image: {source_file} -> {destination_file}")
     except Exception as err:
         logger.error(f"Error merging images directory: {err}")
+
+
+def merge_video_dir() -> None:
+    source_dir = os.path.join(content_dir, "videos")
+    dest_dir = os.path.join(public_dir, "videos")
+
+    if not os.path.exists(source_dir):
+        logger.info(f"Source videos directory does not exist: {source_dir}. Skipping.")
+        return
+
+    ensure_directory(dest_dir)
+
+    try:
+        for root, dirs, files in os.walk(source_dir):
+            for file in files:
+                source_file = os.path.join(root, file)
+                rel_path = os.path.relpath(source_file, source_dir)
+                destination_file = os.path.join(dest_dir, rel_path)
+
+                destination_dir_path = os.path.dirname(destination_file)
+                ensure_directory(destination_dir_path)
+
+                shutil.copy2(source_file, destination_file)
+                logger.info(f"Copied video: {source_file} -> {destination_file}")
+    except Exception as err:
+        logger.error(f"Error merging videos directory: {err}")

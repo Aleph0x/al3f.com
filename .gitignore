@@ -22,3 +22,6 @@ build/
 main.log
 ordinal/ordinal/snapshots/*
 *:Zone.Identifie
+ordinal/public/
+ordinal/logs/
+ordinal/content/*

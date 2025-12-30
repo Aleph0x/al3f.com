@@ -1,44 +1,11 @@
 import os
 import re
-import mistune
 import yaml
 from datetime import datetime
 from typing import List, Dict, Any
 from src.base_utils import setup_logger, ensure_directory, content_dir
 
 logger = setup_logger("markdown_parser", "logs/markdown_parser.log")
-
-
-def markdown_output(md_fp: str, backlinks: Dict[str, List[str]]) -> None:
-    try:
-        logger.info(f"Logging Markdown output for: {md_fp}")
-        with open(md_fp, "r", encoding="utf-8") as f:
-            markdown_content = f.read()
-
-        try:
-            html_content = mistune.create_markdown()(markdown_content)
-        except Exception as err:
-            logger.error(f"Error converting Markdown to HTML: {err}")
-            return
-
-        md_name = os.path.splitext(os.path.basename(md_fp))[0].replace(" ", "-").lower()
-        file_backlinks = backlinks.get(md_name, [])
-
-        log_file = os.path.join("logs", "markdown_output.log")
-        ensure_directory(os.path.dirname(log_file))
-        with open(log_file, "a", encoding="utf-8") as log:
-            log.write("\n\n=== Markdown File: {} ===\n".format(md_fp))
-            log.write("=== Raw Markdown Content ===\n")
-            log.write(markdown_content)
-            log.write("\n\n=== Converted HTML Content ===\n")
-            log.write(html_content)
-            log.write("\n\n=== Backlinks ===\n")
-            if file_backlinks:
-                log.write("\n".join(file_backlinks))
-            else:
-                log.write("No backlinks found.")
-    except Exception as err:
-        logger.error(f"Error logging Markdown output for: {md_fp}: {err}")
 
 
 def parse_quotes(md_content: str) -> str:
@@ -71,7 +38,9 @@ def parse_tables(md_content: str) -> str:
         row_html = ""
         for row in rows:
             cells = row.strip().split("|")[1:-1]
-            row_html += "<tr>" + "".join(f"<td>{c.strip()}</td>" for c in cells) + "</tr>"
+            row_html += (
+                "<tr>" + "".join(f"<td>{c.strip()}</td>" for c in cells) + "</tr>"
+            )
 
         return f"""
         <table>
@@ -98,13 +67,26 @@ def parse_bold_text(md_content: str) -> str:
     return re.sub(bold_pattern, replace_bold, md_content)
 
 
-VALID_IMAGE_EXTENSIONS = (".avif", ".bmp", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp")
+VALID_IMAGE_EXTENSIONS = (
+    ".avif",
+    ".bmp",
+    ".gif",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".svg",
+    ".webp",
+)
+VALID_VIDEO_EXTENSIONS = (".mp4",)
 
 
-def parse_images(md_content: str, base_path: str = "../images/") -> str:
+def parse_images(
+    md_content: str, base_path: str = "../images/", video_base_path: str = "../videos/"
+) -> str:
     """
     - `![Alt Text](image.jpg)` for standard images
     - `![Alt Text|100x200](image.jpg)` for resized image (100px width, 200px height)
+    - `![Alt Text](video.mp4)` for videos (renders a <video> tag with controls)
     """
 
     image_pattern = re.compile(r"!\[(.*?)\]\((.*?)\)")
@@ -122,8 +104,19 @@ def parse_images(md_content: str, base_path: str = "../images/") -> str:
         else:
             size_attr = ""
 
-        if not src.lower().endswith(VALID_IMAGE_EXTENSIONS):
-            return f"<p>[Invalid image format: {src}]</p>"
+        file_ext = os.path.splitext(src)[1].lower()
+
+        if file_ext in VALID_VIDEO_EXTENSIONS:
+            video_path = os.path.join(video_base_path, os.path.basename(src))
+            return f"""
+            <figure class="media-video">
+                <video src="{video_path}" controls{size_attr} aria-label="{alt_text}"></video>
+                <figcaption>{alt_text}</figcaption>
+            </figure>
+            """
+
+        if file_ext not in VALID_IMAGE_EXTENSIONS:
+            return f"<p>[Invalid media format: {src}]</p>"
 
         image_path = os.path.join(base_path, os.path.basename(src))
 
@@ -139,7 +132,9 @@ def parse_images(md_content: str, base_path: str = "../images/") -> str:
 
 def parse_backlink(source: str, target: str, backlinks: Dict[str, List[str]]) -> None:
     try:
-        source_key = os.path.splitext(os.path.basename(source))[0].replace(" ", "-").lower()
+        source_key = (
+            os.path.splitext(os.path.basename(source))[0].replace(" ", "-").lower()
+        )
         target_key = target.replace(" ", "-").lower()
 
         if source_key == "index":
@@ -158,7 +153,9 @@ def parse_backlink(source: str, target: str, backlinks: Dict[str, List[str]]) ->
         logger.error(f"Error parsing backlink from '{source}' to '{target}': {err}")
 
 
-def parse_wikilinks(source_page: str, text: str, backlinks: Dict[str, List[str]]) -> str:
+def parse_wikilinks(
+    source_page: str, text: str, backlinks: Dict[str, List[str]]
+) -> str:
     try:
         pattern = r"\[\[(.*?)\]\]"
 
@@ -172,7 +169,9 @@ def parse_wikilinks(source_page: str, text: str, backlinks: Dict[str, List[str]]
                     category = folder
                     break
 
-            logger.info(f"Backlinks source: {source_page}, link text: {link_text}, resolved to category: {category}")
+            logger.info(
+                f"Backlinks source: {source_page}, link text: {link_text}, resolved to category: {category}"
+            )
             parse_backlink(source_page, link_text, backlinks)
 
             return f'<a href="/{category}/{slug}.html">{link_text}</a>'
@@ -198,7 +197,9 @@ def parse_external_links(text: str) -> str:
         return text
 
 
-def parse_articles(md_content: str, page_name: str, backlinks: Dict[str, List[str]]) -> dict:
+def parse_articles(
+    md_content: str, page_name: str, backlinks: Dict[str, List[str]]
+) -> dict:
     articles = []
     current_article = None
     footnotes = {}
@@ -274,7 +275,10 @@ def parse_footnotes(content: str):
         logger.info("Starting to extract footnotes.")
 
         footnote_pattern = re.compile(r"\[\^(\d+)\]: (.+)")
-        footnotes = {match.group(1): match.group(2) for match in footnote_pattern.finditer(content)}
+        footnotes = {
+            match.group(1): match.group(2)
+            for match in footnote_pattern.finditer(content)
+        }
         logger.info(f"Extracted footnotes: {footnotes}")
 
         content = footnote_pattern.sub("", content)
@@ -322,18 +326,26 @@ def parse_related(frontmatter: dict) -> list[dict]:
                         elif not isinstance(file_domains, list):
                             file_domains = []
 
-                        file_domains = [dom.lower() for dom in file_domains if isinstance(dom, str)]
+                        file_domains = [
+                            dom.lower() for dom in file_domains if isinstance(dom, str)
+                        ]
 
                         if set(domain) & set(file_domains):
-                            logger.info(f"Match found for Domain in file: {markdown_path}")
+                            logger.info(
+                                f"Match found for Domain in file: {markdown_path}"
+                            )
                             related.append(
                                 {
                                     "title": file_frontmatter.get("title", "Untitled"),
-                                    "url": markdown_path.replace(content_dir, "").replace(".md", ".html"),
+                                    "url": markdown_path.replace(
+                                        content_dir, ""
+                                    ).replace(".md", ".html"),
                                 }
                             )
                     except Exception as parse_error:
-                        logger.error(f"Error parsing frontmatter for file {markdown_path}: {parse_error}")
+                        logger.error(
+                            f"Error parsing frontmatter for file {markdown_path}: {parse_error}"
+                        )
 
         logger.info(f"Related articles found: {len(related)}")
         return related
