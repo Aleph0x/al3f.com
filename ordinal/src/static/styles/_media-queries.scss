@@ -9,6 +9,10 @@
         padding: 1.5rem;
     }
 
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
     .toc {
         position: relative;
         top: auto;
@@ -17,6 +21,7 @@
         border-bottom: 2px solid $accent-color;
         margin-bottom: 1.5rem;
         width: 100%;
+        display: block;
     }
 
     main > article {

@@ -521,6 +521,9 @@ table tr:hover {
     max-width: 100%;
     padding: 1.5rem;
   }
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
   .toc {
     position: relative;
     top: auto;
@@ -529,6 +532,7 @@ table tr:hover {
     border-bottom: 2px solid #aaaaaa;
     margin-bottom: 1.5rem;
     width: 100%;
+    display: block;
   }
   main > article {
     max-width: 110ch;

@@ -33,11 +33,6 @@
 
     <main class="layout-shell">
         <section id="latest" class="panel latest-grid">
-            <div class="margin-note right">
-                <span class="note-label">jmp signal</span>
-                <span class="note-line"></span>
-                <span class="note-body">hi/mid throughput</span>
-            </div>
             <div class="panel-head">
                 <h3>Recent Entries</h3>
             </div>
@@ -99,11 +94,6 @@
         </section>
 
         <section class="panel domains">
-            <div class="margin-note right">
-                <span class="note-label">call domains</span>
-                <span class="note-line"></span>
-                <span class="note-body">namespaced entries</span>
-            </div>
             <div class="panel-head">
                 <h3>Domains</h3>
             </div>
@@ -125,11 +115,6 @@
         </section>
 
         <section class="panel activity-panel">
-            <div class="margin-note left">
-                <span class="note-label">int 0x13</span>
-                <span class="note-line"></span>
-                <span class="note-body">last 30d writes</span>
-            </div>
             <div class="panel-head">
                 <p class="eyebrow">Activity</p>
                 <h3>Site changes</h3>
@@ -150,9 +135,6 @@
                     title="{{ day.date }} · {{ day.count }} change(s)"
                 >+</span>
                 {% endfor %}
-            </div>
-            <div id="activity-info" class="activity-info">
-                Hover a cell for date/details. <a class="activity-link" href="/revisions/index.html">Full log</a>
             </div>
             <div class="section-table activity-table">
                 <div class="table-head grid">
