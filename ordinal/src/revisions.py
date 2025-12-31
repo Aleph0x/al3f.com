@@ -36,6 +36,7 @@ def init_db() -> None:
                 title TEXT,
                 created TEXT,
                 word_count INTEGER,
+                word_delta INTEGER,
                 worked_hours REAL,
                 meta_json TEXT,
                 UNIQUE(slug, hash)
@@ -56,6 +57,12 @@ def init_db() -> None:
             """
         )
         conn.commit()
+        # Schema migrations for added columns
+        cur.execute("PRAGMA table_info(commits);")
+        cols = [row["name"] for row in cur.fetchall()]
+        if "word_delta" not in cols:
+            cur.execute("ALTER TABLE commits ADD COLUMN word_delta INTEGER;")
+            conn.commit()
         conn.close()
         logger.info("Initialized revisions database.")
     except Exception as err:
@@ -117,6 +124,10 @@ def insert_commit(
     parent_hash: Optional[str] = None,
 ) -> None:
     try:
+        prev = get_latest_commit(slug)
+        prev_wc = prev["word_count"] if prev and prev["word_count"] is not None else 0
+        word_delta = word_count - prev_wc
+
         conn = get_connection()
         cur = conn.cursor()
         now_ts = datetime.utcnow().isoformat()
@@ -128,7 +139,7 @@ def insert_commit(
         cur.execute(
             """
             INSERT OR IGNORE INTO commits
-            (hash, slug, timestamp, summary, parent_hash, title, created, word_count, worked_hours, meta_json)
+            (hash, slug, timestamp, summary, parent_hash, title, created, word_count, word_delta, worked_hours, meta_json)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
@@ -140,6 +151,7 @@ def insert_commit(
                 frontmatter.get("title"),
                 str(frontmatter.get("created", "")),
                 word_count,
+                word_delta,
                 worked_hours,
                 json.dumps(meta),
             ),
@@ -175,7 +187,7 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
         cur = conn.cursor()
         cur.execute(
             """
-            SELECT hash, timestamp, summary, parent_hash, title, created, word_count, worked_hours, meta_json
+            SELECT hash, timestamp, summary, parent_hash, title, created, word_count, word_delta, worked_hours, meta_json
             FROM commits WHERE slug = ? ORDER BY timestamp DESC
             """,
             (slug,),
@@ -193,6 +205,7 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
                     "title": r["title"],
                     "created": r["created"],
                     "word_count": r["word_count"],
+                    "word_delta": r["word_delta"],
                     "worked_hours": r["worked_hours"],
                     "meta": json.loads(r["meta_json"]) if r["meta_json"] else {},
                 }
@@ -210,14 +223,14 @@ def get_global_changelog(limit: Optional[int] = 200) -> List[Dict[str, Any]]:
         if limit is None:
             cur.execute(
                 """
-                SELECT slug, hash, timestamp, summary, title, word_count, worked_hours
+                SELECT slug, hash, timestamp, summary, title, word_count, word_delta, worked_hours, meta_json
                 FROM commits ORDER BY timestamp DESC
                 """
             )
         else:
             cur.execute(
                 """
-                SELECT slug, hash, timestamp, summary, title, word_count, worked_hours
+                SELECT slug, hash, timestamp, summary, title, word_count, word_delta, worked_hours, meta_json
                 FROM commits ORDER BY timestamp DESC LIMIT ?
                 """,
                 (limit,),
@@ -232,7 +245,9 @@ def get_global_changelog(limit: Optional[int] = 200) -> List[Dict[str, Any]]:
                 "summary": r["summary"],
                 "title": r["title"],
                 "word_count": r["word_count"],
+                "word_delta": r["word_delta"],
                 "worked_hours": r["worked_hours"],
+                "meta": json.loads(r["meta_json"]) if r["meta_json"] else {},
             }
             for r in rows
         ]

@@ -25,15 +25,22 @@
         </nav>
         <div class="now-line">
             <span class="now-text">
-                There's a pit inside where the beating heart of the sun expands. Dust traces its contours like a
+                There's a pit inside where the <span class="frag frag-ghost">beating heart</span> of the sun expands. Dust traces its contours like a
                 <a class="frag frag-box" href="/articles/chernobyl.html">radiograph</a>.
             </span>
+        </div>
+        <div class="mast-nav">
+            <a href="#latest">Entries</a>
+            <a href="#media">Media</a>
+            <a href="#domains">Domains</a>
+            <a href="#activity">Activity logged by Seraph</a>
         </div>
     </header>
 
     <main class="layout-shell">
         <section id="latest" class="panel latest-grid">
             <div class="panel-head">
+                <p class="eyebrow">Entries</p>
                 <h3>Recent Entries</h3>
             </div>
             <div class="card-grid">
@@ -62,8 +69,32 @@
             </div>
         </section>
 
-        <section class="panel media-panel">
+        <section class="panel domains" id="domains">
+            <div class="panel-head">
+                <p class="eyebrow">Taxonomy</p>
+                <h3>Domains</h3>
+            </div>
+            <div class="domain-strips">
+                {% for domain, articles in categorized_articles.items() %}
+                <div class="domain-strip">
+                    <a class="domain-strip-label" href="/domains/{{ domain | lower | replace(' ', '-') }}.html">DOMAIN // {{ domain }}</a>
+                    <span class="domain-strip-meta">— {{ articles|length }} entries —</span>
+                    <span class="domain-strip-entries">
+                        {% for article in articles[:5] %}
+                        <a href="{{ article.url }}" class="domain-dot">● {{ article.title }}</a>
+                        {% endfor %}
+                        {% if articles|length > 5 %}
+                        <span class="domain-more">+{{ articles|length - 5 }} more</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="panel media-panel" id="media">
             <div class="panel-head compact">
+                <p class="eyebrow">Signals</p>
                 <h3>Recent Media</h3>
             </div>
             <div class="media-rail">
@@ -77,86 +108,69 @@
                         {% endif %}
                     </div>
                     <figcaption class="media-caption">
-                        <span class="chip">{{ media.type }}</span>
-                        <span class="media-links">
-                            {% if media.articles %}
-                                {% for art in media.articles %}
-                                <a href="{{ art.url }}">{{ art.title }}</a>{% if not loop.last %}, {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                {{ media.title }}
-                            {% endif %}
-                        </span>
+                        {% set primary = media.articles[0] if media.articles else None %}
+                        {% if primary and primary.hash %}
+                        <a class="mono-tag" href="{{ primary.url }}">{{ primary.hash }}.{{ media.stamp }}.{{ media.basename.split('.')[-1] }}</a>
+                        {% else %}
+                        <span class="mono-tag">{{ media.title }}</span>
+                        {% endif %}
                     </figcaption>
                 </figure>
                 {% endfor %}
             </div>
         </section>
 
-        <section class="panel domains">
-            <div class="panel-head">
-                <h3>Domains</h3>
-            </div>
-            <div class="domain-grid">
-                {% for domain, articles in categorized_articles.items() %}
-                <div class="domain-card">
-                    <div class="card-top">
-                        <a class="chip domain-filter" href="/domains/{{ domain | lower | replace(' ', '-') }}.html">{{ domain }}</a>
-                        <span class="meta">{{ articles|length }} entries</span>
-                    </div>
-                    <ul>
-                        {% for article in articles[:4] %}
-                        <li><a href="{{ article.url }}">{{ article.title }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="panel activity-panel">
+        <section class="panel activity-panel" id="activity">
             <div class="panel-head">
                 <p class="eyebrow">Activity</p>
                 <h3>Site changes</h3>
-                <div class="filter-row mission-filter">
-                    <input id="changelog-filter" type="search" placeholder="Search changelog">
-                    <select id="changelog-action">
-                        <option value="all">All</option>
-                        <option value="commit" selected>Commits</option>
-                    </select>
+                <div class="pill-filters">
+                    <button class="chip pill-ghost" data-filter="all" aria-pressed="true">All</button>
+                    <button class="chip pill-ghost" data-filter="commit">Commits</button>
+                    <button class="chip pill-ghost" data-filter="media">Media</button>
                 </div>
             </div>
-            <div class="activity-graph" title="Changes over the last month">
+            <div class="commit-graph" title="Last 365 days of activity">
                 {% for day in activity_graph %}
                 <span
-                    class="cell level-{{ day.level }}"
-                    data-date="{{ day.date }}"
-                    data-count="{{ day.count }}"
-                    title="{{ day.date }} · {{ day.count }} change(s)"
-                >+</span>
+                    class="commit-cell level-{{ day.level }}"
+                    data-tooltip="{{ day.date }} · {{ day.count }} change(s)"
+                ></span>
                 {% endfor %}
             </div>
-            <div class="section-table activity-table">
-                <div class="table-head grid">
-                    <span>Slug</span>
-                    <span>Hash</span>
-                    <span>Summary</span>
-                    <span>Date</span>
-                    <span>Time</span>
-                </div>
-                <div class="table-body changelog-table">
-                    {% for entry in changelog %}
-                    {% set dt_parts = entry.timestamp.split('T') %}
-                    {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
-                    <div class="table-row grid" data-action="commit" data-path="{{ entry.slug | lower }}">
-                        <span class="cell domain">{{ entry.slug }}</span>
-                        <span class="cell title"><a href="/{{ entry.slug }}.html">{{ entry.hash }}</a></span>
-                        <span class="cell division">{{ entry.summary }}</span>
-                        <span class="cell modified">{{ dt_parts[0] }}</span>
-                        <span class="cell modified">{{ time_part }}</span>
+            <div class="activity-list changelog-table timeline-list">
+                {% for entry in changelog %}
+                {% set dt_parts = entry.timestamp.split('T') %}
+                {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                {% set action = entry.action | default("MODIFIED") %}
+                <article class="activity-item {% if entry.bundle_id %}bundle-item{% endif %}" data-action="{{ action|lower }}" data-path="{{ entry.slug | lower }}" {% if entry.bundle_id %}data-bundle="{{ entry.bundle_id }}"{% endif %}>
+                    <div class="activity-header">
+                        <span class="action-badge">{{ action }}</span>
+                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash }}</a>
+                        {% if entry.meta and entry.meta.domain %}<span class="slug">[{{ entry.meta.domain }}]</span>{% endif %}
+                        {% if entry.meta and entry.meta.division %}<span class="slug">({{ entry.meta.division|join(', ') }})</span>{% endif %}
+                        <span class="date">{{ dt_parts[0] }}</span>
+                        <span class="time">{{ time_part }}</span>
                     </div>
-                    {% endfor %}
-                </div>
+                    <div class="activity-path">
+                        <span class="entry-label">ENTRY:</span>
+                        <a class="entry-link" href="/{{ entry.slug }}.html">{{ entry.title or entry.slug }}</a>
+                    </div>
+                    <div class="activity-summary">
+                        <a class="summary-link" href="/{{ entry.slug }}.html">{{ entry.summary }}</a>
+                    </div>
+                    <div class="activity-word">
+                            <span class="word-meta">
+                            DELTA: {{ entry.word_delta or 0 }} WC: {{ entry.word_count or 0 }}
+                            {% if entry.worked_hours is not none %} · +{{ entry.worked_hours }}h{% endif %}
+                            {% if entry.entry_drift is not none %}{% endif %}
+                        </span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            <div class="table-footer">
+                <a class="chip pill-ghost" href="/revisions/index.html">FULL LOG</a>
             </div>
         </section>
     </main>

@@ -38,7 +38,7 @@
                     <span>Title</span>
                     <span>Hash</span>
                     <span>Summary</span>
-                    <span>Words</span>
+                    <span>Delta / Words</span>
                     <span>Worked (h)</span>
                     <span>Date</span>
                     <span>Time</span>
@@ -52,7 +52,7 @@
                         <span class="cell title">{{ entry.title or '—' }}</span>
                         <span class="cell title"><a href="/{{ entry.slug }}.html">{{ entry.hash }}</a></span>
                         <span class="cell division">{{ entry.summary }}</span>
-                        <span class="cell modified">{{ entry.word_count or 0 }}</span>
+                        <span class="cell modified">Δ {{ entry.word_delta or 0 }}, WC {{ entry.word_count or 0 }}</span>
                         <span class="cell modified">{{ entry.worked_hours or 0 }}</span>
                         <span class="cell modified">{{ dt_parts[0] }}</span>
                         <span class="cell modified">{{ time_part }}</span>

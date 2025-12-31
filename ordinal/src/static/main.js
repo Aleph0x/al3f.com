@@ -38,27 +38,30 @@ function setupSectionFilter() {
 }
 
 function setupChangelogFilter() {
-  const input = document.getElementById("changelog-filter");
-  const select = document.getElementById("changelog-action");
-  const entries = Array.from(
+  const buttons = Array.from(
+    document.querySelectorAll(".pill-filters [data-filter]")
+  );
+  const rows = Array.from(
     document.querySelectorAll(".changelog-table .table-row, .changelog ul li")
   );
-  if (!input || !select || entries.length === 0) return;
+  if (buttons.length === 0 || rows.length === 0) return;
 
-  const apply = () => {
-    const query = input.value.trim().toLowerCase();
-    const action = select.value;
-    entries.forEach((li) => {
-      const liAction = li.dataset.action || "";
-      const path = li.dataset.path || "";
-      const actionMatch = action === "all" || liAction === action;
-      const textMatch = !query || path.includes(query);
-      li.style.display = actionMatch && textMatch ? "" : "none";
+  const apply = (filter) => {
+    rows.forEach((row) => {
+      const action = row.dataset.action || "commit";
+      row.style.display = filter === "all" || action === filter ? "" : "none";
     });
   };
 
-  input.addEventListener("input", apply);
-  select.addEventListener("change", apply);
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      buttons.forEach((b) => b.setAttribute("aria-pressed", "false"));
+      btn.setAttribute("aria-pressed", "true");
+      apply(btn.dataset.filter);
+    });
+  });
+
+  apply("all");
 }
 
 function setupActivityHover() {

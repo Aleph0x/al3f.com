@@ -16,10 +16,12 @@ Merveilles is a decentralized collective of artists, programmers, and writers fo
 
 The community lives primarily in text based spaces such as static sites, IRC, and the [fediverse](https://merveilles.town/home). Conversations often revolve around [complexity in software](https://handmadecities.com/media/seattle-2022/complexity/), sustainable practices, [permacomputing](https://100r.co/site/weathering_software_winter.html) and [alternative methods of computing](https://100r.co/site/shining_sand.html). Members tend to build their own tools rather than rely on commercial frameworks, preferring bespoke and handcrafted solutions that reflect their values and creative processes.
 
-Merveilles favors plain textand simple tools, favoring small webpages over complex systems. Many members design their own typefaces and interfaces with a focus on readability and use.
+Merveilles favors plain text and simple tools, favoring small webpages over complex systems. Many members design their own typefaces and interfaces with a focus on readability and use.
 
 ## Aesthetic
-Aesthetics play a central role in Merveilles. Beyond software, creativity extends into music, physical crafts, and other hands-on disciplines, reinforcing a mindset that values creating over consuming. Much of Merveilles' distinct visual style is described by **Wiley Wiggins**:
+Aesthetics play a central role in Merveilles. Beyond software, creativity extends into music, physical crafts, and other hands-on disciplines, reinforcing a mindset that values creating over consuming. Much of Merveilles' distinct visual style is described by 
+
+**Wiley Wiggins**:
 
 > _"The Merveilles visual aesthetic is defined by stark black-and-white palettes, minimalist geometric design, and a focus on resurrecting older hardware and software platforms. The sensibility connects to the past—it resurrects older hardware and software platforms and aesthetics and reconnects them to the present. Programming new art tools for vintage hardware and software is a common exercise. Livecoding is a defining art practice in the Merveilles sensibility, and exemplified in software projects like ORCA, Hydra, and Supercollider—open programming platforms where code is written and altered while it continues to run, creating music and live visuals algorithmically."_
 - Wiley Wiggins, [The Merveilles Sensibility](https://wileywiggins.com/merveilles.html)

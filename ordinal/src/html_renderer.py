@@ -389,12 +389,14 @@ def get_recent_media(max_items: int = 12) -> list[dict]:
             if file.lower().endswith(valid_images):
                 fp = os.path.join(root, file)
                 rel = os.path.relpath(fp, image_root)
+                ts = os.path.getmtime(fp)
                 media_items.append(
                     {
                         "url": f"images/{rel}".replace("\\", "/"),
                         "type": "image",
                         "title": os.path.splitext(file)[0].replace("-", " ").title(),
-                        "timestamp": os.path.getmtime(fp),
+                        "timestamp": ts,
+                        "stamp": datetime.fromtimestamp(ts).strftime("%Y%m%d%H%M%S"),
                         "basename": file,
                     }
                 )
@@ -404,12 +406,14 @@ def get_recent_media(max_items: int = 12) -> list[dict]:
             if file.lower().endswith(valid_videos):
                 fp = os.path.join(root, file)
                 rel = os.path.relpath(fp, video_root)
+                ts = os.path.getmtime(fp)
                 media_items.append(
                     {
                         "url": f"videos/{rel}".replace("\\", "/"),
                         "type": "video",
                         "title": os.path.splitext(file)[0].replace("-", " ").title(),
-                        "timestamp": os.path.getmtime(fp),
+                        "timestamp": ts,
+                        "stamp": datetime.fromtimestamp(ts).strftime("%Y%m%d%H%M%S"),
                         "basename": file,
                     }
                 )
@@ -423,7 +427,16 @@ def get_recent_media(max_items: int = 12) -> list[dict]:
         for md in inventory:
             text = (md.get("content", "") or "") + json.dumps(md.get("frontmatter", {}))
             if base and base in text:
-                item["articles"].append({"title": md.get("title"), "url": md.get("url")})
+                url = md.get("url", "")
+                slug = url.lstrip("/").replace(".html", "")
+                item["articles"].append(
+                    {
+                        "title": md.get("title"),
+                        "url": url,
+                        "hash": get_entry_fingerprint(slug),
+                        "slug": slug,
+                    }
+                )
         if not item["articles"]:
             # fallback: not found, leave empty
             item["articles"] = []
@@ -602,7 +615,7 @@ def process_file(
             context["categorized_articles"] = get_articles_list()
             context["categories"] = get_categories()
             global_changes = get_global_changelog(limit=500)
-            context["activity_graph"] = get_commit_activity(global_changes, days=30)
+            context["activity_graph"] = get_commit_activity(global_changes, days=365)
             context["changelog"] = global_changes[:30]
             context["recent_media"] = get_recent_media()
 
@@ -617,7 +630,12 @@ def process_file(
         logger.error(f"Error processing file {md_fp}: {err}")
 
 
-def generate_static_site(category="all", commit: bool = False, commit_all: bool = False, summary: str | None = None):
+def generate_static_site(
+    category="all",
+    commit: bool = False,
+    commit_all: bool = False,
+    summary: str | None = None,
+):
     try:
         logger.info("Starting site generation.")
         categories = get_categories()
