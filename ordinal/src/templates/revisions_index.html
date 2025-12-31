@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Site activity log">
     <title>Revisions</title>
-    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <script src="../main.js" defer></script>
 </head>
 <body class="theme-aleph">
     <header class="masthead">
         <div class="brand">
             <div class="brand-mark">
-                <img src="/images/aleph-no-background-web256x256.png" alt="Aleph symbol">
+                <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
             </div>
             <div class="brand-text">
                 <p class="eyebrow">Ordinal</p>
@@ -31,11 +32,14 @@
                 <h1 class="page-title">Revisions</h1>
                 <p class="page-description">Latest acknowledged changes across the site.</p>
             </div>
-            <div class="section-table">
+            <div class="section-table revisions-table">
                 <div class="table-head grid">
                     <span>Slug</span>
+                    <span>Title</span>
                     <span>Hash</span>
                     <span>Summary</span>
+                    <span>Words</span>
+                    <span>Worked (h)</span>
                     <span>Date</span>
                     <span>Time</span>
                 </div>
@@ -45,8 +49,11 @@
                     {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
                     <div class="table-row grid">
                         <span class="cell domain">{{ entry.slug }}</span>
-                        <span class="cell title">{{ entry.hash }}</span>
+                        <span class="cell title">{{ entry.title or '—' }}</span>
+                        <span class="cell title"><a href="/{{ entry.slug }}.html">{{ entry.hash }}</a></span>
                         <span class="cell division">{{ entry.summary }}</span>
+                        <span class="cell modified">{{ entry.word_count or 0 }}</span>
+                        <span class="cell modified">{{ entry.worked_hours or 0 }}</span>
                         <span class="cell modified">{{ dt_parts[0] }}</span>
                         <span class="cell modified">{{ time_part }}</span>
                     </div>

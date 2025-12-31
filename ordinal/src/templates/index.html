@@ -12,12 +12,11 @@
     <header class="masthead">
         <div class="brand">
             <div class="brand-mark">
-                <img src="./images/aleph-no-background-web256x256.png" alt="Aleph symbol">
+                <img src="./images/aleph-no-background-web512x512.png" alt="Aleph symbol">
             </div>
             <div class="brand-text">
-                <p class="eyebrow">Aleph Null</p>
-                <h1>{{ title }}</h1>
-                <p class="tagline">{{ description }}</p>
+                <h1>THE INFINITE ARCHIVE</h1>
+                <p class="tagline">Formless and Empty</p>
             </div>
         </div>
         <nav class="primary-nav">
@@ -25,35 +24,50 @@
             <a href="/articles/articles.html">Entries</a>
         </nav>
         <div class="now-line">
-            <span class="dot"></span>
-            <span class="now-label">Now</span>
-            <span class="now-text">Building, documenting, collecting signals.</span>
+            <span class="now-text">
+                There's a pit inside where the beating heart of the sun expands. Dust traces its contours like a
+                <a class="frag frag-box" href="/articles/chernobyl.html">radiograph</a>.
+            </span>
         </div>
     </header>
 
     <main class="layout-shell">
-        <section id="latest" class="panel latest-grid has-grid grid-loose">
+        <section id="latest" class="panel latest-grid">
+            <div class="margin-note right">
+                <span class="note-label">jmp signal</span>
+                <span class="note-line"></span>
+                <span class="note-body">hi/mid throughput</span>
+            </div>
             <div class="panel-head">
                 <h3>Recent Entries</h3>
-                <div class="filter-row">
-                    <input id="latest-filter" type="search" placeholder="Filter latest by title or domain">
-                </div>
             </div>
             <div class="card-grid">
                 {% for article in recent_articles %}
                 <article class="card" data-title="{{ article.title | lower }}" data-domain="{{ article.domain | lower }}">
                     <div class="card-top">
-                        <span class="chip">{{ article.domain }}</span>
+                        <span class="chip domain-chip">{{ article.domain }}</span>
                         <span class="meta">{{ article.last_modified }}</span>
                     </div>
+                    {% if article.entry_fingerprint %}
+                    <p class="fp-line">
+                        <span>Fingerprint: {{ article.entry_fingerprint }}</span>
+                        {% if article.entry_drift %}<span>&mdash; Drift: {{ article.entry_drift }}</span>{% endif %}
+                    </p>
+                    {% endif %}
                     <h4><a href="{{ article.url }}">{{ article.title }}</a></h4>
-                    <p class="meta-line">{{ article.division | join(', ') }}</p>
+                    {% if article.division %}
+                    <div class="division-pills">
+                        {% for div in article.division %}
+                        <span class="division-pill">{{ div }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </article>
                 {% endfor %}
             </div>
         </section>
 
-        <section class="panel media-panel has-grid grid-loose">
+        <section class="panel media-panel">
             <div class="panel-head compact">
                 <h3>Recent Media</h3>
             </div>
@@ -84,7 +98,12 @@
             </div>
         </section>
 
-        <section class="panel domains has-grid grid-regular">
+        <section class="panel domains">
+            <div class="margin-note right">
+                <span class="note-label">call domains</span>
+                <span class="note-line"></span>
+                <span class="note-body">namespaced entries</span>
+            </div>
             <div class="panel-head">
                 <h3>Domains</h3>
             </div>
@@ -92,7 +111,7 @@
                 {% for domain, articles in categorized_articles.items() %}
                 <div class="domain-card">
                     <div class="card-top">
-                        <span class="chip">{{ domain }}</span>
+                        <a class="chip domain-filter" href="/domains/{{ domain | lower | replace(' ', '-') }}.html">{{ domain }}</a>
                         <span class="meta">{{ articles|length }} entries</span>
                     </div>
                     <ul>
@@ -105,7 +124,12 @@
             </div>
         </section>
 
-        <section class="panel activity-panel has-grid grid-tight">
+        <section class="panel activity-panel">
+            <div class="margin-note left">
+                <span class="note-label">int 0x13</span>
+                <span class="note-line"></span>
+                <span class="note-body">last 30d writes</span>
+            </div>
             <div class="panel-head">
                 <p class="eyebrow">Activity</p>
                 <h3>Site changes</h3>
@@ -117,10 +141,18 @@
                     </select>
                 </div>
             </div>
-            <div class="activity-graph" title="Changes over the last year">
+            <div class="activity-graph" title="Changes over the last month">
                 {% for day in activity_graph %}
-                <span class="cell level-{{ day.level }}" title="{{ day.date }} — {{ day.count }} change(s)"></span>
+                <span
+                    class="cell level-{{ day.level }}"
+                    data-date="{{ day.date }}"
+                    data-count="{{ day.count }}"
+                    title="{{ day.date }} · {{ day.count }} change(s)"
+                >+</span>
                 {% endfor %}
+            </div>
+            <div id="activity-info" class="activity-info">
+                Hover a cell for date/details. <a class="activity-link" href="/revisions/index.html">Full log</a>
             </div>
             <div class="section-table activity-table">
                 <div class="table-head grid">
@@ -136,7 +168,7 @@
                     {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
                     <div class="table-row grid" data-action="commit" data-path="{{ entry.slug | lower }}">
                         <span class="cell domain">{{ entry.slug }}</span>
-                        <span class="cell title">{{ entry.hash }}</span>
+                        <span class="cell title"><a href="/{{ entry.slug }}.html">{{ entry.hash }}</a></span>
                         <span class="cell division">{{ entry.summary }}</span>
                         <span class="cell modified">{{ dt_parts[0] }}</span>
                         <span class="cell modified">{{ time_part }}</span>

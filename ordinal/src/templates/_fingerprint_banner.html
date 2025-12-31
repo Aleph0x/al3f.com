@@ -2,5 +2,6 @@
 <p class="eyebrow fingerprint-banner">
     Fingerprint:
     <a href="{{ entry_revisions_url }}">{{ entry_fingerprint }}</a>
+    {% if entry_drift %}&mdash; Drift: {{ entry_drift }}{% endif %}
 </p>
 {% endif %}

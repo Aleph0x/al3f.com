@@ -203,17 +203,25 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
         return []
 
 
-def get_global_changelog(limit: int = 200) -> List[Dict[str, Any]]:
+def get_global_changelog(limit: Optional[int] = 200) -> List[Dict[str, Any]]:
     try:
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute(
-            """
-            SELECT slug, hash, timestamp, summary, title, word_count, worked_hours
-            FROM commits ORDER BY timestamp DESC LIMIT ?
-            """,
-            (limit,),
-        )
+        if limit is None:
+            cur.execute(
+                """
+                SELECT slug, hash, timestamp, summary, title, word_count, worked_hours
+                FROM commits ORDER BY timestamp DESC
+                """
+            )
+        else:
+            cur.execute(
+                """
+                SELECT slug, hash, timestamp, summary, title, word_count, worked_hours
+                FROM commits ORDER BY timestamp DESC LIMIT ?
+                """,
+                (limit,),
+            )
         rows = cur.fetchall()
         conn.close()
         return [

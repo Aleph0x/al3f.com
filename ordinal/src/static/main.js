@@ -67,7 +67,9 @@ function setupActivityHover() {
   if (!info || cells.length === 0) return;
   cells.forEach((cell) => {
     cell.addEventListener("mouseenter", () => {
-      info.textContent = cell.getAttribute("title");
+      const date = cell.dataset.date || "";
+      const count = cell.dataset.count || "0";
+      info.textContent = `${date} · ${count} change(s)`;
     });
   });
 }

@@ -18,6 +18,7 @@ from src.revisions import (
     get_article_cache,
     list_articles,
 )
+from urllib.parse import quote
 
 
 logger = setup_logger("html_renderer", "logs/html_renderer.log")
@@ -42,8 +43,21 @@ def copy_static_files():
         static_dest = os.path.join(public_dir)
         ensure_directory(static_dest)
 
+        # Remove any previously copied SCSS from public
+        for root, _, files in os.walk(static_dest):
+            for file in files:
+                if file.endswith(".scss"):
+                    try:
+                        os.remove(os.path.join(root, file))
+                        logger.info(f"Removed stray SCSS from public: {os.path.join(root, file)}")
+                    except Exception:
+                        pass
+
         for root, _, files in os.walk(static_src):
             for file in files:
+                if file.endswith(".scss"):
+                    # Skip copying source SCSS; only compiled CSS belongs in public
+                    continue
                 src_fp = os.path.join(root, file)
                 rel_fp = os.path.relpath(src_fp, static_src)
                 dest_fp = os.path.join(static_dest, rel_fp)
@@ -83,6 +97,7 @@ def get_articles_list() -> dict:
                 division = frontmatter.get("division", [])
                 url = f"/articles/{file.replace('.md', '.html')}"
                 header_image = derive_header_image(frontmatter, content)
+                slug = file.replace(".md", "")
 
                 categorized_articles[domain].append(
                     {
@@ -92,6 +107,7 @@ def get_articles_list() -> dict:
                         "domain": domain,
                         "division": division,
                         "header_image": header_image,
+                        "slug": slug,
                     }
                 )
 
@@ -325,6 +341,12 @@ def get_recent_articles(max_items: int = 6) -> list[dict]:
     """
     flattened = []
     categorized = get_articles_list()
+    cache_lookup = {}
+    try:
+        for row in list_articles():
+            cache_lookup[row["slug"]] = row
+    except Exception:
+        cache_lookup = {}
 
     for _, articles in categorized.items():
         flattened.extend(articles)
@@ -337,7 +359,22 @@ def get_recent_articles(max_items: int = 6) -> list[dict]:
     except Exception:
         flattened.sort(key=lambda x: x.get("last_modified", ""), reverse=True)
 
-    return flattened[:max_items]
+    enriched = []
+    for item in flattened[:max_items]:
+        slug = item.get("url", "").lstrip("/").replace(".html", "")
+        cache = cache_lookup.get(slug, {})
+        drift = "—"
+        if cache.get("last_timestamp"):
+            try:
+                dt = datetime.fromisoformat(str(cache["last_timestamp"]))
+                drift = f"{max((datetime.utcnow() - dt).days, 0)}d"
+            except Exception:
+                drift = "—"
+        item["entry_fingerprint"] = cache.get("last_hash")
+        item["entry_drift"] = drift
+        enriched.append(item)
+
+    return enriched
 
 
 def get_recent_media(max_items: int = 12) -> list[dict]:
@@ -445,10 +482,19 @@ def process_file(
         slug = os.path.relpath(md_fp, content_dir).replace(os.sep, "/").replace(".md", "")
         fingerprint = compute_fingerprint(md_fp)
         entry_fingerprint = get_entry_fingerprint(slug) or fingerprint
+        latest_cache_row = get_article_cache(slug)
+        latest_cache = dict(latest_cache_row) if latest_cache_row else None
+        entry_drift = "—"
+        if latest_cache and latest_cache.get("last_timestamp"):
+            try:
+                last_dt = datetime.fromisoformat(str(latest_cache["last_timestamp"]))
+                entry_drift = f"{max((datetime.utcnow() - last_dt).days, 0)}d"
+            except Exception:
+                entry_drift = "—"
 
         if commit:
             try:
-                latest = get_article_cache(slug)
+                latest = latest_cache
                 latest_hash = latest["last_hash"] if latest else None
                 if latest_hash != fingerprint:
                     summary_val = None
@@ -483,6 +529,7 @@ def process_file(
                     if commit_context is not None:
                         commit_context["commits"] = commit_context.get("commits", 0) + 1
                     entry_fingerprint = fingerprint
+                    entry_drift = "0d"
             except Exception as err:
                 logger.error(f"Error during commit flow for {md_fp}: {err}")
 
@@ -514,7 +561,8 @@ def process_file(
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
             "entry_fingerprint": entry_fingerprint,
-            "entry_revisions_url": f"/revisions/{slug}.html",
+            "entry_revisions_url": "/revisions/index.html",
+            "entry_drift": entry_drift,
             "page_meta": [
                 {"label": "Domain", "value": frontmatter.get("domain", "N/A")},
                 {"label": "Modified", "value": frontmatter.get("last_modified", "N/A")},
@@ -553,9 +601,9 @@ def process_file(
             context["recent_articles"] = get_recent_articles()
             context["categorized_articles"] = get_articles_list()
             context["categories"] = get_categories()
-            global_changes = get_global_changelog(limit=200)
-            context["activity_graph"] = get_commit_activity(global_changes, days=365)
-            context["changelog"] = global_changes
+            global_changes = get_global_changelog(limit=500)
+            context["activity_graph"] = get_commit_activity(global_changes, days=30)
+            context["changelog"] = global_changes[:30]
             context["recent_media"] = get_recent_media()
 
         rendered_html = render_template_context(template_name, context)
@@ -599,6 +647,7 @@ def generate_static_site(category="all", commit: bool = False, commit_all: bool 
         update_activity_log()
         try:
             generate_revision_pages()
+            generate_domain_pages()
         except Exception as err:
             logger.error(f"Error generating revision pages: {err}")
 
@@ -670,8 +719,7 @@ def generate_revision_pages() -> None:
         revisions_dir = os.path.join(public_dir, "revisions")
         ensure_directory(revisions_dir)
 
-        global_changelog = get_global_changelog(limit=500)
-        # Global activity page
+        global_changelog = get_global_changelog(limit=None)
         rendered_global = render_template_context(
             "revisions_index.html",
             {
@@ -680,24 +728,34 @@ def generate_revision_pages() -> None:
         )
         with open(os.path.join(revisions_dir, "index.html"), "w", encoding="utf-8") as f:
             f.write(rendered_global)
-
-        # Per-article pages
-        for article in list_articles():
-            slug = article.get("slug")
-            if not slug:
-                continue
-            page_changelog = get_changelog(slug)
-            context = {
-                "title": article.get("title") or slug,
-                "description": "Revision history",
-                "entry_fingerprint": article.get("last_hash"),
-                "page_changelog": page_changelog,
-            }
-            rendered_article = render_template_context("revisions_article.html", context)
-            dest_fp = os.path.join(revisions_dir, f"{slug}.html")
-            ensure_directory(os.path.dirname(dest_fp))
-            with open(dest_fp, "w", encoding="utf-8") as f:
-                f.write(rendered_article)
-        logger.info("Finished generating revision pages.")
+        logger.info("Finished generating global revision page.")
     except Exception as err:
         logger.error(f"Error in generate_revision_pages: {err}", exc_info=True)
+
+
+def generate_domain_pages() -> None:
+    """
+    Generate per-domain listing pages under /public/domains.
+    """
+    try:
+        logger.info("Generating domain pages.")
+        domain_dir = os.path.join(public_dir, "domains")
+        ensure_directory(domain_dir)
+
+        categorized = get_articles_list()
+        for domain, articles in categorized.items():
+            slug = domain.lower().replace(" ", "-")
+            context = {
+                "domain": domain,
+                "articles": articles,
+                "title": f"{domain} — Domain entries",
+                "description": f"Entries for {domain}",
+            }
+            rendered = render_template_context("domain_listing.html", context)
+            dest_fp = os.path.join(domain_dir, f"{slug}.html")
+            ensure_directory(os.path.dirname(dest_fp))
+            with open(dest_fp, "w", encoding="utf-8") as f:
+                f.write(rendered)
+        logger.info("Finished generating domain pages.")
+    except Exception as err:
+        logger.error(f"Error generating domain pages: {err}", exc_info=True)
