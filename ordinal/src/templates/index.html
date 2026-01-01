@@ -40,7 +40,7 @@
     <main class="layout-shell">
         <section id="latest" class="panel latest-grid">
             <div class="panel-head">
-                <p class="eyebrow">Entries</p>
+                <p class="eyebrow">Observed Entries</p>
                 <h3>Recent Entries</h3>
             </div>
             <div class="card-grid">
@@ -94,7 +94,7 @@
 
         <section class="panel media-panel" id="media">
             <div class="panel-head compact">
-                <p class="eyebrow">Signals</p>
+                <p class="eyebrow">Observed Media</p>
                 <h3>Recent Media</h3>
             </div>
             <div class="media-rail">
@@ -122,13 +122,8 @@
 
         <section class="panel activity-panel" id="activity">
             <div class="panel-head">
-                <p class="eyebrow">Activity</p>
-                <h3>Site changes</h3>
-                <div class="pill-filters">
-                    <button class="chip pill-ghost" data-filter="all" aria-pressed="true">All</button>
-                    <button class="chip pill-ghost" data-filter="commit">Commits</button>
-                    <button class="chip pill-ghost" data-filter="media">Media</button>
-                </div>
+                <p class="eyebrow">Observed by Seraph</p>
+                <h3>Acitivty</h3>
             </div>
             <div class="commit-graph" title="Last 365 days of activity">
                 {% for day in activity_graph %}
