@@ -2,6 +2,7 @@ from src.file_manager import setup_project, cleanup_orphans, get_categories
 from src.html_renderer import generate_static_site
 from src.snapshot_manager import manage_snapshots
 from src.base_utils import setup_logger
+from src.revisions import seed_database
 
 logger = setup_logger("command_parser", "logs/command_parser.log")
 
@@ -51,3 +52,6 @@ def parse_commands(parser):
     )
     snapshot_parser.add_argument("--category", type=str, help="Category for snapshots.")
     snapshot_parser.set_defaults(func=lambda args: manage_snapshots(args.action, args.category))
+
+    seed_parser = subparsers.add_parser("seeddb", help="Seed the revisions database from existing content.")
+    seed_parser.set_defaults(func=lambda args: seed_database())

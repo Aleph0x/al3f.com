@@ -199,6 +199,11 @@
         padding: 0.85rem;
     }
 
+    .domain-bar-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .panel .panel-head h3 {
         font-size: 1.1rem;
     }
@@ -310,6 +315,121 @@
 @media (max-width: 720px) {
     .commit-graph {
         display: none !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .content-grid.wiki-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .toc {
+        display: none;
+    }
+
+    .article-stack.wiki-article {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .layout-shell.wiki-layout {
+        padding: 0.25rem !important;
+        margin: 0 auto 1rem;
+        max-width: 100% !important;
+        gap: 0.75rem;
+    }
+
+    body,
+    main {
+        padding: 0.25rem !important;
+    }
+
+    .panel {
+        padding: 0.85rem;
+    }
+
+    /* Mobile-friendly wiki typography */
+    .page-title {
+        font-size: 2.2rem;
+        line-height: 1.2;
+        letter-spacing: 0.06em;
+        margin-bottom: 0.35rem;
+    }
+
+    .page-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.75rem;
+    }
+
+    .page-meta {
+        gap: 0.5rem;
+        flex-direction: column;
+    }
+
+    .article-stack.wiki-article .prose {
+        font-size: 1rem;
+        line-height: 1.7;
+        gap: 0.9rem;
+    }
+
+    .article-stack.wiki-article .prose h1,
+    .article-stack.wiki-article .prose h2,
+    .article-stack.wiki-article .prose h3 {
+        margin: 0.6rem 0 0.3rem;
+    }
+
+    .article-stack.wiki-article .prose p {
+        font-size: 1rem;
+        line-height: 1.7;
+        word-break: break-word;
+    }
+
+    /* Related */
+    .related-articles ul {
+        display: flex;
+        gap: 0.45rem;
+        padding-left: 0;
+        list-style: none;
+        justify-items: center;
+    }
+
+    .related-articles li {
+        display: block;
+        border-left: none;
+        border-left: 0px solid #f5f5f5;
+        color: $text-color;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    /* Changelog */
+    .section-table {
+        border: none;
+        background: transparent;
+    }
+
+    .section-table .table-head {
+        display: none;
+    }
+
+    .section-table .table-body {
+        display: grid;
+        gap: 0.5rem;
+        max-height: none;
+    }
+
+    .section-table .table-row {
+        display: grid;
+        gap: 0.2rem;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .section-table .cell {
+        white-space: normal;
+        word-break: break-word;
     }
 }
 

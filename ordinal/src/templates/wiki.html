@@ -26,9 +26,10 @@
             <a href="/articles/articles.html">Entries</a>
         </nav>
         <div class="now-line">
-            <span class="dot"></span>
-            <span class="now-label">Now</span>
-            <span class="now-text">Building, documenting, collecting signals.</span>
+            <span class="now-text">
+               The interior collapsed slowly enough to be documented. What was set in <span class="frag frag-ghost">motion</span> does not <span class="frag frag-box">consent</span> to being undone. It was and will be <span class="frag frag-bo">observed</span> throughout.
+                
+            </span>
         </div>
     </header>
 
@@ -39,19 +40,22 @@
                 <h2 class="page-title">{{ title }}</h2>
                 <p class="page-description">{{ description }}</p>
                 <div class="page-meta">
-                    <div class="meta-section">
-                        {% for meta in page_meta if meta.label in ["Domain", "Division"] %}
-                        <div class="meta-item">
-                            <span class="label">{{ meta.label }}:</span> {{ meta.value }}
-                        </div>
-                        {% endfor %}
+                    {% set meta = page_meta %}
+                    <div class="meta-item">
+                        <span class="label">Created:</span>
+                        <span class="value">{{ meta.created_val }}</span>
                     </div>
-                    <div class="meta-section">
-                        {% for meta in page_meta if meta.label in ["Modified", "Worked"] %}
-                        <div class="meta-item">
-                            <span class="label">{{ meta.label }}:</span> {{ meta.value }}
-                        </div>
-                        {% endfor %}
+                    <div class="meta-item">
+                        <span class="label">Domain:</span>
+                        <span class="value">{{ meta.domain_val }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Division:</span>
+                        <span class="value">{{ meta.division_val }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Modified:</span>
+                        <span class="value">{{ meta.last_modified }}</span>
                     </div>
                 </div>
             </div>
@@ -80,6 +84,7 @@
                         </section>
                     </article>
                     {% endfor %}
+                    <div class="entry-guid">{{ entry_guid }}</div>
                 </div>
             </div>
         </section>
@@ -112,30 +117,30 @@
 
         {% if page_changelog %}
         <section class="panel changelog-panel">
-            <h2>Changelog</h2>
-            <div class="section-table">
-                <div class="table-head grid">
-                    <span>Hash</span>
-                    <span>Summary</span>
-                    <span>Date</span>
-                    <span>Time</span>
-                </div>
-                <div class="table-body changelog-table">
-                    {% for entry in page_changelog %}
-                    {% set dt_parts = entry.timestamp.split('T') %}
-                    {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
-                    <div class="table-row grid" data-action="commit" data-path="{{ entry.hash | lower }}">
-                        <span class="cell domain">{{ entry.hash }}</span>
-                        <span class="cell division">{{ entry.summary }}</span>
-                        <span class="cell modified">{{ dt_parts[0] }}</span>
-                        <span class="cell modified">{{ time_part }}</span>
+            <h2>REVISIONS</h2>
+            <div class="activity-list changelog-table timeline-list">
+                {% for entry in page_changelog %}
+                {% set dt_parts = entry.timestamp.split('T') %}
+                {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                {% set action = entry.action | default("MODIFIED") %}
+                <article class="activity-item" data-action="{{ action|lower }}" data-path="{{ entry.hash | lower }}">
+                    <div class="activity-header">
+                        <span class="action-badge">{{ action }}</span>
+                        <span class="hash-pill">{{ entry.hash }}</span>
+                        <span class="date">{{ dt_parts[0] }}</span>
+                        <span class="time">{{ time_part }}</span>
                     </div>
-                    {% endfor %}
-                </div>
+                    <div class="activity-summary">
+                        <span class="summary-link">{{ entry.summary }}</span>
+                    </div>
+                </article>
+                {% endfor %}
             </div>
         </section>
         {% endif %}
     </main>
+
+    <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
     <footer class="site-footer">
         <p>&copy; 2025 Aleph. Built with Ordinal.</p>

@@ -2,9 +2,25 @@ import os
 import shutil
 import json
 from datetime import datetime, timedelta
-from src.base_utils import content_dir, public_dir, setup_logger, ensure_directory, logs_dir
-from src.file_manager import get_categories, generate_missing, merge_image_dir, merge_video_dir
-from src.markdown_parser import parse_frontmatter, parse_related, parse_footnotes, parse_articles
+from src.base_utils import (
+    content_dir,
+    public_dir,
+    setup_logger,
+    ensure_directory,
+    logs_dir,
+)
+from src.file_manager import (
+    get_categories,
+    generate_missing,
+    merge_image_dir,
+    merge_video_dir,
+)
+from src.markdown_parser import (
+    parse_frontmatter,
+    parse_related,
+    parse_footnotes,
+    parse_articles,
+)
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import subprocess
 from collections import defaultdict
@@ -16,6 +32,9 @@ from src.revisions import (
     get_changelog,
     get_global_changelog,
     get_article_cache,
+    get_latest_commit,
+    get_previous_commit,
+    get_entry_guid,
     list_articles,
 )
 from urllib.parse import quote
@@ -49,14 +68,16 @@ def copy_static_files():
                 if file.endswith(".scss"):
                     try:
                         os.remove(os.path.join(root, file))
-                        logger.info(f"Removed stray SCSS from public: {os.path.join(root, file)}")
+                        logger.info(
+                            f"Removed stray SCSS from public: {os.path.join(root, file)}"
+                        )
                     except Exception:
                         pass
 
         for root, _, files in os.walk(static_src):
             for file in files:
                 if file.endswith(".scss"):
-                    # Skip copying source SCSS; only compiled CSS belongs in public
+                    # Skip copying source SCSS only compiled CSS belongs in public
                     continue
                 src_fp = os.path.join(root, file)
                 rel_fp = os.path.relpath(src_fp, static_src)
@@ -91,7 +112,9 @@ def get_articles_list() -> dict:
                 frontmatter = parsed_data.get("frontmatter", {})
                 content = parsed_data.get("content", "")
 
-                title = frontmatter.get("title", file.replace(".md", "").replace("-", " ").title())
+                title = frontmatter.get(
+                    "title", file.replace(".md", "").replace("-", " ").title()
+                )
                 last_modified = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 domain = frontmatter.get("domain", "Miscellaneous")
                 division = frontmatter.get("division", [])
@@ -147,7 +170,18 @@ def scan_content_files() -> dict:
 
 def scan_public_files() -> dict:
     public_files = {}
-    valid_assets = (".html", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".mp4", ".avif", ".bmp")
+    valid_assets = (
+        ".html",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".svg",
+        ".webp",
+        ".mp4",
+        ".avif",
+        ".bmp",
+    )
     for root, _, files in os.walk(public_dir):
         for file in files:
             if file.endswith(valid_assets):
@@ -241,7 +275,10 @@ def get_activity_graph(log_fp: str, days: int = 365) -> list[dict]:
             return 3
         return 4
 
-    return [{"date": str(day), "count": counts[day], "level": level(counts[day])} for day in counts]
+    return [
+        {"date": str(day), "count": counts[day], "level": level(counts[day])}
+        for day in counts
+    ]
 
 
 def get_commit_activity(entries: list[dict], days: int = 365) -> list[dict]:
@@ -300,6 +337,7 @@ def load_markdown_inventory() -> list[dict]:
                         else:
                             try:
                                 import datetime as _dt
+
                                 if isinstance(v, (_dt.date, _dt.datetime)):
                                     frontmatter[k] = str(v)
                             except Exception:
@@ -310,7 +348,9 @@ def load_markdown_inventory() -> list[dict]:
                     url = "/" + "/".join(parts).replace(".md", ".html")
                     inventory.append(
                         {
-                            "title": frontmatter.get("title", os.path.splitext(file)[0]),
+                            "title": frontmatter.get(
+                                "title", os.path.splitext(file)[0]
+                            ),
                             "url": url,
                             "frontmatter": frontmatter,
                             "content": content,
@@ -327,7 +367,9 @@ def get_page_changelog(log_fp: str, page_path: str, limit: int = 20) -> list[dic
     """
     log = load_json(log_fp, [])
     normalized = page_path.lstrip("/").replace("\\", "/")
-    filtered = [entry for entry in log if entry.get("path", "").replace("\\", "/") == normalized]
+    filtered = [
+        entry for entry in log if entry.get("path", "").replace("\\", "/") == normalized
+    ]
     try:
         filtered.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
     except Exception:
@@ -353,7 +395,9 @@ def get_recent_articles(max_items: int = 6) -> list[dict]:
 
     try:
         flattened.sort(
-            key=lambda x: datetime.fromisoformat(str(x.get("last_modified", "1970-01-01"))),
+            key=lambda x: datetime.fromisoformat(
+                str(x.get("last_modified", "1970-01-01"))
+            ),
             reverse=True,
         )
     except Exception:
@@ -492,11 +536,22 @@ def process_file(
         # Overwrite last_modified to current UTC time for accurate surface
         frontmatter["last_modified"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
-        slug = os.path.relpath(md_fp, content_dir).replace(os.sep, "/").replace(".md", "")
+        slug = (
+            os.path.relpath(md_fp, content_dir).replace(os.sep, "/").replace(".md", "")
+        )
         fingerprint = compute_fingerprint(md_fp)
         entry_fingerprint = get_entry_fingerprint(slug) or fingerprint
+        entry_guid = get_entry_guid(slug)
         latest_cache_row = get_article_cache(slug)
         latest_cache = dict(latest_cache_row) if latest_cache_row else None
+        latest_commit_row = get_latest_commit(slug)
+        prev_commit_row = get_previous_commit(slug)
+        latest_meta_raw = (
+            latest_commit_row["meta_json"]
+            if latest_commit_row and latest_commit_row["meta_json"]
+            else None
+        )
+        latest_meta = json.loads(latest_meta_raw) if latest_meta_raw else {}
         entry_drift = "—"
         if latest_cache and latest_cache.get("last_timestamp"):
             try:
@@ -514,7 +569,10 @@ def process_file(
                     if commit_context and commit_context.get("bundle"):
                         summary_val = commit_context.get("shared_summary")
                         if not summary_val:
-                            prompt = commit_context.get("summary_prompt") or f"Summary for bundle ({fingerprint}): "
+                            prompt = (
+                                commit_context.get("summary_prompt")
+                                or f"Summary for bundle ({fingerprint}): "
+                            )
                             summary_val = ""
                             while not summary_val.strip():
                                 summary_val = input(prompt).strip()
@@ -522,12 +580,15 @@ def process_file(
                     else:
                         summary_val = ""
                         while not summary_val.strip():
-                            summary_val = input(f"Summary for {slug} ({fingerprint}): ").strip()
+                            summary_val = input(
+                                f"Summary for {slug} ({fingerprint}): "
+                            ).strip()
                     parent_hash = latest_hash
                     word_count = len(raw_content.split())
                     worked_hours = (
                         float(frontmatter["worked"])
-                        if "worked" in frontmatter and str(frontmatter["worked"]).replace(".", "", 1).isdigit()
+                        if "worked" in frontmatter
+                        and str(frontmatter["worked"]).replace(".", "", 1).isdigit()
                         else 0.0
                     )
                     insert_commit(
@@ -570,30 +631,68 @@ def process_file(
 
         header_image = derive_header_image(frontmatter, raw_content)
 
+        worked_val = frontmatter.get("worked", 0)
+        try:
+            worked_val = float(worked_val)
+        except Exception:
+            worked_val = 0.0
+
+        if (
+            latest_commit_row is not None
+            and latest_commit_row["worked_hours"] is not None
+        ):
+            try:
+                worked_val = float(latest_commit_row["worked_hours"])
+            except Exception:
+                pass
+
+        worked_delta = 0.0
+        if latest_commit_row and prev_commit_row:
+            try:
+                latest_work = float(latest_commit_row["worked_hours"] or 0)
+                prev_work = float(prev_commit_row["worked_hours"] or 0)
+                worked_delta = latest_work - prev_work
+            except Exception:
+                worked_delta = 0.0
+
+        domain_val = frontmatter.get("domain", latest_meta.get("domain", "N/A"))
+        division_val = frontmatter.get("division", latest_meta.get("division", []))
+        if isinstance(division_val, str):
+            division_val = [division_val]
+        created_val = frontmatter.get(
+            "created", latest_commit_row["created"] if latest_commit_row else "N/A"
+        )
+        if created_val is None:
+            created_val = "N/A"
+        else:
+            created_val = str(created_val)
+        if domain_val is None:
+            domain_val = "N/A"
+
         context = {
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
             "entry_fingerprint": entry_fingerprint,
             "entry_revisions_url": "/revisions/index.html",
             "entry_drift": entry_drift,
-            "page_meta": [
-                {"label": "Domain", "value": frontmatter.get("domain", "N/A")},
-                {"label": "Modified", "value": frontmatter.get("last_modified", "N/A")},
-                {
-                    "label": "Worked",
-                    "value": (
-                        f"{float(frontmatter['worked'])}h"
-                        if "worked" in frontmatter and str(frontmatter["worked"]).replace(".", "", 1).isdigit()
-                        else "N/A"
-                    ),
-                },
-                {"label": "Division", "value": ", ".join(frontmatter.get("division", []))},
-            ],
+            "entry_worked": worked_val if worked_val is not None else None,
+            "entry_guid": entry_guid,
+            "page_meta": {
+                "created_val": created_val or "N/A",
+                "domain_val": domain_val or "N/A",
+                "division_val": ", ".join(division_val) if division_val else "N/A",
+                "last_modified": frontmatter.get("last_modified", "N/A").split(" ")[0],
+                "worked": f"{worked_val}h",
+                "worked_delta": f"{worked_delta:+.1f}h",
+                "hash": entry_fingerprint or "N/A",
+            },
             "content": footnotes_content,
             "articles": articles.get("articles", []),
             "footnotes": footnotes,
             "toc": articles["toc"],
-            "backlinks": backlinks.get(os.path.splitext(os.path.basename(md_fp))[0], []),
+            "backlinks": backlinks.get(
+                os.path.splitext(os.path.basename(md_fp))[0], []
+            ),
             "external_links": parsed_data.get("external_links", []),
             "related_articles": related,
             "hero_image": header_image,
@@ -613,6 +712,14 @@ def process_file(
         if template_name == "index.html":
             context["recent_articles"] = get_recent_articles()
             context["categorized_articles"] = get_articles_list()
+            try:
+                context["domain_max"] = (
+                    max(len(v) for v in context["categorized_articles"].values())
+                    if context["categorized_articles"]
+                    else 0
+                )
+            except Exception:
+                context["domain_max"] = 0
             context["categories"] = get_categories()
             global_changes = get_global_changelog(limit=500)
             context["activity_graph"] = get_commit_activity(global_changes, days=365)
@@ -650,10 +757,14 @@ def generate_static_site(
 
         if category == "all":
             for cat in categories:
-                process_category(cat, content_dir, public_dir, backlinks, commit, commit_context)
+                process_category(
+                    cat, content_dir, public_dir, backlinks, commit, commit_context
+                )
         else:
             if category in categories:
-                process_category(category, content_dir, public_dir, backlinks, commit, commit_context)
+                process_category(
+                    category, content_dir, public_dir, backlinks, commit, commit_context
+                )
             else:
                 logger.error(f"Invalid category: {category}")
         logger.info("Copying all necessary static files.")
@@ -701,7 +812,14 @@ def process_category(
                 output_fp = os.path.join(output_dir, file.replace(".md", ".html"))
 
                 default_template = f"{category}.html"
-                process_file(md_fp, output_fp, default_template, backlinks, commit, commit_context)
+                process_file(
+                    md_fp,
+                    output_fp,
+                    default_template,
+                    backlinks,
+                    commit,
+                    commit_context,
+                )
     except Exception as err:
         logger.error(f"Error processing category `{category}`: {err}", exc_info=True)
 
@@ -722,7 +840,14 @@ def process_index(
             logger.error(f"`index.md` file does not exist at: {index_md_fp}")
             return
 
-        process_file(index_md_fp, index_output_fp, "index.html", backlinks, commit, commit_context)
+        process_file(
+            index_md_fp,
+            index_output_fp,
+            "index.html",
+            backlinks,
+            commit,
+            commit_context,
+        )
         logger.info(f"Processed `index.md` into {index_output_fp}")
     except Exception as err:
         logger.error(f"Error processing `index.md`: {err}")
@@ -744,7 +869,9 @@ def generate_revision_pages() -> None:
                 "global_changelog": global_changelog,
             },
         )
-        with open(os.path.join(revisions_dir, "index.html"), "w", encoding="utf-8") as f:
+        with open(
+            os.path.join(revisions_dir, "index.html"), "w", encoding="utf-8"
+        ) as f:
             f.write(rendered_global)
         logger.info("Finished generating global revision page.")
     except Exception as err:

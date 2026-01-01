@@ -43,9 +43,14 @@
                 <h2>{{ title }}</h2>
                 <p class="lede">{{ description }}</p>
                 <div class="meta-bar">
-                    {% for meta in page_meta %}
-                    <span class="chip">{{ meta.label }}: {{ meta.value }}</span>
-                    {% endfor %}
+                    {% set meta = page_meta %}
+                    <span class="chip">Created: {{ meta.created_val }}</span>
+                    <span class="chip">Domain: {{ meta.domain_val }}</span>
+                    <span class="chip">Division: {{ meta.division_val }}</span>
+                    <span class="chip">Modified: {{ meta.last_modified }}</span>
+                    <span class="chip">Worked: {{ meta.worked }}</span>
+                    <span class="chip">Δ: {{ meta.worked_delta }}</span>
+                    <span class="chip">Hash: {{ meta.hash }}</span>
                     {% if reading_time %}
                     <span class="chip">Read: {{ reading_time }}</span>
                     {% endif %}

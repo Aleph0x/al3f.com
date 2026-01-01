@@ -8,8 +8,8 @@ created: 2025-02-01 01:02:35
 last_modified: 2025-02-01 01:02:35
 template: "wiki.html"
 ---
-AFaSF
-## Emergence
+
+## Overview
 These are some old notes I took for entries on Emergence I originally wrote in 2021. It started off as an essay for college. As of 2/2/2025, I’m reviewing these entries before publishing them, but this serves as a summary.
 
 Emergence happens when simple interactions create complex outcomes. It’s not something that can be designed directly, only encouraged, when structure is loose enough to allow imagination to take hold. Small, independent actions build on each other, forming structures, patterns, or behaviors that weren’t explicitly planned.

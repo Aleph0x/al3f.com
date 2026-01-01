@@ -24,27 +24,37 @@
     }
 
     .page-meta {
-        display: flex;
-        justify-content: flex-start;
-        gap: 1.25rem;
-        font-size: 1rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        margin-top: 0.75rem;
 
-        .meta-section {
+        .meta-item {
             display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
+            gap: 0.4rem;
+            align-items: baseline;
 
-            .meta-link {
-                text-decoration: none;
-                font-weight: bold;
-                border-bottom: 1px dotted rgba(255, 255, 255, 0.5);
-                transition: color 0.2s, border-color 0.2s;
+            .label {
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                font-size: 0.8rem;
+                color: rgba(255, 255, 255, 0.7);
+            }
 
-                &:hover {
-                    color: #fff;
-                    border-color: #fff;
-                }
+            .value {
+                color: rgba(255, 255, 255, 0.9);
             }
         }
     }
+
+}
+
+.entry-guid {
+    margin-top: 1.25rem;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: right;
+    word-break: break-all;
 }

@@ -1,0 +1,30 @@
+@use "./variables" as *;
+
+.domain-bar-head {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    letter-spacing: 0.08em;
+    font-size: 0.9rem;
+    color: $accent-color;
+}
+
+.domain-bar {
+    width: 100%;
+    height: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.domain-bar-fill {
+    position: absolute;
+    inset: 0;
+    background: $accent-color;
+    opacity: 0.8;
+    width: 0;
+}

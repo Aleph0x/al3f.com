@@ -3,5 +3,6 @@
     Fingerprint:
     <a href="{{ entry_revisions_url }}">{{ entry_fingerprint }}</a>
     {% if entry_drift %}&mdash; Drift: {{ entry_drift }}{% endif %}
+    {% if entry_worked is defined and entry_worked is not none %} · +{{ entry_worked }}h{% endif %}
 </p>
 {% endif %}

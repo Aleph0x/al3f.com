@@ -1,0 +1,118 @@
+@use "./variables" as *;
+@use "sass:color";
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.latest-grid .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    align-items: stretch;
+}
+
+.card {
+    border: 1px solid $accent-color;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: color.scale($background-color, $lightness: 2%);
+    transition: border 0.2s, transform 0.2s;
+
+    &:hover {
+        border-color: $text-color;
+        transform: translateY(-2px);
+    }
+
+    h4 {
+        font-size: 1.25rem;
+        letter-spacing: 0.04em;
+        line-height: 1.4;
+        margin: 0;
+
+        a {
+            color: $text-color;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.08rem 0.15rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+            &:hover {
+                color: #000;
+                background: $text-color;
+                border-bottom-color: $text-color;
+            }
+        }
+    }
+
+    .meta-line {
+        color: $accent-color;
+        font-size: 0.95rem;
+        opacity: 0.75;
+    }
+
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+
+        .meta {
+            color: $accent-color;
+            font-size: 0.8rem;
+            opacity: 0.75;
+        }
+    }
+}
+
+.fp-line {
+    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $accent-color;
+    margin: 0.35rem 0 0.25rem;
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.card .fp-line {
+    opacity: 0.7;
+}
+
+.card .domain-chip {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.12em;
+}
+
+.division-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: -0.2rem;
+}
+
+.division-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.02);
+
+    &:hover {
+        color: #000;
+        background: $text-color;
+        border-color: $text-color;
+    }
+}

@@ -15,9 +15,9 @@
                 <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
             </div>
             <div class="brand-text">
-                <p class="eyebrow">Ordinal</p>
+                <p class="eyebrow">Seraph</p>
                 <h1>Revisions</h1>
-                <p class="tagline">Global site activity</p>
+                <p class="tagline">All observed activity</p>
             </div>
         </div>
         <nav class="primary-nav">
@@ -32,33 +32,33 @@
                 <h1 class="page-title">Revisions</h1>
                 <p class="page-description">Latest acknowledged changes across the site.</p>
             </div>
-            <div class="section-table revisions-table">
-                <div class="table-head grid">
-                    <span>Slug</span>
-                    <span>Title</span>
-                    <span>Hash</span>
-                    <span>Summary</span>
-                    <span>Delta / Words</span>
-                    <span>Worked (h)</span>
-                    <span>Date</span>
-                    <span>Time</span>
-                </div>
-                <div class="table-body">
-                    {% for entry in global_changelog %}
-                    {% set dt_parts = entry.timestamp.split('T') %}
-                    {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
-                    <div class="table-row grid">
-                        <span class="cell domain">{{ entry.slug }}</span>
-                        <span class="cell title">{{ entry.title or '—' }}</span>
-                        <span class="cell title"><a href="/{{ entry.slug }}.html">{{ entry.hash }}</a></span>
-                        <span class="cell division">{{ entry.summary }}</span>
-                        <span class="cell modified">Δ {{ entry.word_delta or 0 }}, WC {{ entry.word_count or 0 }}</span>
-                        <span class="cell modified">{{ entry.worked_hours or 0 }}</span>
-                        <span class="cell modified">{{ dt_parts[0] }}</span>
-                        <span class="cell modified">{{ time_part }}</span>
+            <div class="activity-list changelog-table timeline-list">
+                {% for entry in global_changelog %}
+                {% set dt_parts = entry.timestamp.split('T') %}
+                {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                {% set action = entry.action | default("MODIFIED") %}
+                <article class="activity-item" data-action="{{ action|lower }}" data-path="{{ entry.slug | lower }}">
+                    <div class="activity-header">
+                        <span class="action-badge">{{ action }}</span>
+                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash }}</a>
+                        <span class="date">{{ dt_parts[0] }}</span>
+                        <span class="time">{{ time_part }}</span>
                     </div>
-                    {% endfor %}
-                </div>
+                    <div class="activity-path">
+                        <span class="entry-label">ENTRY:</span>
+                        <a class="entry-link" href="/{{ entry.slug }}.html">{{ entry.title or entry.slug }}</a>
+                    </div>
+                    <div class="activity-summary">
+                        <a class="summary-link" href="/{{ entry.slug }}.html">{{ entry.summary }}</a>
+                    </div>
+                    <div class="activity-word">
+                        <span class="word-meta">
+                            DELTA: {{ entry.word_delta or 0 }} · WC: {{ entry.word_count or 0 }}
+                            {% if entry.worked_hours is not none %} · +{{ entry.worked_hours }}h{% endif %}
+                        </span>
+                    </div>
+                </article>
+                {% endfor %}
             </div>
         </section>
     </main>

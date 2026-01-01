@@ -25,7 +25,7 @@
         </nav>
         <div class="now-line">
             <span class="now-text">
-                There's a pit inside where the <span class="frag frag-ghost">beating heart</span> of the sun expands. Dust traces its contours like a
+                There's a pit inside where the <span class="frag frag-ghost">beating heart</span> of the sun expands. Ash traces its contours like a
                 <a class="frag frag-box" href="/articles/chernobyl.html">radiograph</a>.
             </span>
         </div>
@@ -33,7 +33,8 @@
             <a href="#latest">Entries</a>
             <a href="#media">Media</a>
             <a href="#domains">Domains</a>
-            <a href="#activity">Activity logged by Seraph</a>
+            <a href="#activity">Activity</a>
+            </a>
         </div>
     </header>
 
@@ -76,17 +77,17 @@
             </div>
             <div class="domain-strips">
                 {% for domain, articles in categorized_articles.items() %}
+                {% set count = articles|length %}
+                {% set maxc = domain_max or 1 %}
+                {% set pct = (count / maxc * 100) | round(2) %}
                 <div class="domain-strip">
-                    <a class="domain-strip-label" href="/domains/{{ domain | lower | replace(' ', '-') }}.html">DOMAIN // {{ domain }}</a>
-                    <span class="domain-strip-meta">— {{ articles|length }} entries —</span>
-                    <span class="domain-strip-entries">
-                        {% for article in articles[:5] %}
-                        <a href="{{ article.url }}" class="domain-dot">● {{ article.title }}</a>
-                        {% endfor %}
-                        {% if articles|length > 5 %}
-                        <span class="domain-more">+{{ articles|length - 5 }} more</span>
-                        {% endif %}
-                    </span>
+                    <div class="domain-bar-head">
+                        <a class="domain-strip-label" href="/domains/{{ domain | lower | replace(' ', '-') }}.html">DOMAIN // {{ domain }}</a>
+                        <span class="domain-strip-meta">{{ count }} entries</span>
+                    </div>
+                    <div class="domain-bar" aria-label="{{ domain }} has {{ count }} entries">
+                        <span class="domain-bar-fill" style="width: {{ pct }}%"></span>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -169,6 +170,8 @@
             </div>
         </section>
     </main>
+
+    <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
     <footer class="site-footer">
         <p>&copy; 2025 Aleph. Built with Ordinal.</p>
