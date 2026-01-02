@@ -2,6 +2,13 @@
 
 @use "./variables";
 @use "./base";
+@use "./grid-bg";
+@use "./masthead";
+@use "./shell";
+@use "./panels";
+@use "./cards";
+@use "./domains";
+@use "./media";
 @use "./header";
 @use "./toc";
 @use "./content";
@@ -9,6 +16,5 @@
 @use "./footnotes";
 @use "./articles";
 @use "./page-details";
-@use "./tables";
-@use "./external-links";
 @use "./media-queries";
+@use "./layout";

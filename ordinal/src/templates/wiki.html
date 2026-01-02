@@ -7,103 +7,143 @@
     <meta name="description" content="{{ description }}">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="../styles/main.css">
+    <script src="../main.js" defer></script>
 </head>
 
-<body>
-    <header id="site-banner">
-        <img src="../images/aleph-no-background-web256x256.png" alt="An image of an abstract Hebrew Alef">
-        <nav>
-            <ul>
-                <li><a href="/index.html">Home</a></li>
-                <li><a href="/articles/articles.html">Entries</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <section class="page-details">
-        <h2 class="page-title">{{ title }}</h2>
-        <p class="page-description">{{ description }}</p>
-        <div class="page-meta">
-            <div class="meta-section">
-                {% for meta in page_meta if meta.label in ["Domain", "Division"] %}
-                <div class="meta-item">
-                    <span class="label">{{ meta.label }}:</span> {{ meta.value }}
-                </div>
-                {% endfor %}
+<body class="theme-aleph">
+    <header class="masthead">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="../images/aleph-no-background-web256x256.png" alt="Aleph symbol">
             </div>
-            <div class="meta-section">
-                {% for meta in page_meta if meta.label in ["Modified", "Worked"] %}
-                <div class="meta-item">
-                    <span class="label">{{ meta.label }}:</span> {{ meta.value }}
-                </div>
-                {% endfor %}
+            <div class="brand-text">
+                <h1>THE INFINITE ARCHIVE</h1>
+                <p class="tagline">Formless and Empty</p>
             </div>
         </div>
-    </section>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
+        </nav>
+        <div class="now-line">
+            <span class="now-text">
+               The interior collapsed slowly enough to be documented. What was set in <span class="frag frag-ghost">motion</span> does not <span class="frag frag-box">consent</span> to being undone. It was and will be <span class="frag frag-bo">observed</span> throughout.
+                
+            </span>
+        </div>
+    </header>
 
+    <main class="layout-shell wiki-layout">
+        <section class="panel">
+            <div class="page-details">
+                {% include "_fingerprint_banner.html" %}
+                <h2 class="page-title">{{ title }}</h2>
+                <p class="page-description">{{ description }}</p>
+                <div class="page-meta">
+                    {% set meta = page_meta %}
+                    <div class="meta-item">
+                        <span class="label">Created:</span>
+                        <span class="value">{{ meta.created_val }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Domain:</span>
+                        <span class="value">{{ meta.domain_val }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Division:</span>
+                        <span class="value">{{ meta.division_val }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">Modified:</span>
+                        <span class="value">{{ meta.last_modified }}</span>
+                    </div>
+                </div>
+            </div>
 
-    <main>
-        <aside class="toc">
-            <h2>Outline</h2>
-            <ul>
-                {% for item in toc %}
-                <li class="toc-item toc-level-{{ item.level }}">
-                    <a href="#{{ item.anchor }}">{{ item.text }}</a>
+            <div class="content-grid wiki-grid">
+                <aside class="toc sticky-toc">
+                    <h2>Outline</h2>
+                    <ul>
+                        {% for item in toc %}
+                        <li class="toc-item toc-level-{{ item.level }}">
+                            <a href="#{{ item.anchor }}">{{ item.text }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </aside>
+                <div class="article-stack wiki-article">
+                    {% for article in articles %}
+                    <article class="prose">
+                        <header>
+                            {{ article.header | safe }}
+                        </header>
+                        <section>
+                            {% for section in article.sections %}
+                            <p>{{ section | safe }}</p>
+                            {% endfor %}
+                        </section>
+                    </article>
+                    {% endfor %}
+                    <div class="entry-guid">{{ entry_guid }}</div>
+                </div>
+            </div>
+        </section>
+
+        {% if footnotes %}
+        <section class="panel footnotes">
+            <h2>Footnotes</h2>
+            <ol>
+                {% for key, text in footnotes.items() %}
+                <li id="footnote-{{ key }}">
+                    {{ text }}
+                    <a href="#ref-{{ key }}" class="footnote-backlink">↩</a>
                 </li>
                 {% endfor %}
-            </ul>
-        </aside>
-        {% for article in articles %}
-        <article>
-            <header>
-                {{ article.header | safe }}
-            </header>
-            <section>
-                {% for section in article.sections %}
-                <p>{{ section | safe }}</p>
+            </ol>
+        </section>
+        {% endif %}
+
+
+        {% if related_articles %}
+        <section class="panel related-articles">
+            <h2>Related</h2>
+            <ul>
+                {% for article in related_articles %}
+                <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
                 {% endfor %}
-            </section>
-        </article>
-        {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        {% if page_changelog %}
+        <section class="panel changelog-panel">
+            <h2>REVISIONS</h2>
+            <div class="activity-list changelog-table timeline-list">
+                {% for entry in page_changelog %}
+                {% set dt_parts = entry.timestamp.split('T') %}
+                {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                {% set action = entry.action | default("MODIFIED") %}
+                <article class="activity-item" data-action="{{ action|lower }}" data-path="{{ entry.hash | lower }}">
+                    <div class="activity-header">
+                        <span class="action-badge">{{ action }}</span>
+                        <span class="hash-pill">{{ entry.hash }}</span>
+                        <span class="date">{{ dt_parts[0] }}</span>
+                        <span class="time">{{ time_part }}</span>
+                    </div>
+                    <div class="activity-summary">
+                        <span class="summary-link">{{ entry.summary }}</span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
     </main>
 
-    {% if footnotes %}
-    <section class="footnotes">
-        <h2>Footnotes</h2>
-        <ol>
-            {% for key, text in footnotes.items() %}
-            <li id="footnote-{{ key }}">
-                {{ text }}
-                <a href="#ref-{{ key }}" class="footnote-backlink">↩</a>
-            </li>
-            {% endfor %}
-        </ol>
-    </section>
-    {% endif %}
+    <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
-
-    {% if related_articles %}
-    <section class="related-articles">
-        <h2>Backlinks</h2>
-        <ul>
-            {% for backlink in backlinks %}
-            <li><a href="/{{ backlink | replace(' ', '-') | lower }}.html">{{ backlink }}</a></li>
-            {% endfor %}
-        </ul>
-        <h2>Related Articles</h2>
-        <ul>
-            {% for article in related_articles %}
-            <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
-            {% endfor %}
-        </ul>
-    </section>
-    {% endif %}
-
-
-
-
-    <footer>
-        <p>&copy; 2025 Aleph.</p>
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
     </footer>
 </body>
 

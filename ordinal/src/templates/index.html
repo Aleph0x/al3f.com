@@ -1,125 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ description }}">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="./styles/main.css">
+    <script src="./main.js" defer></script>
 </head>
-
-<body>
-    <header id="site-banner">
-        <img src="./images/aleph-no-background-web256x256.png" alt="An image of an abstract Hebrew Alef">
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="articles/articles.html">Entries</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <section class="page-details">
-        <h2 class="page-title">{{ title }}</h2>
-        <p class="page-description">{{ description }}</p>
-        <div class="page-meta">
-            <div class="meta-section">
-                {% for meta in page_meta if meta.label in ["Domain", "Division"] %}
-                <div class="meta-item">
-                    <span class="label">{{ meta.label }}:</span> {{ meta.value }}
-                </div>
-                {% endfor %}
+<body class="theme-aleph">
+    <header class="masthead">
+        <div class="brand">
+            <div class="brand-mark">
+                <img src="./images/aleph-no-background-web512x512.png" alt="Aleph symbol">
             </div>
-            <div class="meta-section">
-                {% for meta in page_meta if meta.label in ["Modified", "Worked"] %}
-                <div class="meta-item">
-                    <span class="label">{{ meta.label }}:</span> {{ meta.value }}
-                </div>
-                {% endfor %}
+            <div class="brand-text">
+                <h1>THE INFINITE ARCHIVE</h1>
+                <p class="tagline">Formless and Empty</p>
             </div>
         </div>
-    </section>
+        <nav class="primary-nav">
+            <a href="/index.html">Home</a>
+            <a href="/articles/articles.html">Entries</a>
+        </nav>
+        <div class="now-line">
+            <span class="now-text">
+                There's a pit inside where the <span class="frag frag-ghost">beating heart</span> of the sun expands. Ash traces its contours like a
+                <a class="frag frag-box" href="/articles/chernobyl.html">radiograph</a>.
+            </span>
+        </div>
+        <div class="mast-nav">
+            <a href="#latest">Entries</a>
+            <a href="#media">Media</a>
+            <a href="#domains">Domains</a>
+            <a href="#activity">Activity</a>
+            </a>
+        </div>
+    </header>
 
-    <main>
-        <aside class="toc">
-            {% if toc %}
-            <h2>Outline</h2>
-            <ul>
-                {% for item in toc %}
-                <li class="toc-item toc-level-{{ item.level }}">
-                    <a href="#{{ item.anchor }}">{{ item.text }}</a>
-                </li>
+    <main class="layout-shell">
+        <section id="latest" class="panel latest-grid">
+            <div class="panel-head">
+                <p class="eyebrow">Observed Entries</p>
+                <h3>Recent Entries</h3>
+            </div>
+            <div class="card-grid">
+                {% for article in recent_articles %}
+                <article class="card" data-title="{{ article.title | lower }}" data-domain="{{ article.domain | lower }}">
+                    <div class="card-top">
+                        <span class="chip domain-chip">{{ article.domain }}</span>
+                        <span class="meta">{{ article.last_modified }}</span>
+                    </div>
+                    {% if article.entry_fingerprint %}
+                    <p class="fp-line">
+                        <span>Fingerprint: {{ article.entry_fingerprint }}</span>
+                        {% if article.entry_drift %}<span>&mdash; Drift: {{ article.entry_drift }}</span>{% endif %}
+                    </p>
+                    {% endif %}
+                    <h4><a href="{{ article.url }}">{{ article.title }}</a></h4>
+                    {% if article.division %}
+                    <div class="division-pills">
+                        {% for div in article.division %}
+                        <span class="division-pill">{{ div }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </article>
                 {% endfor %}
-            </ul>
-            {% endif %}
+            </div>
+        </section>
 
-        </aside>
-
-        {% for article in articles %}
-        <article>
-            <header>
-                {{ article.header | safe }}
-            </header>
-            <section>
-                {% for section in article.sections %}
-                <p>{{ section | safe }}</p>
+        <section class="panel domains" id="domains">
+            <div class="panel-head">
+                <p class="eyebrow">Taxonomy</p>
+                <h3>Domains</h3>
+            </div>
+            <div class="domain-strips">
+                {% for domain, articles in categorized_articles.items() %}
+                {% set count = articles|length %}
+                {% set maxc = domain_max or 1 %}
+                {% set pct = (count / maxc * 100) | round(2) %}
+                <div class="domain-strip">
+                    <div class="domain-bar-head">
+                        <a class="domain-strip-label" href="/domains/{{ domain | lower | replace(' ', '-') }}.html">DOMAIN // {{ domain }}</a>
+                        <span class="domain-strip-meta">{{ count }} entries</span>
+                    </div>
+                    <div class="domain-bar" aria-label="{{ domain }} has {{ count }} entries">
+                        <span class="domain-bar-fill" style="width: {{ pct }}%"></span>
+                    </div>
+                </div>
                 {% endfor %}
-            </section>
-        </article>
-        {% endfor %}
+            </div>
+        </section>
+
+        <section class="panel media-panel" id="media">
+            <div class="panel-head compact">
+                <p class="eyebrow">Observed Media</p>
+                <h3>Recent Media</h3>
+            </div>
+            <div class="media-rail">
+                {% for media in recent_media %}
+                <figure class="media-rail-card">
+                    <div class="media-thumb">
+                        {% if media.type == "video" %}
+                        <video src="{{ media.url }}" muted playsinline controls></video>
+                        {% else %}
+                        <img src="{{ media.url }}" alt="{{ media.title }}">
+                        {% endif %}
+                    </div>
+                    <figcaption class="media-caption">
+                        {% set primary = media.articles[0] if media.articles else None %}
+                        {% if primary and primary.hash %}
+                        <a class="mono-tag" href="{{ primary.url }}">{{ primary.hash }}.{{ media.stamp }}.{{ media.basename.split('.')[-1] }}</a>
+                        {% else %}
+                        <span class="mono-tag">{{ media.title }}</span>
+                        {% endif %}
+                    </figcaption>
+                </figure>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="panel activity-panel" id="activity">
+            <div class="panel-head">
+                <p class="eyebrow">Observed by Seraph</p>
+                <h3>Acitivty</h3>
+            </div>
+            <div class="commit-graph" title="Last 365 days of activity">
+                {% for day in activity_graph %}
+                <span
+                    class="commit-cell level-{{ day.level }}"
+                    data-tooltip="{{ day.date }} · {{ day.count }} change(s)"
+                ></span>
+                {% endfor %}
+            </div>
+            <div class="activity-list changelog-table timeline-list">
+                {% for entry in changelog %}
+                {% set dt_parts = entry.timestamp.split('T') %}
+                {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
+                {% set action = entry.action | default("MODIFIED") %}
+                <article class="activity-item {% if entry.bundle_id %}bundle-item{% endif %}" data-action="{{ action|lower }}" data-path="{{ entry.slug | lower }}" {% if entry.bundle_id %}data-bundle="{{ entry.bundle_id }}"{% endif %}>
+                    <div class="activity-header">
+                        <span class="action-badge">{{ action }}</span>
+                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash }}</a>
+                        {% if entry.meta and entry.meta.domain %}<span class="slug">[{{ entry.meta.domain }}]</span>{% endif %}
+                        {% if entry.meta and entry.meta.division %}<span class="slug">({{ entry.meta.division|join(', ') }})</span>{% endif %}
+                        <span class="date">{{ dt_parts[0] }}</span>
+                        <span class="time">{{ time_part }}</span>
+                    </div>
+                    <div class="activity-path">
+                        <span class="entry-label">ENTRY:</span>
+                        <a class="entry-link" href="/{{ entry.slug }}.html">{{ entry.title or entry.slug }}</a>
+                    </div>
+                    <div class="activity-summary">
+                        <a class="summary-link" href="/{{ entry.slug }}.html">{{ entry.summary }}</a>
+                    </div>
+                    <div class="activity-word">
+                            <span class="word-meta">
+                            DELTA: {{ entry.word_delta or 0 }} WC: {{ entry.word_count or 0 }}
+                            {% if entry.worked_hours is not none %} · +{{ entry.worked_hours }}h{% endif %}
+                            {% if entry.entry_drift is not none %}{% endif %}
+                        </span>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            <div class="table-footer">
+                <a class="chip pill-ghost" href="/revisions/index.html">FULL LOG</a>
+            </div>
+        </section>
     </main>
 
-    {% if footnotes %}
-    <section class="footnotes">
-        <h2>Footnotes</h2>
-        <ol>
-            {% for key, text in footnotes.items() %}
-            <li id="footnote-{{ key }}">
-                {{ text }}
-                <a href="#ref-{{ key }}" class="footnote-backlink">↩</a>
-            </li>
-            {% endfor %}
-        </ol>
-    </section>
-    {% endif %}
+    <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
-
-    {% if related_articles %}
-    <section class="related-articles">
-        <h2>Backlinks</h2>
-        <ul>
-            {% for backlink in backlinks %}
-            <li><a href="/{{ backlink | replace(' ', '-') | lower }}.html">{{ backlink }}</a></li>
-            {% endfor %}
-        </ul>
-
-        <h2>Related Articles</h2>
-        <ul>
-            {% for article in related_articles %}
-            <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
-            {% endfor %}
-        </ul>
-    </section>
-    {% endif %}
-
-    {% if external_links %}
-    <section class="external-links">
-        <h2>External References</h2>
-        <ul>
-            {% for link in external_links %}
-            <li><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.text }}</a></li>
-            {% endfor %}
-        </ul>
-    </section>
-    {% endif %}
-
-    <footer>
-        <p>&copy; 2025 Aleph.</p>
+    <footer class="site-footer">
+        <p>&copy; 2025 Aleph. Built with Ordinal.</p>
     </footer>
 </body>
-
 </html>

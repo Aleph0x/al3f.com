@@ -1,0 +1,39 @@
+@use "./variables" as *;
+
+body.theme-aleph {
+    background: $background-color;
+    color: $text-color;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 0;
+    position: relative;
+    overflow-x: hidden;
+
+    &::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.25) 1px, transparent 1px),
+            radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.8) 1px, transparent 0);
+        background-size: 140px 140px;
+        mix-blend-mode: screen;
+        opacity: 0.24;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    &::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 70px 70px;
+        mix-blend-mode: screen;
+        opacity: 0.16;
+        pointer-events: none;
+        z-index: 0;
+    }
+}

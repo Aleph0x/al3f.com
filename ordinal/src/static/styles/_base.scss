@@ -7,22 +7,24 @@
 }
 
 body {
-    font-family: serif;
+    font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
     background-color: $background-color;
     color: $text-color;
     padding: $content-padding;
-    text-align: center;
+    text-align: left;
 }
 
 a {
     color: $link-color;
     text-decoration: none;
     border-bottom: 1px dotted $text-color;
-    transition: color 0.2s, background-color 0.2s;
+    transition: color 0.2s, background-color 0.2s, border-color 0.2s;
 
     &:hover {
-        color: $link-hover-color;
-        background-color: $link-hover-bg-color;
+        color: #000;
+        background-color: $text-color;
+        border-color: $text-color;
     }
 
     &:visited {

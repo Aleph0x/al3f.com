@@ -1,0 +1,102 @@
+@use "./variables" as *;
+@use "sass:color";
+
+.media-panel .panel-head.compact {
+    margin-bottom: 0.5rem;
+}
+
+.media-panel .media-rail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.75rem;
+}
+
+.media-rail-card {
+    border: 1px solid $accent-color;
+    background: color.scale($background-color, $lightness: 1%);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .media-thumb {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        position: relative;
+        background: #050505;
+        outline: 1px solid rgba(255, 255, 255, 0.14);
+        transition: outline-color 0.15s ease, filter 0.15s ease;
+
+        img,
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: grayscale(0.2) saturate(0.6) contrast(1.08);
+        }
+
+        video {
+            background: #000;
+        }
+    }
+
+    &:hover .media-thumb {
+        outline-color: $accent-color;
+        filter: invert(0.02);
+    }
+}
+
+.media-caption {
+    padding: 0.4rem 0.65rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+    .mono-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.45rem;
+        border: 1px solid $accent-color;
+        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .media-title {
+        font-size: 0.95rem;
+        color: $text-color;
+        font-weight: 600;
+    }
+}
+
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 9999;
+
+    img {
+        max-width: 90vw;
+        max-height: 90vh;
+        border: 1px solid $accent-color;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    &.open {
+        opacity: 1;
+        visibility: visible;
+    }
+}

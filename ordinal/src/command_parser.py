@@ -2,6 +2,7 @@ from src.file_manager import setup_project, cleanup_orphans, get_categories
 from src.html_renderer import generate_static_site
 from src.snapshot_manager import manage_snapshots
 from src.base_utils import setup_logger
+from src.revisions import seed_database
 
 logger = setup_logger("command_parser", "logs/command_parser.log")
 
@@ -21,7 +22,23 @@ def parse_commands(parser):
     generate_parser.add_argument(
         "--category", choices=categories + ["all"], default="all", help="Category to generate."
     )
-    generate_parser.set_defaults(func=lambda args: generate_static_site(args.category))
+    generate_parser.add_argument(
+        "--commit", action="store_true", help="Record acknowledged changes to the revisions database."
+    )
+    generate_parser.add_argument(
+        "--commit-all",
+        action="store_true",
+        help="Bundle all detected changes under a single shared summary.",
+    )
+    generate_parser.add_argument(
+        "--summary",
+        type=str,
+        default=None,
+        help="Optional summary to use for commits (shared when --commit-all is set).",
+    )
+    generate_parser.set_defaults(
+        func=lambda args: generate_static_site(args.category, args.commit, args.commit_all, args.summary)
+    )
 
     cleanup_parser = subparsers.add_parser("cleanup", help="Remove orphaned files.")
     cleanup_parser.set_defaults(func=lambda args: cleanup_orphans())
@@ -35,3 +52,6 @@ def parse_commands(parser):
     )
     snapshot_parser.add_argument("--category", type=str, help="Category for snapshots.")
     snapshot_parser.set_defaults(func=lambda args: manage_snapshots(args.action, args.category))
+
+    seed_parser = subparsers.add_parser("seeddb", help="Seed the revisions database from existing content.")
+    seed_parser.set_defaults(func=lambda args: seed_database())
