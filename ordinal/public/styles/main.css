@@ -506,6 +506,7 @@ body.theme-aleph::after {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
+  margin-top: 0.5rem;
 }
 
 .domain-section {
@@ -534,11 +535,17 @@ body.theme-aleph::after {
   font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border-bottom: 1px solid transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: #e0e0e0;
+  color: #000;
+  padding: 0.12rem 0.45rem;
+  box-shadow: none;
 }
 .domain-title .domain-strip-label:hover {
-  border-bottom-color: #f5f5f5;
-  color: #f5f5f5;
+  color: #e0e0e0;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.12);
 }
 
 .domain-metrics {
