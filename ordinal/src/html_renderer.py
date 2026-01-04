@@ -33,12 +33,7 @@ from src.file_manager import (
     merge_image_dir,
     merge_video_dir,
 )
-from src.markdown_parser import (
-    parse_articles,
-    parse_footnotes,
-    parse_frontmatter,
-    parse_related,
-)
+from src.markdown_parser import parse_frontmatter
 from src.revisions import (
     compute_fingerprint,
     get_article_cache,
@@ -46,7 +41,7 @@ from src.revisions import (
     init_db,
     list_articles,
 )
-from src.taxonomy import get_articles_list, get_recent_articles
+from src.taxonomy import get_articles_list
 
 logger = setup_logger("html_renderer", "logs/html_renderer.log")
 
@@ -134,7 +129,9 @@ def save_json(fp: Path, data) -> None:
         logger.error(f"Error writing json to {fp}: {err}")
 
 
-def _render_to_file(template_name: str, context: dict[str, Any] | Any, dest: Path) -> None:
+def _render_to_file(
+    template_name: str, context: dict[str, Any] | Any, dest: Path
+) -> None:
     rendered_html = render_template_context(str(template_name), dict(context))
     ensure_directory(str(dest.parent))
     with dest.open("w", encoding="utf-8") as f:
@@ -151,19 +148,7 @@ def scan_content_files() -> dict:
 
 def scan_public_files() -> dict:
     public_files = {}
-    valid_assets = (
-        ".html",
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".gif",
-        ".svg",
-        ".webp",
-        ".mp4",
-        ".avif",
-        ".bmp",
-    )
-    for fp in _walk_files(PUBLIC_PATH, suffixes=valid_assets):
+    for fp in _walk_files(PUBLIC_PATH, suffixes=tuple(VALID_ASSETS)):
         rel = fp.relative_to(PUBLIC_PATH)
         public_files[rel.as_posix()] = fp.stat().st_mtime
     return public_files
@@ -248,16 +233,6 @@ def get_page_changelog(log_fp: str, page_path: str, limit: int = 20) -> list[dic
     return filtered[:limit]
 
 
-def get_recent_articles(max_items: int = 6) -> list[dict]:
-    try:
-        from src.taxonomy import get_recent_articles as _recent
-
-        return _recent(max_items)
-    except Exception as err:
-        logger.error(f"Error getting recent articles: {err}")
-        return []
-
-
 def process_file(
     md_fp: str,
     output_fp: str,
@@ -279,8 +254,6 @@ def process_file(
             md_fp,
             default_template,
             backlinks,
-            commit,
-            commit_context,
             parsed_data,
         )
         frontmatter = context.get("frontmatter", {})
@@ -360,7 +333,7 @@ def generate_static_site(
         logger.info("Checking and generating missing markdown files.")
         generate_missing()
 
-        process_index(content_dir, public_dir, backlinks, commit, commit_context)
+        process_index(backlinks, commit, commit_context)
 
         if category != "all" and category not in categories:
             logger.error(f"Invalid category: {category}")
@@ -368,9 +341,7 @@ def generate_static_site(
 
         cats = categories if category == "all" else [category]
         for cat in cats:
-            process_category(
-                cat, content_dir, public_dir, backlinks, commit, commit_context
-            )
+            process_category(cat, backlinks, commit, commit_context)
 
         logger.info("Copying all necessary static files.")
         copy_static_files()
@@ -396,16 +367,14 @@ def generate_static_site(
 
 def process_category(
     category: str,
-    content_dir: str,
-    public_dir: str,
     backlinks: dict,
     commit: bool = False,
     commit_context: dict | None = None,
 ) -> None:
     try:
         logger.info(f"Processing category: {category}")
-        category_dir = Path(content_dir) / category
-        output_dir = Path(public_dir) / category
+        category_dir = CONTENT_PATH / category
+        output_dir = PUBLIC_PATH / category
 
         if not os.path.isdir(category_dir):
             logger.error(f"Category directory `{category_dir}` does not exist.")
@@ -430,16 +399,14 @@ def process_category(
 
 
 def process_index(
-    content_dir: str,
-    public_dir: str,
     backlinks: dict,
     commit: bool = False,
     commit_context: dict | None = None,
 ) -> None:
     try:
         logger.info("Processing `index.md`.")
-        index_md_fp = Path(content_dir) / "index.md"
-        index_output_fp = Path(public_dir) / "index.html"
+        index_md_fp = CONTENT_PATH / "index.md"
+        index_output_fp = PUBLIC_PATH / "index.html"
 
         if not index_md_fp.exists():
             logger.error(f"`index.md` file does not exist at: {index_md_fp}")

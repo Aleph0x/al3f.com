@@ -145,8 +145,6 @@ def build_entry_context(
     md_fp: str,
     default_template: str,
     backlinks: dict,
-    commit: bool,
-    commit_context: dict | None,
     parsed_data: dict,
 ) -> EntryContext:
     logger.info(f"Building context for {md_fp}")
