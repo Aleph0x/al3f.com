@@ -13,5 +13,4 @@ template: "wiki.html"
 
 **This page is currently empty. Content will be added soon.**
 
-## Why is this also a 404 page?
-Until content is added, this page acts as a placeholder, essentially a 404 page within my wiki. If you arrived here expecting something more, it means I haven’t written about it yet (or I just haven’t linked the relevant entries properly). Check back later as I expand this section with detailed notes and references.
+If you are seeing this page, it means the topic was referenced somewhere else, but the content has not been added yet. This page exists as a placeholder and will be filled in later.

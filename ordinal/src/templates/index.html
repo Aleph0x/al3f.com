@@ -16,7 +16,7 @@
             </div>
             <div class="brand-text">
                 <h1>THE INFINITE ARCHIVE</h1>
-                <p class="tagline">Formless and Empty</p>
+                <p class="tagline">formless and empty</p>
             </div>
         </div>
         <nav class="primary-nav">
@@ -51,12 +51,18 @@
                         <span class="chip domain-chip">{{ article.domain }}</span>
                         <span class="meta">{{ article.last_modified }}</span>
                     </div>
-                    {% if article.entry_fingerprint %}
-                    <p class="fp-line">
-                        <span>Fingerprint: {{ article.entry_fingerprint }}</span>
-                        {% if article.entry_drift %}<span>&mdash; Drift: {{ article.entry_drift }}</span>{% endif %}
-                    </p>
-                    {% endif %}
+                  
+                            <p class="fp-line">
+                                <span>{{ article.entry_fingerprint }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
+                                {% if article.worked_hours is not none or article.word_count is not none %}
+                                <span>
+                                    {% if article.worked_hours is not none %}+{{ article.worked_hours }}h{% endif %}
+                                    {% if article.worked_hours is not none and article.word_count is not none %}{% endif %}|
+                                    {% if article.word_count is not none %}{{ article.word_count }}w{% endif %}
+                                </span>
+                                {% endif %}
+                            </p>
+               
                     <h4><a href="{{ article.url }}">{{ article.title }}</a></h4>
                     {% if article.division %}
                     <div class="division-pills">
@@ -149,11 +155,11 @@
                         <span class="time">{{ time_part }}</span>
                     </div>
                     <div class="activity-path">
-                        <span class="entry-label">ENTRY:</span>
                         <a class="entry-link" href="/{{ entry.slug }}.html">{{ entry.title or entry.slug }}</a>
                     </div>
                     <div class="activity-summary">
-                        <a class="summary-link" href="/{{ entry.slug }}.html">{{ entry.summary }}</a>
+                        <span class="summary-label">DETAILS:</span>
+                        <span class="summary-text">{{ entry.summary }}</span>
                     </div>
                     <div class="activity-word">
                             <span class="word-meta">

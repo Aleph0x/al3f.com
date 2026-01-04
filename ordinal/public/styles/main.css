@@ -2464,6 +2464,32 @@ figure figcaption {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.activity-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.15rem;
+  flex-wrap: wrap;
+}
+.activity-summary .summary-label {
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: #e0e0e0;
+}
+.activity-summary .summary-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  color: #e0e0e0;
+  border: none;
+  background: transparent;
+}
+.activity-summary {
+  /* fallback for older markup if anchor remains in log items */
+}
 .activity-summary .summary-link {
   font-weight: 400;
   color: #f5f5f5;
@@ -2533,29 +2559,27 @@ figure figcaption {
 }
 
 .activity-path {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+  display: flex;
+  align-items: flex-start;
 }
 
 .activity-path .entry-label {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.35rem;
+  display: flex;
   background: #000;
-  color: #f5f5f5;
+  color: #e0e0e0;
   font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   letter-spacing: 0.08em;
-  font-size: 0.78rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  font-size: 1.2rem;
 }
 
 .activity-path .entry-link {
   font-weight: 400;
   color: #e0e0e0;
   text-decoration: none;
+  padding: 0.05rem 0.15rem;
   border-bottom: 1px solid transparent;
   letter-spacing: 0.04em;
+  font-size: 1.2rem;
 }
 .activity-path .entry-link:hover {
   background: #f5f5f5;
