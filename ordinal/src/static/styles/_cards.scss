@@ -116,3 +116,18 @@
         border-color: $text-color;
     }
 }
+
+.entry-card {
+    min-height: 160px;
+
+    .entry-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    h4 {
+        margin-top: 0.2rem;
+    }
+}

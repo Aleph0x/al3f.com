@@ -28,3 +28,56 @@
     opacity: 0.8;
     width: 0;
 }
+
+.domains-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.domain-section {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.domain-section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.domain-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    .eyebrow {
+        margin: 0;
+    }
+
+    .domain-strip-label {
+        color: $text-color;
+        text-decoration: none;
+        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border-bottom: 1px solid transparent;
+
+        &:hover {
+            border-bottom-color: $accent-color;
+            color: $accent-color;
+        }
+    }
+}
+
+.domain-metrics {
+    display: inline-flex;
+    gap: 0.4rem;
+}
+
+.domain-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
