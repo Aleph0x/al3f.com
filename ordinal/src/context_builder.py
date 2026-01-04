@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, TypedDict
+from typing import Any, Dict, TypedDict, cast
 
 from src.base_utils import content_dir
 from src.revisions import (
@@ -63,10 +63,10 @@ class RelatedEntry(TypedDict):
     url: str
 
 
-class EntryContext(TypedDict):
+class EntryContext(TypedDict, total=False):
     title: str
     description: str
-    entry_fingerprint: str | None
+    entry_fingerprint: str
     entry_revisions_url: str
     entry_drift: str
     entry_worked: float | None
@@ -88,7 +88,14 @@ class EntryContext(TypedDict):
     location: Any
     reading_time: Any
     frontmatter: dict
-    page_changelog: list
+    page_changelog: list[Any]
+    recent_articles: list[Any]
+    categorized_articles: dict[str, Any]
+    domain_max: int
+    categories: list[str]
+    activity_graph: list[Any]
+    changelog: list[Any]
+    recent_media: list[Any]
     template_name: str
     slug: str
 
@@ -170,7 +177,8 @@ def build_entry_context(
 
         footnotes_content, footnotes = parse_footnotes(raw_content)
         articles = parse_articles(footnotes_content, os.path.basename(md_fp), backlinks)
-        related = parse_related(frontmatter)
+        related_raw = parse_related(frontmatter)
+        related = cast(list[RelatedEntry], related_raw)
         template_name = frontmatter.get("template", default_template)
         gallery = frontmatter.get("gallery", [])
         if not isinstance(gallery, list):
@@ -201,7 +209,7 @@ def build_entry_context(
         )
         domain_val = "N/A" if domain_val is None else domain_val
 
-        context = {
+        context: EntryContext = {
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
             "entry_fingerprint": entry_fingerprint,
@@ -243,23 +251,26 @@ def build_entry_context(
         return context
     except Exception as err:
         logger.error(f"Error building context for {md_fp}: {err}", exc_info=True)
-        return {
-            "title": "Error",
-            "description": "",
-            "content": "",
-            "articles": [],
-            "footnotes": [],
-            "toc": [],
-            "backlinks": [],
-            "external_links": [],
-            "related_articles": [],
-            "gallery": [],
-            "tags": [],
-            "frontmatter": {},
-            "page_changelog": [],
-            "template_name": default_template,
-            "slug": Path(md_fp).name,
-        }
+        return cast(
+            EntryContext,
+            {
+                "title": "Error",
+                "description": "",
+                "content": "",
+                "articles": [],
+                "footnotes": [],
+                "toc": [],
+                "backlinks": [],
+                "external_links": [],
+                "related_articles": [],
+                "gallery": [],
+                "tags": [],
+                "frontmatter": {},
+                "page_changelog": [],
+                "template_name": default_template,
+                "slug": Path(md_fp).name,
+            },
+        )
 
 
 def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:

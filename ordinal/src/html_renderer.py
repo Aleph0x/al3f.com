@@ -5,6 +5,7 @@ import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
+from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 
@@ -133,8 +134,8 @@ def save_json(fp: Path, data) -> None:
         logger.error(f"Error writing json to {fp}: {err}")
 
 
-def _render_to_file(template_name: str, context: dict, dest: Path) -> None:
-    rendered_html = render_template_context(template_name, context)
+def _render_to_file(template_name: str, context: dict[str, Any] | Any, dest: Path) -> None:
+    rendered_html = render_template_context(str(template_name), dict(context))
     ensure_directory(str(dest.parent))
     with dest.open("w", encoding="utf-8") as f:
         f.write(rendered_html)
@@ -282,10 +283,10 @@ def process_file(
             commit_context,
             parsed_data,
         )
-        frontmatter = context["frontmatter"]
+        frontmatter = context.get("frontmatter", {})
         raw_content = parsed_data.get("content", "")
-        slug = context["slug"]
-        entry_fingerprint = context["entry_fingerprint"]
+        slug = str(context.get("slug", ""))
+        entry_fingerprint = str(context.get("entry_fingerprint", ""))
 
         if commit and should_commit(slug, entry_fingerprint):
             worked_hours = (
@@ -311,7 +312,7 @@ def process_file(
             except Exception as err:
                 logger.error(f"Error during commit flow for {md_fp}: {err}")
 
-        template_name = context.pop("template_name", default_template)
+        template_name = str(context.pop("template_name", default_template))
         if (
             output_fp.endswith("index.html")
             and default_template == "index.html"
