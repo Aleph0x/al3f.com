@@ -709,6 +709,10 @@ def process_file(
 
         if template_name == "section.html":
             context["categorized_articles"] = get_articles_list()
+            try:
+                context["domain_max"] = max(len(v) for v in context["categorized_articles"].values()) if context["categorized_articles"] else 0
+            except Exception:
+                context["domain_max"] = 0
         if template_name == "index.html":
             context["recent_articles"] = get_recent_articles()
             context["categorized_articles"] = get_articles_list()
