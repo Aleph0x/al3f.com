@@ -45,11 +45,11 @@
                         <span class="time">{{ time_part }}</span>
                     </div>
                     <div class="activity-path">
-                        <span class="entry-label">ENTRY:</span>
                         <a class="entry-link" href="/{{ entry.slug }}.html">{{ entry.title or entry.slug }}</a>
                     </div>
                     <div class="activity-summary">
-                        <a class="summary-link" href="/{{ entry.slug }}.html">{{ entry.summary }}</a>
+                        <span class="summary-label">DETAILS:</span>
+                        <span class="summary-text">{{ entry.summary }}</span>
                     </div>
                     <div class="activity-word">
                         <span class="word-meta">

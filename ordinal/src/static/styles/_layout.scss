@@ -1123,19 +1123,47 @@
 
 }
 
-.activity-summary .summary-link {
-    font-weight: 400;
-    color: $accent-color;
-    background: transparent;
-    padding: 0.05rem 0.2rem;
-    text-decoration: none;
-    letter-spacing: 0.04em;
-    border: 1px solid transparent;
+.activity-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.15rem;
+    flex-wrap: wrap;
 
-    &:hover {
-        background: $accent-color;
-        color: #000;
-        border-color: $accent-color;
+    .summary-label {
+        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.78rem;
+        color: $text-color;
+    }
+
+    .summary-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+        color: $text-color;
+        border: none;
+        background: transparent;
+    }
+
+
+    /* fallback for older markup if anchor remains in log items */
+    .summary-link {
+        font-weight: 400;
+        color: $accent-color;
+        background: transparent;
+        padding: 0.05rem 0.2rem;
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        border: 1px solid transparent;
+
+        &:hover {
+            background: $accent-color;
+            color: #000;
+            border-color: $accent-color;
+        }
     }
 }
 
@@ -1196,29 +1224,28 @@
 }
 
 .activity-path {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
+    display: flex;
+    align-items: flex-start;
 }
 
 .activity-path .entry-label {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.1rem 0.35rem;
+    display: flex;
     background: #000;
-    color: $accent-color;
+    color: $text-color;
     font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
     letter-spacing: 0.08em;
-    font-size: 0.78rem;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    font-size: 1.2rem;
+
 }
 
 .activity-path .entry-link {
     font-weight: 400;
     color: $text-color;
     text-decoration: none;
+    padding: 0.05rem 0.15rem;
     border-bottom: 1px solid transparent;
     letter-spacing: 0.04em;
+    font-size: 1.2rem;
 
     &:hover {
         background: $accent-color;

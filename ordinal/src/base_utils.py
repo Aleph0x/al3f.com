@@ -12,18 +12,24 @@ os.makedirs(logs_dir, exist_ok=True)
 
 
 def setup_logger(name: str, log_file: str, level=logging.INFO) -> logging.Logger:
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    file_handler = None
+    try:
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    except Exception:
+        # Fallback to console-only if file logging is not writable
+        file_handler = None
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
     if not logger.hasHandlers():
-        logger.addHandler(file_handler)
+        if file_handler:
+            logger.addHandler(file_handler)
         logger.addHandler(console_handler)
 
     return logger

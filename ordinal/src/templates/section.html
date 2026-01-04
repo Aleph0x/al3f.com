@@ -69,11 +69,23 @@
 
                     <div class="domain-card-grid">
                         {% for article in articles %}
-                        <article class="card entry-card" data-domain="{{ domain | lower }}" data-title="{{ article.title | lower }}">
-                            <div class="entry-card-head">
-                                <span class="mono-chip">{{ domain }}</span>
-                                <span class="mono-chip">{{ article.last_modified.split(' ')[0] }}</span>
+                        <article class="card" data-domain="{{ domain | lower }}" data-title="{{ article.title | lower }}">
+                            <div class="card-top">
+                                <span class="chip domain-chip">{{ article.domain }}</span>
+                                <span class="meta">{{ article.last_modified }}</span>
                             </div>
+                            {% if article.entry_fingerprint %}
+                            <p class="fp-line">
+                                <span>{{ article.entry_fingerprint }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
+                                {% if article.worked_hours is not none or article.word_count is not none %}
+                                <span>
+                                    {% if article.worked_hours is not none %}+{{ article.worked_hours }}h{% endif %}
+                                    {% if article.worked_hours is not none and article.word_count is not none %}{% endif %}|
+                                    {% if article.word_count is not none %}{{ article.word_count }}w{% endif %}
+                                </span>
+                                {% endif %}
+                            </p>
+                            {% endif %}
                             <h4><a href="{{ article.url }}">{{ article.title }}</a></h4>
                             {% if article.division %}
                             <div class="division-pills">
