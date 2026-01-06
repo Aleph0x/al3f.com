@@ -57,7 +57,7 @@
                                 {% if article.worked_hours is not none or article.word_count is not none %}
                                 <span>
                                     {% if article.worked_hours is not none %}+{{ article.worked_hours }}h{% endif %}
-                                    {% if article.worked_hours is not none and article.word_count is not none %}{% endif %}|
+                                    {% if article.worked_hours is not none and article.word_count is not none %} | {% endif %}
                                     {% if article.word_count is not none %}{{ article.word_count }}w{% endif %}
                                 </span>
                                 {% endif %}
