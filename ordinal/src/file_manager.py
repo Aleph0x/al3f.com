@@ -4,7 +4,14 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
-from src.base_utils import content_dir, ensure_directory, public_dir, setup_logger, snapshots_dir, templates_dir
+from src.base_utils import (
+    content_dir,
+    ensure_directory,
+    public_dir,
+    setup_logger,
+    snapshots_dir,
+    templates_dir,
+)
 from src.markdown_parser import parse_frontmatter
 
 logger = setup_logger("file_manager", "logs/file_manager.log")
@@ -72,7 +79,9 @@ def generate_section() -> None:
     try:
         categories = get_categories()
     except Exception as err:
-        logger.error(f"Error fetching categories for section generation: {err}", exc_info=True)
+        logger.error(
+            f"Error fetching categories for section generation: {err}", exc_info=True
+        )
         return
 
     for category in categories:
@@ -127,13 +136,18 @@ def generate_section() -> None:
                 "## Latest Articles",
             ]
             new_content_lines.extend(
-                [f"- {article['wikilink']} - {article['created']}" for article in articles[:5]]
+                [
+                    f"- {article['wikilink']} - {article['created']}"
+                    for article in articles[:5]
+                ]
             )
             new_content_lines.append("")
             new_content_lines.append("## All Articles by Domain")
             for domain, domain_articles in articles_by_domain.items():
                 new_content_lines.append(f"\n### {domain.title()}")
-                new_content_lines.extend([f"- {article['wikilink']}" for article in domain_articles])
+                new_content_lines.extend(
+                    [f"- {article['wikilink']}" for article in domain_articles]
+                )
 
             new_content = "\n".join(new_content_lines)
             try:
@@ -159,13 +173,19 @@ def generate_missing() -> None:
 
         with template_fp.open("r", encoding="utf-8") as template_file:
             template_content = template_file.read()
+        # please god ignore fenced code
+        fenced_re = re.compile(r"```.*?```", re.S)
+        inline_code_re = re.compile(r"`[^`]*`")
 
         for md_path in CONTENT_PATH.rglob("*.md"):
             try:
                 markdown_content = md_path.read_text(encoding="utf-8")
 
+                scrubbed = fenced_re.sub("", markdown_content)
+                scrubbed = inline_code_re.sub("", scrubbed)
+
                 pattern = r"\[\[(.*?)\]\]"
-                wikilinks = re.findall(pattern, markdown_content)
+                wikilinks = re.findall(pattern, scrubbed)
 
                 for link in wikilinks:
                     slug = link.replace(" ", "-").lower()
@@ -179,7 +199,11 @@ def generate_missing() -> None:
                         logger.info(f"File already exists for wikilink: {link}")
                         continue
 
-                    category = md_path.parent.name if md_path.parent != CONTENT_PATH else "articles"
+                    category = (
+                        md_path.parent.name
+                        if md_path.parent != CONTENT_PATH
+                        else "articles"
+                    )
                     category_dir = CONTENT_PATH / category
                     ensure_directory(str(category_dir))
 
@@ -232,7 +256,9 @@ def merge_video_dir() -> None:
 
 def _copy_dir(source_dir: Path, dest_dir: Path, label: str) -> None:
     if not source_dir.exists():
-        logger.info(f"Source {label}s directory does not exist: {source_dir}. Skipping.")
+        logger.info(
+            f"Source {label}s directory does not exist: {source_dir}. Skipping."
+        )
         return
 
     ensure_directory(str(dest_dir))

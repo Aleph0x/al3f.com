@@ -33,3 +33,34 @@ a {
 
     }
 }
+
+/* Inline and block code styles (Obsidian/Discord-style) */
+code {
+    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.95em;
+    background: rgba(255, 255, 255, 0.06);
+    color: $text-color;
+    padding: 0.08rem 0.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    white-space: pre-wrap;
+}
+
+pre {
+    background: #0b0b0b;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 0.9rem 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    white-space: pre;
+    display: block;
+}
