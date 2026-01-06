@@ -1,7 +1,7 @@
 import os
 import re
 import yaml
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -295,7 +295,7 @@ def _render_media(
 
 def _stringify_dates(frontmatter: dict, keys: tuple[str, ...]) -> None:
     for key in keys:
-        if key in frontmatter and isinstance(frontmatter[key], (datetime, str)):
+        if key in frontmatter and isinstance(frontmatter[key], (datetime, date, str)):
             frontmatter[key] = str(frontmatter[key])
 
 
@@ -306,7 +306,11 @@ def parse_frontmatter(md_fp: str) -> Dict[str, Any]:
 
         frontmatter_match = FRONTMATTER_RE.match(md_content)
         if frontmatter_match:
-            frontmatter = yaml.safe_load(frontmatter_match.group(1))
+            try:
+                frontmatter = yaml.safe_load(frontmatter_match.group(1)) or {}
+            except Exception as load_err:
+                logger.error(f"Error loading YAML frontmatter in {md_fp}: {load_err}", exc_info=True)
+                frontmatter = {}
             content = frontmatter_match.group(2).strip()
         else:
             frontmatter = {}

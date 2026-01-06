@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +68,10 @@ def get_articles_list() -> dict:
             frontmatter.get("created"),
             "",
         )
+        if isinstance(last_modified, (datetime, date)):
+            last_modified = last_modified.isoformat()
+        elif last_modified is None:
+            last_modified = ""
         entry_drift = _compute_drift(last_modified)
 
         if worked_hours is None:
