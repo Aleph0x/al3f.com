@@ -39,6 +39,8 @@ code {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 2px;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 pre {
@@ -50,13 +52,15 @@ pre {
   font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   font-size: 0.95em;
   line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 pre code {
   background: transparent;
   border: none;
   padding: 0;
-  white-space: pre;
+  white-space: inherit;
   display: block;
 }
 
@@ -1059,9 +1063,10 @@ figure figcaption {
   margin-bottom: 1.5rem;
   padding: 1.5rem 0 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  min-width: 0;
 }
 .page-details .page-title {
-  font-size: 2.8rem;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 700;
   margin: 0 0 0.35rem;
   text-transform: uppercase;
@@ -1069,6 +1074,11 @@ figure figcaption {
   border-bottom: 1px solid rgba(255, 255, 255, 0.6);
   display: inline-block;
   padding-bottom: 0.25rem;
+  max-width: 100%;
+  line-height: 1.15;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
 }
 .page-details .page-description {
   font-size: 1.2rem;
@@ -1164,7 +1174,10 @@ figure figcaption {
     padding: 1.5rem 0;
   }
   .page-title {
-    font-size: 3rem;
+    font-size: clamp(1.7rem, 6vw, 2.3rem);
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+    hyphens: auto;
   }
   .page-description {
     font-size: 1.4rem;
@@ -1390,10 +1403,11 @@ figure figcaption {
   }
   /* Mobile-friendly wiki typography */
   .page-title {
-    font-size: 2.2rem;
+    font-size: clamp(1.5rem, 7vw, 2.1rem);
     line-height: 1.2;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     margin-bottom: 0.35rem;
+    hyphens: auto;
   }
   .page-description {
     font-size: 1rem;
@@ -2040,6 +2054,10 @@ figure figcaption {
   grid-template-columns: minmax(240px, 300px) 1fr;
   gap: 1.5rem;
   align-items: start;
+  min-width: 0;
+}
+.content-grid > * {
+  min-width: 0;
 }
 
 .content-grid.wiki-grid {

@@ -640,6 +640,11 @@
     grid-template-columns: minmax(240px, 300px) 1fr;
     gap: 1.5rem;
     align-items: start;
+    min-width: 0;
+
+    & > * {
+        min-width: 0;
+    }
 }
 
 .content-grid.wiki-grid {
