@@ -42,7 +42,10 @@ def get_articles_list() -> dict:
         slug = md_path.stem
         cache = cache_lookup.get(slug, {})
         domain = frontmatter.get("domain", "Miscellaneous")
-        division = frontmatter.get("division", [])
+        division_val = frontmatter.get("division", [])
+        if isinstance(division_val, str):
+            division_val = [division_val]
+        division = division_val
         url = f"/articles/{md_path.with_suffix('.html').name}"
         header_image = derive_header_image(frontmatter, content)
         fingerprint = cache.get("last_hash")

@@ -235,9 +235,7 @@ def parse_articles(
             idx = len(code_placeholders)
             placeholder = f"@@CODE_BLOCK_{idx}@@"
             lang = match.group(1).strip() if match.group(1) else ""
-            code_html = (
-                f'<pre><code class="lang-{lang}">{html.escape(match.group(2))}</code></pre>'
-            )
+            code_html = f'<pre><code class="lang-{lang}">{html.escape(match.group(2))}</code></pre>'
             code_placeholders[placeholder] = code_html
             return placeholder
 
@@ -291,7 +289,9 @@ def parse_articles(
         for article in articles:
             if "header" in article:
                 for placeholder, html_snippet in code_placeholders.items():
-                    article["header"] = article["header"].replace(placeholder, html_snippet)
+                    article["header"] = article["header"].replace(
+                        placeholder, html_snippet
+                    )
             if article.get("sections"):
                 restored = []
                 for sec in article["sections"]:
