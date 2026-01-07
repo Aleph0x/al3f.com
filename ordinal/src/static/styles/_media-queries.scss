@@ -73,7 +73,10 @@
     }
 
     .page-title {
-        font-size: 3rem;
+        font-size: clamp(1.7rem, 6vw, 2.3rem);
+        letter-spacing: 0.06em;
+        line-height: 1.15;
+        hyphens: auto;
     }
 
     .page-description {
@@ -350,10 +353,11 @@
 
     /* Mobile-friendly wiki typography */
     .page-title {
-        font-size: 2.2rem;
+        font-size: clamp(1.5rem, 7vw, 2.1rem);
         line-height: 1.2;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.04em;
         margin-bottom: 0.35rem;
+        hyphens: auto;
     }
 
     .page-description {

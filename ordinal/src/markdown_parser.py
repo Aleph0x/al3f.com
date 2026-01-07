@@ -1,6 +1,7 @@
 import os
 import re
 import yaml
+import html
 from datetime import datetime, date
 from pathlib import Path
 from typing import Any, Dict, List
@@ -22,6 +23,8 @@ EXTERNAL_RE = re.compile(r"\[(.*?)\]\((https?://.*?)\)")
 FOOTNOTE_RE = re.compile(r"\[\^(\d+)\]: (.+)")
 FOOTNOTE_REF_RE = re.compile(r"\[\^(\d+)\]")
 FRONTMATTER_RE = re.compile(r"---\n(.*?)\n---\n(.*)", re.S)
+FENCED_CODE_RE = re.compile(r"```([^\n`]*)\n(.*?)```", re.S)
+INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 
 
 def parse_quotes(md_content: str) -> str:
@@ -45,6 +48,7 @@ def parse_quotes(md_content: str) -> str:
 
 def parse_tables(md_content: str) -> str:
     try:
+
         def replace_table(match):
             headers = match.group(1).strip().split("|")[1:-1]
             rows = match.group(3).strip().split("\n")
@@ -109,6 +113,7 @@ def parse_images(
     """
 
     try:
+
         def replace_image(match):
             alt_text, src = match.groups()
 
@@ -158,7 +163,10 @@ def parse_backlink(source: str, target: str, backlinks: Dict[str, List[str]]) ->
 
         logger.info(f"Backlinks for '{target_key}': {backlinks[target_key]}")
     except Exception as err:
-        logger.error(f"Error parsing backlink from '{source}' to '{target}': {err}", exc_info=True)
+        logger.error(
+            f"Error parsing backlink from '{source}' to '{target}': {err}",
+            exc_info=True,
+        )
 
 
 def parse_wikilinks(
@@ -184,7 +192,15 @@ def parse_wikilinks(
             parse_backlink(source_page, link_text, backlinks)
             return f'<a href="/{category}/{slug}.html">{link_text}</a>'
 
-        return WIKILINK_RE.sub(replace_link, text)
+        # Do not replace wikilinks inside inline code spans!
+        segments = re.split(r"(`[^`]*`)", text)
+        processed = []
+        for seg in segments:
+            if seg.startswith("`") and seg.endswith("`"):
+                processed.append(seg)
+            else:
+                processed.append(WIKILINK_RE.sub(replace_link, seg))
+        return "".join(processed)
     except Exception as err:
         logger.error(f"Error parsing wikilinks in text: {err}", exc_info=True)
         return text
@@ -211,6 +227,28 @@ def parse_articles(
 
     try:
         processed_content, footnotes = parse_footnotes(md_content)
+
+        # Protect code blocks and inline code so they are not altered by other parsers.
+        code_placeholders: Dict[str, str] = {}
+
+        def replace_fenced(match):
+            idx = len(code_placeholders)
+            placeholder = f"@@CODE_BLOCK_{idx}@@"
+            lang = match.group(1).strip() if match.group(1) else ""
+            code_html = f'<pre><code class="lang-{lang}">{html.escape(match.group(2))}</code></pre>'
+            code_placeholders[placeholder] = code_html
+            return placeholder
+
+        def replace_inline(match):
+            idx = len(code_placeholders)
+            placeholder = f"@@CODE_INLINE_{idx}@@"
+            code_html = f"<code>{html.escape(match.group(1))}</code>"
+            code_placeholders[placeholder] = code_html
+            return placeholder
+
+        processed_content = FENCED_CODE_RE.sub(replace_fenced, processed_content)
+        processed_content = INLINE_CODE_RE.sub(replace_inline, processed_content)
+
         processed_content = parse_quotes(processed_content)
         processed_content = parse_images(processed_content)
         processed_content = parse_bold_text(processed_content)
@@ -240,10 +278,27 @@ def parse_articles(
             elif current_article and line.strip():
                 processed_line = parse_wikilinks(page_name, line.strip(), backlinks)
                 processed_line = parse_external_links(processed_line)
+                for placeholder, html_snippet in code_placeholders.items():
+                    processed_line = processed_line.replace(placeholder, html_snippet)
                 current_article["sections"].append(processed_line)
 
         if current_article:
             articles.append(current_article)
+
+        # Restore any remaining placeholders in headers/sections
+        for article in articles:
+            if "header" in article:
+                for placeholder, html_snippet in code_placeholders.items():
+                    article["header"] = article["header"].replace(
+                        placeholder, html_snippet
+                    )
+            if article.get("sections"):
+                restored = []
+                for sec in article["sections"]:
+                    for placeholder, html_snippet in code_placeholders.items():
+                        sec = sec.replace(placeholder, html_snippet)
+                    restored.append(sec)
+                article["sections"] = restored
 
     except Exception as err:
         logger.error(f"Error parsing articles: {err}", exc_info=True)
@@ -309,7 +364,10 @@ def parse_frontmatter(md_fp: str) -> Dict[str, Any]:
             try:
                 frontmatter = yaml.safe_load(frontmatter_match.group(1)) or {}
             except Exception as load_err:
-                logger.error(f"Error loading YAML frontmatter in {md_fp}: {load_err}", exc_info=True)
+                logger.error(
+                    f"Error loading YAML frontmatter in {md_fp}: {load_err}",
+                    exc_info=True,
+                )
                 frontmatter = {}
             content = frontmatter_match.group(2).strip()
         else:
@@ -327,8 +385,7 @@ def parse_frontmatter(md_fp: str) -> Dict[str, Any]:
 def parse_footnotes(content: str):
     try:
         footnotes = {
-            match.group(1): match.group(2)
-            for match in FOOTNOTE_RE.finditer(content)
+            match.group(1): match.group(2) for match in FOOTNOTE_RE.finditer(content)
         }
         content = FOOTNOTE_RE.sub("", content)
 
@@ -375,7 +432,8 @@ def parse_related(frontmatter: dict) -> list[dict]:
                             )
                     except Exception as parse_error:
                         logger.error(
-                            f"Error parsing frontmatter for file {markdown_path}: {parse_error}", exc_info=True
+                            f"Error parsing frontmatter for file {markdown_path}: {parse_error}",
+                            exc_info=True,
                         )
 
         logger.info(f"Related articles found: {len(related)}")
