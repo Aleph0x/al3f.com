@@ -41,7 +41,7 @@
             <div class="filter-row mission-filter">
                 <input id="section-filter" type="search" placeholder="Filter by title or domain">
                 <div class="summary">
-                    <span class="chip">Entries: {{ categorized_articles|map('count')|sum }}</span>
+                    <span class="chip">Entries: {{ entries_total }}</span>
                     <span class="chip">Domains: {{ categorized_articles|length }}</span>
                 </div>
             </div>

@@ -275,9 +275,8 @@ def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:
     try:
         context["recent_articles"] = get_recent_articles(6)
         context["categorized_articles"] = get_articles_list()
-        context["domain_max"] = max(
-            (len(v) for v in context["categorized_articles"].values()), default=0
-        )
+        context["entries_total"] = sum(len(v) for v in context["categorized_articles"].values())
+        context["domain_max"] = max((len(v) for v in context["categorized_articles"].values()), default=0)
         context["categories"] = get_categories()
         global_changes = get_global_changelog(limit=500)
         context["activity_graph"] = get_commit_activity(global_changes, days=365)
@@ -290,9 +289,8 @@ def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:
 def attach_section_context(context: EntryContext | Dict[str, Any]) -> None:
     try:
         context["categorized_articles"] = get_articles_list()
-        context["domain_max"] = max(
-            (len(v) for v in context["categorized_articles"].values()), default=0
-        )
+        context["entries_total"] = sum(len(v) for v in context["categorized_articles"].values())
+        context["domain_max"] = max((len(v) for v in context["categorized_articles"].values()), default=0)
     except Exception as err:
         logger.error(f"Error attaching section context: {err}", exc_info=True)
 
