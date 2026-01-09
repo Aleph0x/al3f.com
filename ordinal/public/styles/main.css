@@ -29,10 +29,9 @@ a:visited {
   text-decoration: none;
 }
 
-/* Inline and block code styles (Obsidian/Discord-style) */
 code {
   font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 0.95em;
+  font-size: 0.85em;
   background: rgba(255, 255, 255, 0.06);
   color: #e0e0e0;
   padding: 0.08rem 0.3rem;
@@ -1280,6 +1279,7 @@ figure figcaption {
   }
   .panel {
     padding: 0.85rem;
+    overflow: visible;
   }
   .domain-bar-head {
     flex-direction: column;
@@ -1393,6 +1393,7 @@ figure figcaption {
     margin: 0 auto 1rem;
     max-width: 100% !important;
     gap: 0.75rem;
+    overflow-x: hidden;
   }
   body,
   main {
@@ -1400,6 +1401,11 @@ figure figcaption {
   }
   .panel {
     padding: 0.85rem;
+    overflow: visible;
+    min-width: 0;
+  }
+  .layout-shell.wiki-layout .panel {
+    overflow: visible;
   }
   /* Mobile-friendly wiki typography */
   .page-title {
@@ -1432,7 +1438,72 @@ figure figcaption {
   .article-stack.wiki-article .prose p {
     font-size: 1rem;
     line-height: 1.7;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+  .article-stack.wiki-article .prose ul,
+  .article-stack.wiki-article .prose ol {
+    padding-left: 1.1rem;
+  }
+  .article-stack.wiki-article .prose li {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+  /* Tables: constrain on small screens */
+  .prose table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    table-layout: fixed;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose th,
+  .prose td {
+    white-space: normal;
     word-break: break-word;
+    padding: 0.35rem 0.4rem;
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .article-stack,
+  .article-stack.wiki-article {
+    min-width: 0;
+    overflow: visible;
+  }
+  .content-grid.wiki-grid,
+  .article-stack.wiki-article,
+  .article-stack.wiki-article .prose {
+    overflow: visible;
+  }
+  .page-details,
+  .page-details *,
+  .article-stack.wiki-article .prose {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  .page-meta .meta-item,
+  .page-meta .value,
+  .page-meta .label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  .content-grid.wiki-grid,
+  .page-details,
+  .page-meta,
+  .article-stack.wiki-article,
+  .article-stack.wiki-article .prose,
+  .article-stack.wiki-article .prose > * {
+    min-width: 0;
+    max-width: 100%;
   }
   /* Related */
   .related-articles ul {
@@ -2018,11 +2089,66 @@ figure figcaption {
 .prose {
   display: grid;
   gap: 0.9rem;
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.699);
 }
 .prose p {
   text-indent: 0;
   text-align: left;
-  line-height: 1.7;
+  line-height: 1.75;
+  margin: 0 0 1.1rem;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+.prose ul,
+.prose ol {
+  margin: 0.35rem 0 0.75rem;
+  padding-left: 1.25rem;
+  list-style-position: outside;
+}
+.prose li {
+  margin: 0.25rem 0;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: #e0e0e0;
+}
+.prose h2 {
+  margin-top: 1.6rem;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.25rem 0 1rem;
+  display: block;
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgb(7.65, 7.65, 7.65);
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+.prose thead {
+  background: rgba(255, 255, 255, 0.06);
+}
+.prose th,
+.prose td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+.prose tr:last-child td {
+  border-bottom: none;
+}
+.prose tr td:last-child,
+.prose tr th:last-child {
+  border-right: none;
 }
 
 .gallery-grid .grid {
@@ -2080,10 +2206,11 @@ figure figcaption {
 .article-stack {
   display: grid;
   gap: 1.4rem;
+  min-width: 0;
 }
 
 .article-stack.wiki-article {
-  max-width: 1080px;
+  max-width: 82ch;
   width: 100%;
   margin: 0 auto;
 }

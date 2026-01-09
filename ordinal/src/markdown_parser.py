@@ -29,18 +29,25 @@ INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 
 def parse_quotes(md_content: str) -> str:
     try:
-        quote_pattern = re.compile(r"^> (.*)", re.MULTILINE)
-        author_pattern = re.compile(r"^- (.*)", re.MULTILINE)
+        lines = md_content.splitlines()
+        output = []
+        last_was_quote = False
 
-        def replace_quote(match):
-            return f"<blockquote>{match.group(1)}</blockquote>"
+        for line in lines:
+            if line.startswith("> "):
+                output.append(f"<blockquote>{line[2:]}</blockquote>")
+                last_was_quote = True
+                continue
 
-        def replace_author(match):
-            return f"<cite>{match.group(1)}</cite>"
+            if last_was_quote and line.startswith("- "):
+                output.append(f"<cite>{line[2:]}</cite>")
+                last_was_quote = False
+                continue
 
-        md_content = quote_pattern.sub(replace_quote, md_content)
-        md_content = author_pattern.sub(replace_author, md_content)
-        return md_content
+            output.append(line)
+            last_was_quote = False
+
+        return "\n".join(output)
     except Exception as err:
         logger.error(f"Error parsing quotes: {err}", exc_info=True)
         return md_content
@@ -224,6 +231,8 @@ def parse_articles(
     current_article = None
     footnotes = {}
     toc = []
+    list_mode = None
+    list_items: List[str] = []
 
     try:
         processed_content, footnotes = parse_footnotes(md_content)
@@ -255,8 +264,27 @@ def parse_articles(
         processed_content = parse_italics(processed_content)
         processed_content = parse_tables(processed_content)
 
+        def render_inline(text_line: str) -> str:
+            processed_line = parse_wikilinks(page_name, text_line, backlinks)
+            processed_line = parse_external_links(processed_line)
+            for placeholder, html_snippet in code_placeholders.items():
+                processed_line = processed_line.replace(placeholder, html_snippet)
+            return processed_line
+
+        def flush_list() -> None:
+            nonlocal list_mode, list_items
+            if not current_article or not list_mode or not list_items:
+                list_mode = None
+                list_items = []
+                return
+            items_html = "".join(f"<li>{item}</li>" for item in list_items)
+            current_article["sections"].append(f"<{list_mode}>{items_html}</{list_mode}>")
+            list_mode = None
+            list_items = []
+
         for line in processed_content.splitlines():
             if line.startswith("## "):
+                flush_list()
                 heading_text = line[3:].strip()
                 anchor = _anchor(heading_text)
                 toc.append({"text": heading_text, "anchor": anchor, "level": 2})
@@ -267,6 +295,7 @@ def parse_articles(
                 current_article = {"header": line, "sections": []}
 
             elif line.startswith("### "):
+                flush_list()
                 heading_text = line[4:].strip()
                 anchor = _anchor(heading_text)
                 toc.append({"text": heading_text, "anchor": anchor, "level": 3})
@@ -275,14 +304,33 @@ def parse_articles(
                 if current_article:
                     current_article["sections"].append(line)
 
+            elif current_article:
+                ordered_match = re.match(r"^\s*\d+\.\s+(.*)", line)
+                unordered_match = re.match(r"^\s*[-*+]\s+(.*)", line)
+                if ordered_match or unordered_match:
+                    match = ordered_match or unordered_match
+                    if not match:
+                        continue
+                    item_text = match.group(1).strip()
+                    rendered_item = render_inline(item_text)
+                    mode = "ol" if ordered_match else "ul"
+                    if list_mode and list_mode != mode:
+                        flush_list()
+                    list_mode = mode
+                    list_items.append(rendered_item)
+                else:
+                    if not line.strip():
+                        flush_list()
+                        continue
+                    if list_mode:
+                        flush_list()
+                    current_article["sections"].append(render_inline(line.strip()))
+
             elif current_article and line.strip():
-                processed_line = parse_wikilinks(page_name, line.strip(), backlinks)
-                processed_line = parse_external_links(processed_line)
-                for placeholder, html_snippet in code_placeholders.items():
-                    processed_line = processed_line.replace(placeholder, html_snippet)
-                current_article["sections"].append(processed_line)
+                current_article["sections"].append(render_inline(line.strip()))
 
         if current_article:
+            flush_list()
             articles.append(current_article)
 
         # Restore any remaining placeholders in headers/sections
