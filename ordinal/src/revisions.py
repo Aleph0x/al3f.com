@@ -46,9 +46,7 @@ def init_db() -> None:
                 );
                 """
             )
-            cur.execute(
-                "CREATE INDEX IF NOT EXISTS idx_commits_slug ON commits(slug);"
-            )
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_commits_slug ON commits(slug);")
             cur.execute(
                 "CREATE INDEX IF NOT EXISTS idx_commits_timestamp ON commits(timestamp);"
             )
@@ -212,6 +210,12 @@ def insert_commit(
     update_article: bool = True,
 ) -> None:
     try:
+        division_val = frontmatter.get("division", [])
+        if isinstance(division_val, str):
+            division_val = [division_val]
+        elif division_val is None:
+            division_val = []
+
         prev = get_latest_commit(slug)
         prev_wc = prev["word_count"] if prev and prev["word_count"] is not None else 0
         word_delta = word_count - prev_wc
@@ -219,7 +223,7 @@ def insert_commit(
 
         now_ts = timestamp_override or datetime.utcnow().isoformat()
         meta = {
-            "division": frontmatter.get("division", []),
+            "division": division_val,
             "domain": frontmatter.get("domain", ""),
             "template": frontmatter.get("template", ""),
         }
@@ -286,6 +290,13 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
             rows = cur.fetchall()
         results = []
         for r in rows:
+            meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+            division_val = meta.get("division", [])
+            if isinstance(division_val, str):
+                division_val = [division_val]
+            elif division_val is None:
+                division_val = []
+            meta["division"] = division_val
             results.append(
                 {
                     "hash": r["hash"],
@@ -298,7 +309,7 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
                     "word_count": r["word_count"],
                     "word_delta": r["word_delta"],
                     "worked_hours": r["worked_hours"],
-                    "meta": json.loads(r["meta_json"]) if r["meta_json"] else {},
+                    "meta": meta,
                 }
             )
         return results
@@ -327,21 +338,30 @@ def get_global_changelog(limit: Optional[int] = 200) -> List[Dict[str, Any]]:
                     (limit,),
                 )
             rows = cur.fetchall()
-        return [
-            {
-                "slug": r["slug"],
-                "hash": r["hash"],
-                "fingerprint": r["hash"],  # compatibility alias
-                "timestamp": r["timestamp"],
-                "summary": r["summary"],
-                "title": r["title"],
-                "word_count": r["word_count"],
-                "word_delta": r["word_delta"],
-                "worked_hours": r["worked_hours"],
-                "meta": json.loads(r["meta_json"]) if r["meta_json"] else {},
-            }
-            for r in rows
-        ]
+        results = []
+        for r in rows:
+            meta = json.loads(r["meta_json"]) if r["meta_json"] else {}
+            division_val = meta.get("division", [])
+            if isinstance(division_val, str):
+                division_val = [division_val]
+            elif division_val is None:
+                division_val = []
+            meta["division"] = division_val
+            results.append(
+                {
+                    "slug": r["slug"],
+                    "hash": r["hash"],
+                    "fingerprint": r["hash"],  # compatibility
+                    "timestamp": r["timestamp"],
+                    "summary": r["summary"],
+                    "title": r["title"],
+                    "word_count": r["word_count"],
+                    "word_delta": r["word_delta"],
+                    "worked_hours": r["worked_hours"],
+                    "meta": meta,
+                }
+            )
+        return results
     except Exception:
         logger.exception("Error loading global changelog")
         return []
@@ -445,9 +465,7 @@ def seed_database() -> None:
                 seeded += 1
             except Exception as err_file:
                 skipped += 1
-                logger.error(
-                    f"Error seeding file {md_path}: {err_file}", exc_info=True
-                )
+                logger.error(f"Error seeding file {md_path}: {err_file}", exc_info=True)
 
         logger.info(f"Seed complete. Seeded: {seeded}, skipped: {skipped}")
     except Exception as err:

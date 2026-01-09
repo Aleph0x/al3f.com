@@ -602,11 +602,75 @@
 .prose {
     display: grid;
     gap: 0.9rem;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.699);
 
     p {
         text-indent: 0;
         text-align: left;
-        line-height: 1.7;
+        line-height: 1.75;
+        margin: 0 0 1.1rem;
+        word-break: normal;
+        overflow-wrap: normal;
+        hyphens: none;
+    }
+
+    ul,
+    ol {
+        margin: 0.35rem 0 0.75rem;
+        padding-left: 1.25rem;
+        list-style-position: outside;
+    }
+
+    li {
+        margin: 0.25rem 0;
+        word-break: normal;
+        overflow-wrap: normal;
+        hyphens: none;
+    }
+
+    h1,
+    h2,
+    h3 {
+        color: #e0e0e0;
+    }
+
+    h2 {
+        margin-top: 1.6rem;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.25rem 0 1rem;
+        display: block;
+        overflow-x: auto;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: color.scale($background-color, $lightness: 3%);
+        scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+    }
+
+    thead {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    th,
+    td {
+        padding: 0.55rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        white-space: nowrap;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr td:last-child,
+    tr th:last-child {
+        border-right: none;
     }
 }
 
@@ -667,10 +731,11 @@
 .article-stack {
     display: grid;
     gap: 1.4rem;
+    min-width: 0;
 }
 
 .article-stack.wiki-article {
-    max-width: 1080px;
+    max-width: 82ch;
     width: 100%;
     margin: 0 auto;
 }
