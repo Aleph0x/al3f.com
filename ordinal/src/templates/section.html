@@ -87,6 +87,9 @@
                             </p>
                             {% endif %}
                             <h4><a href="{{ article.url }}">{{ article.title }}</a></h4>
+                            {% if article.description %}
+                            <p class="card-description">{{ article.description }}</p>
+                            {% endif %}
                             {% if article.division %}
                             <div class="division-pills">
                                 {% for div in article.division %}

@@ -231,6 +231,7 @@ def parse_articles(
     current_article = None
     footnotes = {}
     toc = []
+    anchor_counts: Dict[str, int] = {}
     list_mode = None
     list_items: List[str] = []
 
@@ -282,11 +283,17 @@ def parse_articles(
             list_mode = None
             list_items = []
 
+        def unique_anchor(heading_text: str) -> str:
+            base = _anchor(heading_text)
+            count = anchor_counts.get(base, 0) + 1
+            anchor_counts[base] = count
+            return base if count == 1 else f"{base}-{count}"
+
         for line in processed_content.splitlines():
             if line.startswith("## "):
                 flush_list()
                 heading_text = line[3:].strip()
-                anchor = _anchor(heading_text)
+                anchor = unique_anchor(heading_text)
                 toc.append({"text": heading_text, "anchor": anchor, "level": 2})
                 line = f'<h2 id="{anchor}">{heading_text}</h2>'
 
@@ -297,7 +304,7 @@ def parse_articles(
             elif line.startswith("### "):
                 flush_list()
                 heading_text = line[4:].strip()
-                anchor = _anchor(heading_text)
+                anchor = unique_anchor(heading_text)
                 toc.append({"text": heading_text, "anchor": anchor, "level": 3})
                 line = f'<h3 id="{anchor}">{heading_text}</h3>'
 
