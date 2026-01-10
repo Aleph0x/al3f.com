@@ -39,7 +39,7 @@
                 <article class="activity-item" data-action="{{ action|lower }}" data-path="{{ entry.slug | lower }}">
                     <div class="activity-header">
                         <span class="action-badge">{{ action }}</span>
-                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash }}</a>
+                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash | short_hash }}</a>
                         <span class="date">{{ dt_parts[0] }}</span>
                         <span class="time">{{ time_part }}</span>
                     </div>

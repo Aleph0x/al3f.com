@@ -39,6 +39,7 @@ def get_articles_list() -> dict:
         content = parsed_data.get("content", "") or ""
 
         title = frontmatter.get("title", md_path.stem.replace("-", " ").title())
+        description = frontmatter.get("description", "")
         slug = md_path.stem
         cache = cache_lookup.get(slug, {})
         domain = frontmatter.get("domain", "Miscellaneous")
@@ -91,6 +92,7 @@ def get_articles_list() -> dict:
         categorized_articles[domain].append(
             {
                 "title": title,
+                "description": description,
                 "url": url,
                 "last_modified": last_modified,
                 "domain": domain,

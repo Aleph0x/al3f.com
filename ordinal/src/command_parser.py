@@ -36,8 +36,25 @@ def parse_commands(parser):
         default=None,
         help="Optional summary to use for commits (shared when --commit-all is set).",
     )
+    generate_parser.add_argument(
+        "--diff",
+        action="store_true",
+        help="Print entries whose fingerprints differ from the database.",
+    )
+    generate_parser.add_argument(
+        "--diff-only",
+        action="store_true",
+        help="Print entries whose fingerprints differ from the database and exit.",
+    )
     generate_parser.set_defaults(
-        func=lambda args: generate_static_site(args.category, args.commit, args.commit_all, args.summary)
+        func=lambda args: generate_static_site(
+            args.category,
+            args.commit,
+            args.commit_all,
+            args.summary,
+            args.diff,
+            args.diff_only,
+        )
     )
 
     cleanup_parser = subparsers.add_parser("cleanup", help="Remove orphaned files.")

@@ -108,7 +108,7 @@
             <h2>Related</h2>
             <ul>
                 {% for article in related_articles %}
-                <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
+                <li><a href="/{{ article['url'] }}">{{ article['title'] }}</a></li>
                 {% endfor %}
             </ul>
         </section>
@@ -125,7 +125,7 @@
                 <article class="activity-item" data-action="{{ action|lower }}" data-path="{{ entry.hash | lower }}">
                     <div class="activity-header">
                         <span class="action-badge">{{ action }}</span>
-                        <span class="hash-pill">{{ entry.hash }}</span>
+                        <span class="hash-pill">{{ entry.hash | short_hash }}</span>
                         <span class="date">{{ dt_parts[0] }}</span>
                         <span class="time">{{ time_part }}</span>
                     </div>

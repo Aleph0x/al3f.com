@@ -46,7 +46,7 @@
                     </div>
                   
                             <p class="fp-line">
-                                <span>{{ article.entry_fingerprint }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
+                                <span>{{ article.entry_fingerprint | short_hash }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
                                 {% if article.worked_hours is not none or article.word_count is not none %}
                                 <span>
                                     {% if article.worked_hours is not none %}+{{ article.worked_hours }}h{% endif %}
@@ -57,6 +57,9 @@
                             </p>
                
                     <h4><a href="{{ article.url }}">{{ article.title }}</a></h4>
+                    {% if article.description %}
+                    <p class="card-description">{{ article.description }}</p>
+                    {% endif %}
                     {% if article.division %}
                     <div class="division-pills">
                         {% for div in article.division %}
@@ -110,7 +113,7 @@
                     <figcaption class="media-caption">
                         {% set primary = media.articles[0] if media.articles else None %}
                         {% if primary and primary.hash %}
-                        <a class="mono-tag" href="{{ primary.url }}">{{ primary.hash }}.{{ media.stamp }}.{{ media.basename.split('.')[-1] }}</a>
+                        <a class="mono-tag" href="{{ primary.url }}">{{ primary.hash | short_hash }}.{{ media.stamp }}.{{ media.basename.split('.')[-1] }}</a>
                         {% else %}
                         <span class="mono-tag">{{ media.title }}</span>
                         {% endif %}
@@ -141,7 +144,7 @@
                 <article class="activity-item {% if entry.bundle_id %}bundle-item{% endif %}" data-action="{{ action|lower }}" data-path="{{ entry.slug | lower }}" {% if entry.bundle_id %}data-bundle="{{ entry.bundle_id }}"{% endif %}>
                     <div class="activity-header">
                         <span class="action-badge">{{ action }}</span>
-                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash }}</a>
+                        <a class="hash-pill" href="/{{ entry.slug }}.html">{{ entry.hash | short_hash }}</a>
                         {% if entry.meta and entry.meta.domain %}<span class="slug">[{{ entry.meta.domain }}]</span>{% endif %}
                         {% if entry.meta and entry.meta.division %}<span class="slug">({{ entry.meta.division|join(', ') }})</span>{% endif %}
                         <span class="date">{{ dt_parts[0] }}</span>

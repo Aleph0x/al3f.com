@@ -37,6 +37,7 @@ from src.markdown_parser import parse_frontmatter
 from src.revisions import (
     compute_fingerprint,
     get_article_cache,
+    get_entry_fingerprint,
     get_global_changelog,
     init_db,
     list_articles,
@@ -64,7 +65,17 @@ VALID_ASSETS = {
     ".bmp",
 }
 
+DISPLAY_HASH_LEN = 7
+
+
+def short_hash(value: Any, length: int = DISPLAY_HASH_LEN) -> str:
+    if not value:
+        return ""
+    return str(value)[:length]
+
+
 env = Environment(loader=FileSystemLoader(TEMPLATES_PATH))
+env.filters["short_hash"] = short_hash
 
 
 def compile_scss():
@@ -259,9 +270,10 @@ def process_file(
         frontmatter = context.get("frontmatter", {})
         raw_content = parsed_data.get("content", "")
         slug = str(context.get("slug", ""))
-        entry_fingerprint = str(context.get("entry_fingerprint", ""))
+        current_fingerprint = compute_fingerprint(md_fp)
+        context["entry_fingerprint"] = current_fingerprint
 
-        if commit and should_commit(slug, entry_fingerprint):
+        if commit and should_commit(slug, current_fingerprint):
             worked_hours = (
                 float(frontmatter["worked"])
                 if "worked" in frontmatter
@@ -273,7 +285,7 @@ def process_file(
             try:
                 entry_fingerprint, entry_drift = record_commit(
                     slug,
-                    compute_fingerprint(md_fp),
+                    current_fingerprint,
                     frontmatter,
                     raw_content,
                     worked_hours,
@@ -322,6 +334,8 @@ def generate_static_site(
     commit: bool = False,
     commit_all: bool = False,
     summary: str | None = None,
+    diff: bool = False,
+    diff_only: bool = False,
 ):
     try:
         logger.info("Starting site generation.")
@@ -329,6 +343,12 @@ def generate_static_site(
         backlinks = {}
         init_db()
         commit_context = {"bundle": commit_all, "shared_summary": summary, "commits": 0}
+
+        if diff or diff_only:
+            diffs = list_hash_diffs(category, categories)
+            _print_hash_diffs(diffs)
+            if diff_only:
+                return
 
         logger.info("Checking and generating missing markdown files.")
         generate_missing()
@@ -363,6 +383,55 @@ def generate_static_site(
 
     except Exception as err:
         logger.error(f"Error generating static site: {err}", exc_info=True)
+
+
+def list_hash_diffs(category: str, categories: list[str] | None = None) -> list[dict]:
+    if categories is None:
+        categories = get_categories()
+    if category != "all" and category not in categories:
+        logger.error(f"Invalid category: {category}")
+        return []
+
+    md_files: list[Path] = []
+    index_md = CONTENT_PATH / "index.md"
+    if index_md.exists():
+        md_files.append(index_md)
+
+    cats = categories if category == "all" else [category]
+    for cat in cats:
+        cat_dir = CONTENT_PATH / cat
+        if not os.path.isdir(cat_dir):
+            logger.error(f"Category directory `{cat_dir}` does not exist.")
+            continue
+        for file in cat_dir.iterdir():
+            if file.is_file() and file.suffix == ".md":
+                md_files.append(file)
+
+    diffs = []
+    for md_path in md_files:
+        slug = md_path.relative_to(CONTENT_PATH).with_suffix("").as_posix()
+        current_hash = compute_fingerprint(str(md_path))
+        cached_hash = get_entry_fingerprint(slug)
+        if cached_hash != current_hash:
+            diffs.append(
+                {
+                    "slug": slug,
+                    "previous": cached_hash or "",
+                    "current": current_hash,
+                }
+            )
+    return diffs
+
+
+def _print_hash_diffs(diffs: list[dict]) -> None:
+    if not diffs:
+        print("No hash changes detected.")
+        return
+    print("Hash changes detected:")
+    for entry in diffs:
+        previous = entry.get("previous") or "—"
+        current = entry.get("current") or "—"
+        print(f"- {entry.get('slug')}: {previous} -> {current}")
 
 
 def process_category(

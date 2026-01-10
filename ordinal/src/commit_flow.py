@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Tuple
-from src.revisions import insert_commit, get_latest_commit
+from src.revisions import insert_commit, get_entry_fingerprint
 from src.base_utils import setup_logger
 
 logger = setup_logger("commit_flow", "logs/commit_flow.log")
@@ -14,27 +14,37 @@ def should_commit(slug: str, fingerprint: str) -> bool:
         logger.info(
             f"Checking if commit is needed for {slug} with fingerprint {fingerprint}"
         )
-        latest = get_latest_commit(slug)
-        latest_hash = latest["last_hash"] if latest else None
+        latest_hash = get_entry_fingerprint(slug)
         return latest_hash != fingerprint
     except Exception as err:
         logger.error(f"Error checking commit necessity for {slug}: {err}")
         return False
 
 
-def prompt_summary(slug: str, fingerprint: str) -> str:
+def _short_hash(fingerprint: str, length: int = 7) -> str:
+    return fingerprint[:length] if fingerprint else ""
+
+
+def prompt_summary(slug: str, fingerprint: str, title: str | None = None) -> str:
+    display_hash = _short_hash(fingerprint)
+    label = title or slug
     logger.info(f"Prompting summary for {slug} with fingerprint {fingerprint}")
     try:
         summary_val = ""
         while not summary_val.strip():
-            summary_val = input(f"Summary for {slug} ({fingerprint}): ").strip()
+            summary_val = input(f"Summary for {label} ({display_hash}): ").strip()
         return summary_val
     except Exception as err:
         logger.error(f"Error prompting summary for {slug}: {err}")
         return "update"
 
 
-def get_summary(commit_context: dict | None, slug: str, fingerprint: str) -> str:
+def get_summary(
+    commit_context: dict | None,
+    slug: str,
+    fingerprint: str,
+    title: str | None = None,
+) -> str:
     logger.info(f"Getting summary for {slug} with fingerprint {fingerprint}")
     try:
         if commit_context and commit_context.get("bundle"):
@@ -50,7 +60,7 @@ def get_summary(commit_context: dict | None, slug: str, fingerprint: str) -> str
                 summary_val = input(prompt).strip()
             commit_context["shared_summary"] = summary_val
             return summary_val
-        return prompt_summary(slug, fingerprint)
+        return prompt_summary(slug, fingerprint, title)
     except Exception as err:
         logger.error(f"Error getting summary for {slug}: {err}")
         return "update"
@@ -68,7 +78,9 @@ def record_commit(
     logger.info(f"Recording commit for {slug} with fingerprint {fingerprint}")
     try:
         word_count = sum(1 for _ in raw_content.split())
-        summary_val = get_summary(commit_context, slug, fingerprint)
+        summary_val = get_summary(
+            commit_context, slug, fingerprint, frontmatter.get("title")
+        )
         insert_commit(
             slug=slug,
             hash_val=fingerprint,
