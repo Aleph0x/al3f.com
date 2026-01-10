@@ -123,8 +123,8 @@ def compute_fingerprint(md_fp: str) -> str:
             line.strip() for line in content.splitlines() if line.strip()
         )
         raw = f"{created}|{title}|{normalized_body}"
-        sha = hashlib.sha1(raw.encode("utf-8")).hexdigest()
-        return sha[:7]
+        sha = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+        return sha
     except Exception:
         logger.exception("Error computing fingerprint for %s", md_fp)
         return "unknown"

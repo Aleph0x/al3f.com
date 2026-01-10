@@ -36,7 +36,7 @@
                 <span class="chip">Modified: {{ meta.last_modified }}</span>
                 <span class="chip">Worked: {{ meta.worked }}</span>
                 <span class="chip">Δ: {{ meta.worked_delta }}</span>
-                <span class="chip">Hash: {{ meta.hash }}</span>
+                <span class="chip">Hash: {{ meta.hash | short_hash }}</span>
                 {% if location %}
                 <span class="chip">Location: {{ location }}</span>
                 {% endif %}
@@ -89,7 +89,7 @@
             <h2>Related</h2>
             <ul>
                 {% for article in related_articles %}
-                <li><a href="{{ article['url'] }}">{{ article['title'] }}</a></li>
+                <li><a href="/{{ article['url'] }}">{{ article['title'] }}</a></li>
                 {% endfor %}
             </ul>
         </section>
@@ -110,7 +110,7 @@
                     {% set dt_parts = entry.timestamp.split('T') %}
                     {% set time_part = dt_parts[1].split('.')[0] if dt_parts|length > 1 else '' %}
                     <div class="table-row grid" data-action="commit" data-path="{{ entry.hash | lower }}">
-                        <span class="cell domain">{{ entry.hash }}</span>
+                        <span class="cell domain">{{ entry.hash | short_hash }}</span>
                         <span class="cell division">{{ entry.summary }}</span>
                         <span class="cell modified">{{ dt_parts[0] }}</span>
                         <span class="cell modified">{{ time_part }}</span>
