@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Domain entries">
+        <meta property="og:image" content="https://al3f.com/images/aleph-no-background-web256x256.png">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:type" content="website">
     <title>{{ title }}</title>
+    <link rel="icon" href="./images/favicon.ico">
     <link rel="stylesheet" href="../styles/main.css">
     <script src="../main.js" defer></script>
 </head>
@@ -55,7 +60,7 @@
                             <span>{{ article.entry_fingerprint | short_hash }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
                             {% if article.worked_hours is not none or article.word_count is not none %}
                             <span>
-                                {% if article.worked_hours is not none %}+{{ article.worked_hours }}h{% endif %}
+                                {% if article.worked_hours is not none %}+{{ "%.1f"|format(article.worked_hours) }}h{% endif %}
                                 {% if article.worked_hours is not none and article.word_count is not none %} | {% endif %}
                                 {% if article.word_count is not none %}{{ article.word_count }}w{% endif %}
                             </span>

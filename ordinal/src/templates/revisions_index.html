@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Site activity log">
+    <meta property="og:image" content="https://al3f.com/images/aleph-no-background-web256x256.png">
+    <meta property="og:title" content="Revisions">
+    <meta property="og:description" content="Site activity log">
+    <meta property="og:type" content="website">
     <title>Revisions</title>
+    <link rel="icon" href="./images/favicon.ico">
     <link rel="stylesheet" href="../styles/main.css">
     <script src="../main.js" defer></script>
 </head>
@@ -53,7 +58,7 @@
                     <div class="activity-word">
                         <span class="word-meta">
                             DELTA: {{ entry.word_delta or 0 }} · WC: {{ entry.word_count or 0 }}
-                            {% if entry.worked_hours is not none %} · +{{ entry.worked_hours }}h{% endif %}
+                            {% if entry.worked_delta is not none %} · +{{ "%.1f"|format(entry.worked_delta) }}h{% endif %}
                         </span>
                     </div>
                 </article>

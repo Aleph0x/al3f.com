@@ -274,12 +274,6 @@ def process_file(
         context["entry_fingerprint"] = current_fingerprint
 
         if commit and should_commit(slug, current_fingerprint):
-            worked_hours = (
-                float(frontmatter["worked"])
-                if "worked" in frontmatter
-                and str(frontmatter["worked"]).replace(".", "", 1).isdigit()
-                else 0.0
-            )
             latest = get_article_cache(slug)
             parent_hash = latest["last_hash"] if latest else None
             try:
@@ -288,7 +282,6 @@ def process_file(
                     current_fingerprint,
                     frontmatter,
                     raw_content,
-                    worked_hours,
                     parent_hash,
                     commit_context,
                 )

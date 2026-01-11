@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ description }}">
+    <meta property="og:image" content="https://al3f.com/images/favicon.ico">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:type" content="website">
     <title>{{ title }}</title>
+    <link rel="icon" href="./images/favicon.ico">
     <link rel="stylesheet" href="../styles/main.css">
     <script src="../main.js" defer></script>
 </head>
@@ -69,7 +74,7 @@
 
                     <div class="domain-card-grid">
                         {% for article in articles %}
-                        <article class="card" data-domain="{{ domain | lower }}" data-title="{{ article.title | lower }}">
+                        <article class="card" data-domain="{{ domain | lower }}" data-title="{{ article.title | lower }}" data-division="{{ article.division | join(' ') | lower }}">
                             <div class="card-top">
                                 <span class="chip domain-chip">{{ article.domain }}</span>
                                 <span class="meta">{{ article.last_modified }}</span>
@@ -79,7 +84,7 @@
                                 <span>{{ article.entry_fingerprint | short_hash }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
                                 {% if article.worked_hours is not none or article.word_count is not none %}
                                 <span>
-                                    {% if article.worked_hours is not none %}+{{ article.worked_hours }}h{% endif %}
+                                    {% if article.worked_hours is not none %}+{{ "%.1f"|format(article.worked_hours) }}h{% endif %}
                                     {% if article.worked_hours is not none and article.word_count is not none %} | {% endif %}
                                     {% if article.word_count is not none %}{{ article.word_count }}w{% endif %}
                                 </span>

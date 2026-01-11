@@ -3,6 +3,8 @@
     Fingerprint:
     <a href="{{ entry_revisions_url }}">{{ entry_fingerprint | short_hash }}</a>
     {% if entry_drift %}&mdash; Drift: {{ entry_drift }}{% endif %}
-    {% if entry_worked is defined and entry_worked is not none %} · +{{ entry_worked }}h{% endif %}
+    {% if entry_worked is defined and entry_worked is not none %} · {{ "%.2f"|format(entry_worked) }}h{% endif %}
+    {% if entry_worked_delta is defined and entry_worked_delta is not none %} · +{{ "%.1f"|format(entry_worked_delta) }}h{% endif %}
+    {% if entry_word_count is defined and entry_word_count is not none %} · {{ entry_word_count }} wc{% endif %}
 </p>
 {% endif %}

@@ -299,6 +299,7 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
             meta["division"] = division_val
             results.append(
                 {
+                    "slug": slug,
                     "hash": r["hash"],
                     "fingerprint": r["hash"],  # compatibility alias
                     "timestamp": r["timestamp"],
@@ -309,9 +310,11 @@ def get_changelog(slug: str) -> List[Dict[str, Any]]:
                     "word_count": r["word_count"],
                     "word_delta": r["word_delta"],
                     "worked_hours": r["worked_hours"],
+                    "worked_delta": None,
                     "meta": meta,
                 }
             )
+        _apply_worked_deltas(results, slug_key="slug")
         return results
     except Exception:
         logger.exception("Error loading changelog for %s", slug)
@@ -358,9 +361,11 @@ def get_global_changelog(limit: Optional[int] = 200) -> List[Dict[str, Any]]:
                     "word_count": r["word_count"],
                     "word_delta": r["word_delta"],
                     "worked_hours": r["worked_hours"],
+                    "worked_delta": None,
                     "meta": meta,
                 }
             )
+        _apply_worked_deltas(results, slug_key="slug")
         return results
     except Exception:
         logger.exception("Error loading global changelog")
@@ -414,6 +419,27 @@ def list_articles() -> List[Dict[str, Any]]:
     except Exception:
         logger.exception("Error listing articles")
         return []
+
+
+def _apply_worked_deltas(rows: list[dict], slug_key: str = "slug") -> None:
+    """
+    Populate worked_delta for each commit row based on the previous commit's total.
+    Expects rows ordered newest -> oldest.
+    """
+    indices: dict[str, list[int]] = {}
+    for idx, row in enumerate(rows):
+        slug = row.get(slug_key) or ""
+        indices.setdefault(str(slug), []).append(idx)
+
+    for slug, idx_list in indices.items():
+        for pos, idx in enumerate(idx_list):
+            current = rows[idx]
+            current_total = _safe_float(current.get("worked_hours"), default=0.0)
+            prev_total = 0.0
+            if pos + 1 < len(idx_list):
+                prev = rows[idx_list[pos + 1]]
+                prev_total = _safe_float(prev.get("worked_hours"), default=0.0)
+            current["worked_delta"] = current_total - prev_total
 
 
 def seed_database() -> None:

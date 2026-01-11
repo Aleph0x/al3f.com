@@ -188,7 +188,10 @@ def generate_missing() -> None:
                 wikilinks = re.findall(pattern, scrubbed)
 
                 for link in wikilinks:
-                    slug = link.replace(" ", "-").lower()
+                    target = link.split("|", 1)[0].strip()
+                    if not target:
+                        continue
+                    slug = target.replace(" ", "-").lower()
                     filename = f"{slug}.md"
 
                     file_found = any(
@@ -210,7 +213,7 @@ def generate_missing() -> None:
                     filepath = category_dir / filename
 
                     frontmatter = template_content.format(
-                        title=link.title(),
+                        title=target.title(),
                         created=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         last_modified=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     )

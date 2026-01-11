@@ -57,8 +57,7 @@ def get_articles_list() -> dict:
         try:
             latest_commit = get_latest_commit(slug)
             if latest_commit:
-                if latest_commit["worked_hours"] is not None:
-                    worked_hours = _safe_float(latest_commit["worked_hours"])
+                worked_hours = _safe_float(latest_commit["worked_hours"], default=0.0)
                 if latest_commit["word_count"] is not None:
                     word_count = int(latest_commit["word_count"])
         except Exception as err:
