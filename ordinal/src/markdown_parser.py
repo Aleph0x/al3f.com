@@ -333,8 +333,11 @@ def parse_articles(
                         flush_list()
                     current_article["sections"].append(render_inline(line.strip()))
 
-            elif current_article and line.strip():
-                current_article["sections"].append(render_inline(line.strip()))
+            else:
+                if line.strip():
+                    if not current_article:
+                        current_article = {"header": "", "sections": []}
+                    current_article["sections"].append(render_inline(line.strip()))
 
         if current_article:
             flush_list()
