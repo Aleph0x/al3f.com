@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -251,7 +252,7 @@ def process_file(
     backlinks: dict,
     commit: bool = False,
     commit_context: dict | None = None,
-) -> None:
+) -> bool:
     try:
         logger.info(f"Processing file: {md_fp}")
         out_path = Path(output_fp)
@@ -318,8 +319,10 @@ def process_file(
 
         _render_to_file(template_name, context, out_path)
         logger.info(f"Generated: {output_fp} using template {template_name}")
+        return True
     except Exception as err:
         logger.error(f"Error processing file {md_fp}: {err}", exc_info=True)
+        return False
 
 
 def generate_static_site(
@@ -331,14 +334,20 @@ def generate_static_site(
     diff_only: bool = False,
 ):
     try:
+        start_ts = datetime.utcnow()
+        error_handler = _ErrorCaptureHandler()
+        logging.getLogger().addHandler(error_handler)
+        diffs: list[dict] = []
+        stats = {"index": 0, "total": 0, "categories": {}}
+
         logger.info("Starting site generation.")
         categories = get_categories()
         backlinks = {}
         init_db()
         commit_context = {"bundle": commit_all, "shared_summary": summary, "commits": 0}
 
+        diffs = list_hash_diffs(category, categories)
         if diff or diff_only:
-            diffs = list_hash_diffs(category, categories)
             _print_hash_diffs(diffs)
             if diff_only:
                 return
@@ -346,7 +355,8 @@ def generate_static_site(
         logger.info("Checking and generating missing markdown files.")
         generate_missing()
 
-        process_index(backlinks, commit, commit_context)
+        stats["index"] = 1 if process_index(backlinks, commit, commit_context) else 0
+        stats["total"] += stats["index"]
 
         if category != "all" and category not in categories:
             logger.error(f"Invalid category: {category}")
@@ -354,7 +364,9 @@ def generate_static_site(
 
         cats = categories if category == "all" else [category]
         for cat in cats:
-            process_category(cat, backlinks, commit, commit_context)
+            count = process_category(cat, backlinks, commit, commit_context)
+            stats["categories"][cat] = count
+            stats["total"] += count
 
         logger.info("Copying all necessary static files.")
         copy_static_files()
@@ -376,6 +388,16 @@ def generate_static_site(
 
     except Exception as err:
         logger.error(f"Error generating static site: {err}", exc_info=True)
+    finally:
+        try:
+            _print_build_summary(
+                diffs,
+                stats,
+                error_handler.records,
+                start_ts,
+            )
+        finally:
+            logging.getLogger().removeHandler(error_handler)
 
 
 def list_hash_diffs(category: str, categories: list[str] | None = None) -> list[dict]:
@@ -432,7 +454,7 @@ def process_category(
     backlinks: dict,
     commit: bool = False,
     commit_context: dict | None = None,
-) -> None:
+) -> int:
     try:
         logger.info(f"Processing category: {category}")
         category_dir = CONTENT_PATH / category
@@ -440,31 +462,35 @@ def process_category(
 
         if not os.path.isdir(category_dir):
             logger.error(f"Category directory `{category_dir}` does not exist.")
-            return
+            return 0
 
+        processed = 0
         for file in category_dir.iterdir():
             if file.is_file() and file.suffix == ".md":
                 md_fp = str(file)
                 output_fp = str(output_dir / f"{file.stem}.html")
 
                 default_template = f"{category}.html"
-                process_file(
+                if process_file(
                     md_fp,
                     output_fp,
                     default_template,
                     backlinks,
                     commit,
                     commit_context,
-                )
+                ):
+                    processed += 1
+        return processed
     except Exception as err:
         logger.error(f"Error processing category `{category}`: {err}", exc_info=True)
+        return 0
 
 
 def process_index(
     backlinks: dict,
     commit: bool = False,
     commit_context: dict | None = None,
-) -> None:
+) -> bool:
     try:
         logger.info("Processing `index.md`.")
         index_md_fp = CONTENT_PATH / "index.md"
@@ -472,9 +498,9 @@ def process_index(
 
         if not index_md_fp.exists():
             logger.error(f"`index.md` file does not exist at: {index_md_fp}")
-            return
+            return False
 
-        process_file(
+        result = process_file(
             str(index_md_fp),
             str(index_output_fp),
             "index.html",
@@ -483,8 +509,56 @@ def process_index(
             commit_context,
         )
         logger.info(f"Processed `index.md` into {index_output_fp}")
+        return result
     except Exception as err:
         logger.error(f"Error processing `index.md`: {err}", exc_info=True)
+        return False
+
+
+class _ErrorCaptureHandler(logging.Handler):
+    def __init__(self) -> None:
+        super().__init__()
+        self.records: list[logging.LogRecord] = []
+
+    def emit(self, record: logging.LogRecord) -> None:
+        if record.levelno >= logging.ERROR:
+            self.records.append(record)
+
+
+def _print_build_summary(
+    diffs: list[dict],
+    stats: dict,
+    errors: list[logging.LogRecord],
+    start_ts: datetime,
+) -> None:
+    duration = datetime.utcnow() - start_ts
+    print("\nBuild summary")
+    if diffs:
+        print(f"- content changes: {len(diffs)}")
+        for entry in diffs[:10]:
+            print(f"  - {entry.get('slug')}")
+        if len(diffs) > 10:
+            print(f"  - +{len(diffs) - 10} more")
+    else:
+        print("- content changes: 0")
+
+    print(f"- pages rendered: {stats.get('total', 0)}")
+    if stats.get("index"):
+        print("- index: rendered")
+    if stats.get("categories"):
+        for cat, count in stats["categories"].items():
+            print(f"- {cat}: {count}")
+
+    print(f"- duration: {duration.total_seconds():.2f}s")
+
+    if errors:
+        print(f"- errors: {len(errors)}")
+        for record in errors[:10]:
+            print(f"  - {record.getMessage()}")
+        if len(errors) > 10:
+            print(f"  - +{len(errors) - 10} more")
+    else:
+        print("- errors: 0")
 
 
 def generate_revision_pages() -> None:
