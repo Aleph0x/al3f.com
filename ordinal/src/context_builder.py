@@ -278,12 +278,45 @@ def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:
         context["entries_total"] = sum(len(v) for v in context["categorized_articles"].values())
         context["domain_max"] = max((len(v) for v in context["categorized_articles"].values()), default=0)
         context["categories"] = get_categories()
+        context["about_copy"] = render_about_copy()
         global_changes = get_global_changelog(limit=500)
         context["activity_graph"] = get_commit_activity(global_changes, days=365)
         context["changelog"] = global_changes[:30]
         context["recent_media"] = get_recent_media()
     except Exception as err:
         logger.error(f"Error attaching index context: {err}", exc_info=True)
+
+
+def render_about_copy() -> str:
+    about_fp = CONTENT_PATH / "about.md"
+    if not about_fp.exists():
+        return ""
+
+    parsed = parse_frontmatter(str(about_fp))
+    raw_content = parsed.get("content", "")
+    if not raw_content.strip():
+        return ""
+
+    md_content = "## About\n" + raw_content
+    parsed_articles = parse_articles(md_content, about_fp.name, {})
+    sections: list[str] = []
+    for article in parsed_articles.get("articles", []):
+        sections.extend(article.get("sections", []))
+
+    if not sections:
+        return ""
+
+    output: list[str] = []
+    for section in sections:
+        text = section.strip()
+        if not text:
+            continue
+        if text.startswith(("<ul", "<ol", "<pre", "<blockquote", "<table", "<h")):
+            output.append(text)
+        else:
+            output.append(f"<p>{text}</p>")
+
+    return "\n".join(output)
 
 
 def attach_section_context(context: EntryContext | Dict[str, Any]) -> None:

@@ -104,3 +104,11 @@
     background: transparent;
     padding: 0;
 }
+
+.about-copy p {
+    color: rgba(224, 224, 224, 0.75);
+    hyphens: none;
+    overflow-wrap: normal;
+    word-break: normal;
+    font-size: 1.2rem;
+}

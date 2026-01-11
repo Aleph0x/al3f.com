@@ -386,6 +386,14 @@ body.theme-aleph::after {
   padding: 0;
 }
 
+.about-copy p {
+  color: rgba(224, 224, 224, 0.75);
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
+  font-size: 1.2rem;
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -1227,11 +1235,15 @@ figure figcaption {
   .card h4 {
     font-size: 1.05rem;
     line-height: 1.25;
-    word-break: break-word;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
   }
   .card .fp-line {
     font-size: 0.8rem;
-    word-break: break-all;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
     min-width: 0;
   }
   .card .division-pills {
@@ -1247,7 +1259,9 @@ figure figcaption {
   }
   .media-rail-card .media-caption {
     font-size: 0.8rem;
-    word-break: break-word;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
     min-width: 0;
   }
   .mono-tag {
@@ -1306,7 +1320,9 @@ figure figcaption {
   }
   .latest-grid .fp-line {
     font-size: 0.7rem;
-    word-break: break-all;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
   }
   .division-pill {
     font-size: 0.7rem;
@@ -1319,7 +1335,9 @@ figure figcaption {
   }
   .media-rail-card .media-caption {
     font-size: 0.75rem;
-    word-break: break-all;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
   }
   .mono-tag {
     font-size: 0.68rem;
