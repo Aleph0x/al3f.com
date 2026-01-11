@@ -125,11 +125,15 @@
         h4 {
             font-size: 1.05rem;
             line-height: 1.25;
-            word-break: break-word;
+            word-break: normal;
+            overflow-wrap: normal;
+            hyphens: none;
         }
         .fp-line {
             font-size: 0.8rem;
-            word-break: break-all;
+            word-break: normal;
+            overflow-wrap: normal;
+            hyphens: none;
             min-width: 0;
         }
         .division-pills {
@@ -149,7 +153,9 @@
 
     .media-rail-card .media-caption {
         font-size: 0.8rem;
-        word-break: break-word;
+        word-break: normal;
+        overflow-wrap: normal;
+        hyphens: none;
         min-width: 0;
     }
 
@@ -223,7 +229,9 @@
 
     .latest-grid .fp-line {
         font-size: 0.7rem;
-        word-break: break-all;
+        word-break: normal;
+        overflow-wrap: normal;
+        hyphens: none;
     }
 
     .division-pill {
@@ -240,7 +248,9 @@
 
     .media-rail-card .media-caption {
         font-size: 0.75rem;
-        word-break: break-all;
+        word-break: normal;
+        overflow-wrap: normal;
+        hyphens: none;
     }
 
     .mono-tag {

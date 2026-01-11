@@ -32,10 +32,22 @@
     </header>
 
     <main class="layout-shell">
+        <section class="panel about-panel" id="about">
+            <div class="panel-head">
+                <p class="eyebrow">About</p>
+                <h3>About This Site</h3>
+            </div>
+            <div class="about-copy">
+                {% if about_copy %}
+                {{ about_copy | safe }}
+                {% endif %}
+            </div>
+        </section>
+
         <section id="latest" class="panel latest-grid">
             <div class="panel-head">
                 <p class="eyebrow">Observed Entries</p>
-                <h3>Recent Entries</h3>
+                <h3><a href="/articles/articles.html">Recent Entries</a></h3>
             </div>
             <div class="card-grid">
                 {% for article in recent_articles %}
@@ -75,7 +87,7 @@
         <section class="panel domains" id="domains">
             <div class="panel-head">
                 <p class="eyebrow">Taxonomy</p>
-                <h3>Domains</h3>
+                <h3><a href="/articles/articles.html">Domains</a></h3>
             </div>
             <div class="domain-strips">
                 {% for domain, articles in categorized_articles.items() %}
@@ -126,7 +138,7 @@
         <section class="panel activity-panel" id="activity">
             <div class="panel-head">
                 <p class="eyebrow">Observed by Seraph</p>
-                <h3>Acitivty</h3>
+                <h3><a href="/revisions/index.html">Acitivty</a></h3>
             </div>
             <div class="commit-graph" title="Last 365 days of activity">
                 {% for day in activity_graph %}
