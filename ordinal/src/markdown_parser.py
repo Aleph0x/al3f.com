@@ -25,6 +25,7 @@ FOOTNOTE_REF_RE = re.compile(r"\[\^(\d+)\]")
 FRONTMATTER_RE = re.compile(r"---\n(.*?)\n---\n(.*)", re.S)
 FENCED_CODE_RE = re.compile(r"```([^\n`]*)\n(.*?)```", re.S)
 INLINE_CODE_RE = re.compile(r"`([^`]+)`")
+WORD_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9'’-]*")
 
 
 def parse_quotes(md_content: str) -> str:
@@ -225,6 +226,21 @@ def parse_external_links(text: str) -> str:
     except Exception as err:
         logger.error(f"Error parsing external links in text: {err}", exc_info=True)
         return text
+
+
+def count_body_words(text: str) -> int:
+    """
+    Count visible words from markdown content (exclude frontmatter, markup, URLs).
+    """
+    if not text:
+        return 0
+    cleaned = FENCED_CODE_RE.sub(" ", text)
+    cleaned = INLINE_CODE_RE.sub(" ", cleaned)
+    cleaned = IMAGE_RE.sub(" ", cleaned)
+    cleaned = EXTERNAL_RE.sub(r"\1", cleaned)
+    cleaned = WIKILINK_RE.sub(lambda m: m.group(1).split("|", 1)[0], cleaned)
+    cleaned = re.sub(r"<[^>]+>", " ", cleaned)
+    return len(WORD_RE.findall(cleaned))
 
 
 def parse_articles(

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from src.base_utils import content_dir, ensure_directory, setup_logger
-from src.markdown_parser import parse_frontmatter
+from src.markdown_parser import parse_frontmatter, count_body_words
 
 logger = setup_logger("revisions", "logs/revisions.log")
 
@@ -466,7 +466,7 @@ def seed_database() -> None:
                 )
 
                 ts = created_dt.isoformat()
-                word_count = len([w for w in content.split() if w.strip()])
+                word_count = count_body_words(content)
                 worked_hours = _safe_float(fm.get("worked", 0), default=0.0)
                 guid_val = get_entry_guid(slug)
 
