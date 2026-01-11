@@ -75,7 +75,11 @@ def get_articles_list() -> dict:
             last_modified = last_modified.isoformat()
         elif last_modified is None:
             last_modified = ""
-        entry_drift = _compute_drift(last_modified)
+        entry_drift = (
+            _compute_drift(latest_commit["timestamp"])
+            if latest_commit and latest_commit["timestamp"]
+            else None
+        )
 
         if worked_hours is None:
             worked_hours = _safe_float(frontmatter.get("worked"), default=None)

@@ -57,7 +57,7 @@
                         </div>
                         {% if article.entry_fingerprint %}
                         <p class="fp-line">
-                            <span>{{ article.entry_fingerprint | short_hash }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}+0{% endif %}</span>
+                            <span>{{ article.entry_fingerprint | short_hash }}::{% if article.entry_drift %}{{ article.entry_drift }}{% else %}0d{% endif %}</span>
                             {% if article.worked_hours is not none or article.word_count is not none %}
                             <span>
                                 {% if article.worked_hours is not none %}+{{ "%.1f"|format(article.worked_hours) }}h{% endif %}
