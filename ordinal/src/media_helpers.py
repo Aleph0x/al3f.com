@@ -122,8 +122,11 @@ def _iter_media_files(
 def _build_media_index(inventory: list[dict]) -> dict[str, list[dict]]:
     index: dict[str, list[dict]] = {}
     for md in inventory:
+        frontmatter = md.get("frontmatter", {}) or {}
+        if not _frontmatter_flag(frontmatter, "is_recent_media", default=True):
+            continue
         basenames = _extract_media_basenames(
-            md.get("frontmatter", {}), md.get("content", "")
+            frontmatter, md.get("content", "")
         )
         if not basenames:
             continue
@@ -183,3 +186,16 @@ def _cached_inventory() -> list[dict]:
             }
         )
     return items
+
+
+def _frontmatter_flag(frontmatter: dict, key: str, default: bool = True) -> bool:
+    if key in frontmatter:
+        value = frontmatter.get(key)
+    else:
+        dashed_key = key.replace("_", "-")
+        value = frontmatter.get(dashed_key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in ("true", "1", "yes", "y", "on")
+    return bool(value) if value is not None else default

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Tuple
-from src.revisions import insert_commit, get_entry_fingerprint
+from src.revisions import insert_commit, get_entry_fingerprint, get_latest_commit
 from src.base_utils import setup_logger
 
 logger = setup_logger("commit_flow", "logs/commit_flow.log")
@@ -71,7 +71,6 @@ def record_commit(
     fingerprint: str,
     frontmatter: dict,
     raw_content: str,
-    worked_hours: float,
     parent_hash: str | None,
     commit_context: dict | None,
 ) -> Tuple[str, str]:
@@ -81,6 +80,12 @@ def record_commit(
         summary_val = get_summary(
             commit_context, slug, fingerprint, frontmatter.get("title")
         )
+        base_worked = _coerce_hours(frontmatter.get("worked", 0.0), default=0.0)
+        latest = get_latest_commit(slug)
+        if latest and latest["worked_hours"] is not None:
+            base_worked = _coerce_hours(latest["worked_hours"], default=base_worked)
+        worked_delta = prompt_worked_delta(frontmatter.get("title") or slug)
+        worked_hours = base_worked + worked_delta
         insert_commit(
             slug=slug,
             hash_val=fingerprint,
@@ -96,3 +101,32 @@ def record_commit(
     except Exception as err:
         logger.error(f"Error recording commit for {slug}: {err}")
         return fingerprint, "—"
+
+
+def prompt_worked_delta(label: str) -> float:
+    try:
+        while True:
+            raw = input(
+                f"Hours worked since last commit for {label} (blank for 0): "
+            ).strip()
+            if not raw:
+                return 0.0
+            try:
+                value = float(raw)
+            except ValueError:
+                continue
+            if value < 0:
+                continue
+            return value
+    except Exception as err:
+        logger.error(f"Error prompting worked hours for {label}: {err}")
+        return 0.0
+
+
+def _coerce_hours(value, default: float = 0.0) -> float:
+    try:
+        if isinstance(value, str):
+            value = value.strip().lower().rstrip("h")
+        return float(value)
+    except Exception:
+        return default

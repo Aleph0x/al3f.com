@@ -107,22 +107,20 @@ def normalize_tags(tags):
 
 
 def compute_worked(frontmatter, latest_commit_row, prev_commit_row):
-    worked_val = frontmatter.get("worked", 0)
-
     def _to_float(val):
         return _safe_float(val, default=0.0)
 
     try:
-        worked_val = _to_float(worked_val)
+        worked_val = _to_float(frontmatter.get("worked", 0))
     except Exception as err:
         logger.error(
             f"Failed to parse worked hours from frontmatter: {err}", exc_info=True
         )
         worked_val = 0.0
 
-    if latest_commit_row is not None and latest_commit_row["worked_hours"] is not None:
+    if latest_commit_row is not None:
         try:
-            worked_val = _to_float(latest_commit_row["worked_hours"])
+            worked_val = _to_float(latest_commit_row["worked_hours"] or 0.0)
         except Exception as err:
             logger.error(
                 f"Failed to parse worked_hours from latest commit: {err}", exc_info=True
@@ -194,6 +192,12 @@ def build_entry_context(
             else None
         )
         latest_meta = json.loads(latest_meta_raw) if latest_meta_raw else {}
+        word_count = None
+        if latest_commit_row and latest_commit_row["word_count"] is not None:
+            try:
+                word_count = int(latest_commit_row["word_count"])
+            except Exception as err:
+                logger.error(f"Failed parsing word_count for {slug}: {err}", exc_info=True)
         domain_val = frontmatter.get("domain", latest_meta.get("domain", "N/A"))
         division_val = frontmatter.get("division", latest_meta.get("division", []))
         if isinstance(division_val, str):
@@ -214,6 +218,8 @@ def build_entry_context(
             "entry_revisions_url": "/revisions/index.html",
             "entry_drift": entry_drift,
             "entry_worked": worked_val if worked_val is not None else None,
+            "entry_worked_delta": worked_delta if worked_delta is not None else None,
+            "entry_word_count": word_count,
             "entry_guid": entry_guid,
             "page_meta": {
                 "created_val": created_val or "N/A",

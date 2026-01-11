@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ description }}">
+        <meta property="og:image" content="https://al3f.com/images/aleph-no-background-web256x256.png">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ description }}">
+    <meta property="og:type" content="website">
     <title>{{ title }}</title>
+    <link rel="icon" href="./images/favicon.ico">
     <link rel="stylesheet" href="../styles/main.css">
     <script src="../main.js" defer></script>
 </head>
@@ -46,11 +51,25 @@
                     </div>
                     <div class="meta-item">
                         <span class="label">Domain:</span>
-                        <span class="value">{{ meta.domain_val }}</span>
+                        <span class="value">
+                            {% if meta.domain_val and meta.domain_val != "N/A" %}
+                            <a href="/domains/{{ meta.domain_val | lower | replace(' ', '-') }}.html">{{ meta.domain_val }}</a>
+                            {% else %}
+                            {{ meta.domain_val }}
+                            {% endif %}
+                        </span>
                     </div>
                     <div class="meta-item">
                         <span class="label">Division:</span>
-                        <span class="value">{{ meta.division_val }}</span>
+                        <span class="value">
+                            {% if meta.division_val and meta.division_val != "N/A" %}
+                                {% for division in meta.division_val.split(", ") %}
+                                <a href="/articles/articles.html?division={{ division | lower | replace(' ', '%20') }}">{{ division }}</a>{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                            {{ meta.division_val }}
+                            {% endif %}
+                        </span>
                     </div>
                     <div class="meta-item">
                         <span class="label">Modified:</span>

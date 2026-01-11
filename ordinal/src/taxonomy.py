@@ -57,8 +57,7 @@ def get_articles_list() -> dict:
         try:
             latest_commit = get_latest_commit(slug)
             if latest_commit:
-                if latest_commit["worked_hours"] is not None:
-                    worked_hours = _safe_float(latest_commit["worked_hours"])
+                worked_hours = _safe_float(latest_commit["worked_hours"], default=0.0)
                 if latest_commit["word_count"] is not None:
                     word_count = int(latest_commit["word_count"])
         except Exception as err:
@@ -89,6 +88,8 @@ def get_articles_list() -> dict:
             except Exception as err:
                 logger.error(f"Error computing fallback fingerprint for {slug}: {err}", exc_info=True)
 
+        is_recent_entry = _frontmatter_flag(frontmatter, "is_recent_entry", default=True)
+
         categorized_articles[domain].append(
             {
                 "title": title,
@@ -105,6 +106,7 @@ def get_articles_list() -> dict:
                 "drift": cache.get("last_timestamp"),
                 "worked_hours": worked_hours,
                 "word_count": word_count,
+                "is_recent_entry": is_recent_entry,
             }
         )
 
@@ -116,6 +118,7 @@ def get_articles_list() -> dict:
 
 def get_recent_articles(max_items: int = 12) -> list[dict]:
     articles = [art for articles in get_articles_list().values() for art in articles]
+    articles = [art for art in articles if art.get("is_recent_entry", True)]
     articles.sort(key=lambda x: x.get("last_modified") or "", reverse=True)
     return articles[:max_items]
 
@@ -153,3 +156,16 @@ def _safe_int(val: Any, default: int | None = 0) -> int | None:
         return int(val)
     except Exception:
         return default
+
+
+def _frontmatter_flag(frontmatter: dict, key: str, default: bool = True) -> bool:
+    if key in frontmatter:
+        value = frontmatter.get(key)
+    else:
+        dashed_key = key.replace("_", "-")
+        value = frontmatter.get(dashed_key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in ("true", "1", "yes", "y", "on")
+    return bool(value) if value is not None else default

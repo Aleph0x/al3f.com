@@ -193,11 +193,14 @@ def parse_wikilinks(
             return "articles"
 
         def replace_link(match):
-            link_text = match.group(1)
+            raw_text = match.group(1)
+            parts = [p.strip() for p in raw_text.split("|", 1)]
+            link_text = parts[0] if parts else raw_text
+            display_text = parts[1] if len(parts) > 1 and parts[1] else link_text
             slug = link_text.replace(" ", "-").lower()
             category = resolve_category(slug)
             parse_backlink(source_page, link_text, backlinks)
-            return f'<a href="/{category}/{slug}.html">{link_text}</a>'
+            return f'<a href="/{category}/{slug}.html">{display_text}</a>'
 
         # Do not replace wikilinks inside inline code spans!
         segments = re.split(r"(`[^`]*`)", text)
@@ -333,8 +336,11 @@ def parse_articles(
                         flush_list()
                     current_article["sections"].append(render_inline(line.strip()))
 
-            elif current_article and line.strip():
-                current_article["sections"].append(render_inline(line.strip()))
+            else:
+                if line.strip():
+                    if not current_article:
+                        current_article = {"header": "", "sections": []}
+                    current_article["sections"].append(render_inline(line.strip()))
 
         if current_article:
             flush_list()

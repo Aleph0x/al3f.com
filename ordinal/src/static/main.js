@@ -25,16 +25,31 @@ function setupLatestFilter() {
 function setupSectionFilter() {
   const input = document.getElementById("section-filter");
   if (!input) return;
-  const cards = Array.from(document.querySelectorAll(".section-card"));
+  const cards = Array.from(
+    document.querySelectorAll(".domain-card-grid .card")
+  );
+  const params = new URLSearchParams(window.location.search);
+  const preset = params.get("q") || params.get("division") || params.get("domain");
+  if (preset) {
+    input.value = preset.replace(/\+/g, " ");
+  }
   input.addEventListener("input", () => {
     const query = input.value.trim().toLowerCase();
     cards.forEach((card) => {
       const title = (card.dataset.title || "").toLowerCase();
       const domain = (card.dataset.domain || "").toLowerCase();
-      const match = !query || title.includes(query) || domain.includes(query);
+      const division = (card.dataset.division || "").toLowerCase();
+      const match =
+        !query ||
+        title.includes(query) ||
+        domain.includes(query) ||
+        division.includes(query);
       card.style.display = match ? "" : "none";
     });
   });
+  if (preset) {
+    input.dispatchEvent(new Event("input"));
+  }
 }
 
 function setupChangelogFilter() {
