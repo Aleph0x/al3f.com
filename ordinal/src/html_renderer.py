@@ -332,14 +332,18 @@ def generate_static_site(
     summary: str | None = None,
     diff: bool = False,
     diff_only: bool = False,
+    post_commit_regen: bool = True,
+    print_summary: bool = True,
 ):
-    try:
-        start_ts = datetime.utcnow()
-        error_handler = _ErrorCaptureHandler()
-        logging.getLogger().addHandler(error_handler)
-        diffs: list[dict] = []
-        stats = {"index": 0, "total": 0, "categories": {}}
+    start_ts = datetime.utcnow()
+    error_handler = _ErrorCaptureHandler()
+    logging.getLogger().addHandler(error_handler)
+    diffs: list[dict] = []
+    stats = {"index": 0, "total": 0, "categories": {}}
+    commit_context: dict | None = None
+    did_commit = False
 
+    try:
         logger.info("Starting site generation.")
         categories = get_categories()
         backlinks = {}
@@ -386,18 +390,33 @@ def generate_static_site(
             print(msg)
             logger.info(msg)
 
+        did_commit = bool(commit and commit_context.get("commits", 0))
     except Exception as err:
         logger.error(f"Error generating static site: {err}", exc_info=True)
     finally:
         try:
-            _print_build_summary(
-                diffs,
-                stats,
-                error_handler.records,
-                start_ts,
-            )
+            if print_summary:
+                _print_build_summary(
+                    diffs,
+                    stats,
+                    error_handler.records,
+                    start_ts,
+                )
         finally:
             logging.getLogger().removeHandler(error_handler)
+
+    if did_commit and post_commit_regen:
+        logger.info("Regenerating site to refresh commit metadata.")
+        generate_static_site(
+            category=category,
+            commit=False,
+            commit_all=False,
+            summary=None,
+            diff=False,
+            diff_only=False,
+            post_commit_regen=False,
+            print_summary=False,
+        )
 
 
 def list_hash_diffs(category: str, categories: list[str] | None = None) -> list[dict]:

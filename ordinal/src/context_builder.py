@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, TypedDict, cast
@@ -73,6 +73,7 @@ class EntryContext(TypedDict, total=False):
     entry_worked_delta: float | None
     entry_word_count: int | None
     entry_guid: str
+    revision_spark: list[dict[str, float]]
     page_meta: PageMeta
     content: str
     articles: list[ArticleEntry]
@@ -141,6 +142,33 @@ def compute_worked(frontmatter, latest_commit_row, prev_commit_row):
             worked_delta = 0.0
 
     return worked_val, worked_delta
+
+
+def build_revision_spark(slug: str) -> list[dict[str, float]]:
+    commits = get_changelog(slug)
+    day_counts: dict[date, int] = {}
+    for entry in commits:
+        ts = _parse_timestamp(entry.get("timestamp"))
+        if ts is None:
+            continue
+        day = ts.date()
+        day_counts[day] = day_counts.get(day, 0) + 1
+
+    if not day_counts:
+        return []
+
+    days_sorted = sorted(day_counts.keys())
+    total_days = len(days_sorted)
+    max_count = max(day_counts.values()) if day_counts else 0
+
+    output: list[dict[str, float]] = []
+    for day in days_sorted:
+        count = day_counts.get(day, 0)
+        h_raw = (count / max_count) if max_count else 0.0
+        h = min(1.0, max(0.35, h_raw))
+        output.append({"h": h})
+
+    return output
 
 
 def build_entry_context(
@@ -227,6 +255,7 @@ def build_entry_context(
             "entry_worked_delta": worked_delta if worked_delta is not None else None,
             "entry_word_count": word_count,
             "entry_guid": entry_guid,
+            "revision_spark": build_revision_spark(slug),
             "page_meta": {
                 "created_val": created_val or "N/A",
                 "domain_val": domain_val or "N/A",
@@ -350,6 +379,15 @@ def attach_section_context(context: EntryContext | Dict[str, Any]) -> None:
 
 def _slug_from_path(md_fp: str) -> str:
     return Path(md_fp).relative_to(CONTENT_PATH).with_suffix("").as_posix()
+
+
+def _parse_timestamp(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value))
+    except Exception:
+        return None
 
 
 def _safe_float(val: Any, default: float = 0.0) -> float:
