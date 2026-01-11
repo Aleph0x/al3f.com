@@ -70,6 +70,8 @@ class EntryContext(TypedDict, total=False):
     entry_revisions_url: str
     entry_drift: str
     entry_worked: float | None
+    entry_worked_delta: float | None
+    entry_word_count: int | None
     entry_guid: str
     page_meta: PageMeta
     content: str
@@ -91,11 +93,13 @@ class EntryContext(TypedDict, total=False):
     page_changelog: list[Any]
     recent_articles: list[Any]
     categorized_articles: dict[str, Any]
+    entries_total: int
     domain_max: int
     categories: list[str]
     activity_graph: list[Any]
     changelog: list[Any]
     recent_media: list[Any]
+    about_copy: str
     template_name: str
     slug: str
 
@@ -197,7 +201,9 @@ def build_entry_context(
             try:
                 word_count = int(latest_commit_row["word_count"])
             except Exception as err:
-                logger.error(f"Failed parsing word_count for {slug}: {err}", exc_info=True)
+                logger.error(
+                    f"Failed parsing word_count for {slug}: {err}", exc_info=True
+                )
         domain_val = frontmatter.get("domain", latest_meta.get("domain", "N/A"))
         division_val = frontmatter.get("division", latest_meta.get("division", []))
         if isinstance(division_val, str):
@@ -281,8 +287,12 @@ def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:
     try:
         context["recent_articles"] = get_recent_articles(6)
         context["categorized_articles"] = get_articles_list()
-        context["entries_total"] = sum(len(v) for v in context["categorized_articles"].values())
-        context["domain_max"] = max((len(v) for v in context["categorized_articles"].values()), default=0)
+        context["entries_total"] = sum(
+            len(v) for v in context["categorized_articles"].values()
+        )
+        context["domain_max"] = max(
+            (len(v) for v in context["categorized_articles"].values()), default=0
+        )
         context["categories"] = get_categories()
         context["about_copy"] = render_about_copy()
         global_changes = get_global_changelog(limit=500)
@@ -328,8 +338,12 @@ def render_about_copy() -> str:
 def attach_section_context(context: EntryContext | Dict[str, Any]) -> None:
     try:
         context["categorized_articles"] = get_articles_list()
-        context["entries_total"] = sum(len(v) for v in context["categorized_articles"].values())
-        context["domain_max"] = max((len(v) for v in context["categorized_articles"].values()), default=0)
+        context["entries_total"] = sum(
+            len(v) for v in context["categorized_articles"].values()
+        )
+        context["domain_max"] = max(
+            (len(v) for v in context["categorized_articles"].values()), default=0
+        )
     except Exception as err:
         logger.error(f"Error attaching section context: {err}", exc_info=True)
 
