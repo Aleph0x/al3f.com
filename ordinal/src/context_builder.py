@@ -374,7 +374,7 @@ def build_entry_context(
 
 def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:
     try:
-        context["recent_articles"] = get_recent_articles(6)
+        context["recent_articles"] = get_recent_articles(9)
         context["categorized_articles"] = get_articles_list()
         context["entries_total"] = sum(
             len(v) for v in context["categorized_articles"].values()

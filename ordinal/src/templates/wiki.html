@@ -79,6 +79,7 @@
             </div>
 
             <div class="content-grid wiki-grid">
+                {% if toc %}
                 <aside class="toc sticky-toc">
                     <h2>Outline</h2>
                     <ul>
@@ -89,6 +90,7 @@
                         {% endfor %}
                     </ul>
                 </aside>
+                {% endif %}
                 <div class="article-stack wiki-article">
                     {% for article in articles %}
                     <article class="prose">
