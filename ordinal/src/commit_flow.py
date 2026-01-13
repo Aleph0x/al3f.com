@@ -8,9 +8,6 @@ logger = setup_logger("commit_flow", "logs/commit_flow.log")
 
 
 def should_commit(slug: str, fingerprint: str) -> bool:
-    logger.info(
-        f"Checking if commit is needed for {slug} with fingerprint {fingerprint}"
-    )
     try:
         logger.info(
             f"Checking if commit is needed for {slug} with fingerprint {fingerprint}"
