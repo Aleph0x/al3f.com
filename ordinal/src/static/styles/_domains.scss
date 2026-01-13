@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.35rem;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     letter-spacing: 0.08em;
     font-size: 0.9rem;
     color: $accent-color;
@@ -60,7 +60,7 @@
     .domain-strip-label {
         color: $text-color;
         text-decoration: none;
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         letter-spacing: 0.1em;
         text-transform: uppercase;
         border: 1px solid rgba(255, 255, 255, 0.6);

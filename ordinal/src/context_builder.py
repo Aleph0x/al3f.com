@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, TypedDict, cast
@@ -63,6 +63,12 @@ class RelatedEntry(TypedDict):
     url: str
 
 
+class ConnectionEntry(TypedDict):
+    slug: str
+    title: str
+    last_modified: str | None
+
+
 class EntryContext(TypedDict, total=False):
     title: str
     description: str
@@ -73,6 +79,11 @@ class EntryContext(TypedDict, total=False):
     entry_worked_delta: float | None
     entry_word_count: int | None
     entry_guid: str
+    revision_spark: list[dict[str, float]]
+    outgoing_links: list[ConnectionEntry]
+    outgoing_links_more: int
+    backlinks_links: list[ConnectionEntry]
+    backlinks_more: int
     page_meta: PageMeta
     content: str
     articles: list[ArticleEntry]
@@ -143,10 +154,78 @@ def compute_worked(frontmatter, latest_commit_row, prev_commit_row):
     return worked_val, worked_delta
 
 
+def build_revision_spark(slug: str) -> list[dict[str, float]]:
+    commits = get_changelog(slug)
+    day_counts: dict[date, int] = {}
+    for entry in commits:
+        ts = _parse_timestamp(entry.get("timestamp"))
+        if ts is None:
+            continue
+        day = ts.date()
+        day_counts[day] = day_counts.get(day, 0) + 1
+
+    if not day_counts:
+        return []
+
+    days_sorted = sorted(day_counts.keys())
+    total_days = len(days_sorted)
+    max_count = max(day_counts.values()) if day_counts else 0
+
+    output: list[dict[str, float]] = []
+    for day in days_sorted:
+        count = day_counts.get(day, 0)
+        h_raw = (count / max_count) if max_count else 0.0
+        h = min(1.0, max(0.35, h_raw))
+        output.append({"h": h})
+
+    return output
+
+
+CONNECTIONS_OUTGOING_CAP = 25
+CONNECTIONS_BACKLINKS_CAP = 25
+
+
+@lru_cache(maxsize=1)
+def _load_entry_index() -> dict[str, dict[str, str | None]]:
+    entries: dict[str, dict[str, str | None]] = {}
+    for md_path in CONTENT_PATH.rglob("*.md"):
+        slug = md_path.relative_to(CONTENT_PATH).with_suffix("").as_posix()
+        parsed = parse_frontmatter(str(md_path))
+        frontmatter = parsed.get("frontmatter", {}) or {}
+        title = frontmatter.get("title") or slug
+        last_modified = frontmatter.get("last_modified")
+        entries[slug] = {
+            "title": str(title),
+            "last_modified": str(last_modified) if last_modified else None,
+        }
+    return entries
+
+
+def _build_connection_entries(
+    slugs: list[str],
+    entry_index: dict[str, dict[str, str | None]],
+) -> list[ConnectionEntry]:
+    entries: list[ConnectionEntry] = []
+    for slug in slugs:
+        meta = entry_index.get(slug, {})
+        title = meta.get("title") or slug
+        last_modified = meta.get("last_modified")
+        entries.append(
+            {
+                "slug": slug,
+                "title": str(title),
+                "last_modified": str(last_modified) if last_modified else None,
+            }
+        )
+    entries.sort(key=lambda e: e["title"].lower())
+    return entries
+
+
 def build_entry_context(
     md_fp: str,
     default_template: str,
     backlinks: dict,
+    outgoing_links: dict,
     parsed_data: dict,
 ) -> EntryContext:
     logger.info(f"Building context for {md_fp}")
@@ -176,7 +255,7 @@ def build_entry_context(
             entry_drift = "NULL"
 
         footnotes_content, footnotes = parse_footnotes(raw_content)
-        articles = parse_articles(footnotes_content, os.path.basename(md_fp), backlinks)
+        articles = parse_articles(footnotes_content, slug, backlinks, outgoing_links)
         related_raw = parse_related(frontmatter)
         related = cast(list[RelatedEntry], related_raw)
         template_name = frontmatter.get("template", default_template)
@@ -217,6 +296,13 @@ def build_entry_context(
         )
         domain_val = "N/A" if domain_val is None else domain_val
 
+        entry_index = _load_entry_index()
+        outgoing_slugs = sorted(set(outgoing_links.get(slug, [])))
+        backlink_slugs = sorted(set(backlinks.get(slug, [])))
+        outgoing_entries = _build_connection_entries(outgoing_slugs, entry_index)
+        backlink_entries = _build_connection_entries(backlink_slugs, entry_index)
+        outgoing_more = max(0, len(outgoing_entries) - CONNECTIONS_OUTGOING_CAP)
+        backlink_more = max(0, len(backlink_entries) - CONNECTIONS_BACKLINKS_CAP)
         context: EntryContext = {
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
@@ -227,6 +313,11 @@ def build_entry_context(
             "entry_worked_delta": worked_delta if worked_delta is not None else None,
             "entry_word_count": word_count,
             "entry_guid": entry_guid,
+            "revision_spark": build_revision_spark(slug),
+            "outgoing_links": outgoing_entries[:CONNECTIONS_OUTGOING_CAP],
+            "outgoing_links_more": outgoing_more,
+            "backlinks_links": backlink_entries[:CONNECTIONS_BACKLINKS_CAP],
+            "backlinks_more": backlink_more,
             "page_meta": {
                 "created_val": created_val or "N/A",
                 "domain_val": domain_val or "N/A",
@@ -240,9 +331,7 @@ def build_entry_context(
             "articles": articles.get("articles", []),
             "footnotes": footnotes,
             "toc": articles["toc"],
-            "backlinks": backlinks.get(
-                os.path.splitext(os.path.basename(md_fp))[0], []
-            ),
+            "backlinks": backlinks.get(slug, []),
             "external_links": parsed_data.get("external_links", []),
             "related_articles": related,
             "hero_image": header_image,
@@ -285,7 +374,7 @@ def build_entry_context(
 
 def attach_index_context(context: EntryContext | Dict[str, Any]) -> None:
     try:
-        context["recent_articles"] = get_recent_articles(6)
+        context["recent_articles"] = get_recent_articles(9)
         context["categorized_articles"] = get_articles_list()
         context["entries_total"] = sum(
             len(v) for v in context["categorized_articles"].values()
@@ -350,6 +439,15 @@ def attach_section_context(context: EntryContext | Dict[str, Any]) -> None:
 
 def _slug_from_path(md_fp: str) -> str:
     return Path(md_fp).relative_to(CONTENT_PATH).with_suffix("").as_posix()
+
+
+def _parse_timestamp(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value))
+    except Exception:
+        return None
 
 
 def _safe_float(val: Any, default: float = 0.0) -> float:

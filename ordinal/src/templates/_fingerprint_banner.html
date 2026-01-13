@@ -1,10 +1,37 @@
 {% if entry_fingerprint %}
-<p class="eyebrow fingerprint-banner">
-    Fingerprint:
-    <a href="{{ entry_revisions_url }}">{{ entry_fingerprint | short_hash }}</a>
-    {% if entry_drift %}&mdash; Drift: {{ entry_drift }}{% endif %}
-    {% if entry_worked is defined and entry_worked is not none %} · {{ "%.2f"|format(entry_worked) }}h{% endif %}
-    {% if entry_worked_delta is defined and entry_worked_delta is not none %} · +{{ "%.1f"|format(entry_worked_delta) }}h{% endif %}
-    {% if entry_word_count is defined and entry_word_count is not none %} · {{ entry_word_count }} wc{% endif %}
-</p>
+<div class="fingerprint-block">
+    <p class="eyebrow fingerprint-banner">
+        Fingerprint:
+        <a href="{{ entry_revisions_url }}">{{ entry_fingerprint | short_hash }}</a>
+        {% if entry_drift %}&mdash; Drift: {{ entry_drift }}{% endif %}
+        {% if entry_worked is defined and entry_worked is not none %} · {{ "%.2f"|format(entry_worked) }}h{% endif %}
+        {% if entry_worked_delta is defined and entry_worked_delta is not none %} · +{{ "%.1f"|format(entry_worked_delta) }}h{% endif %}
+        {% if entry_word_count is defined and entry_word_count is not none %} · {{ entry_word_count }} wc{% endif %}
+    </p>
+    {% if revision_spark %}
+    <div class="revision-spark" aria-hidden="true">
+        {% set count = revision_spark|length %}
+        {% set pad = 4 %}
+        {% set step = 6 %}
+        {% if count > 1 %}
+            {% set computed_w = (pad * 2) + ((count - 1) * step) %}
+            {% if computed_w > 300 %}
+                {% set step = (300 - (pad * 2)) / (count - 1) %}
+                {% set w = 300 %}
+            {% else %}
+                {% set w = 120 if computed_w < 120 else computed_w %}
+            {% endif %}
+        {% else %}
+            {% set w = 120 %}
+        {% endif %}
+        <svg viewBox="0 0 {{ w }} 18" width="{{ w }}" height="18" focusable="false">
+            {% for point in revision_spark %}
+            {% set x = pad + (loop.index0 * step) %}
+            {% set h = (point.h * 16) %}
+            <line class="spark-line" x1="{{ x }}" x2="{{ x }}" y1="15" y2="{{ 15 - h }}"></line>
+            {% endfor %}
+        </svg>
+    </div>
+    {% endif %}
+</div>
 {% endif %}

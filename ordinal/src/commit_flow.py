@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Tuple
 from src.revisions import insert_commit, get_entry_fingerprint, get_latest_commit
+from src.markdown_parser import count_body_words
 from src.base_utils import setup_logger
 
 logger = setup_logger("commit_flow", "logs/commit_flow.log")
@@ -76,7 +77,7 @@ def record_commit(
 ) -> Tuple[str, str]:
     logger.info(f"Recording commit for {slug} with fingerprint {fingerprint}")
     try:
-        word_count = sum(1 for _ in raw_content.split())
+        word_count = count_body_words(raw_content)
         summary_val = get_summary(
             commit_context, slug, fingerprint, frontmatter.get("title")
         )

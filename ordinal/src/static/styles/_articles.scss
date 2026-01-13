@@ -34,7 +34,7 @@
         flex: 1 1 calc(50% - 1.5rem);
         padding: 1.5rem;
         border-left: 2px solid $accent-color;
-        background: color.scale($background-color, $lightness: 5%);
+        background: color.scale($background-color, $lightness: 1%);
         transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
 
         &:hover {
@@ -108,65 +108,69 @@ figure {
 .related-articles {
     max-width: $content-max-width;
     margin: 0.5rem auto;
-    padding: 0.5rem;
-    background-color: $background-color;
+    padding: 0.25rem 0;
     color: $text-color;
-    font-size: 1rem;
+    font-size: 0.95rem;
     line-height: 1.6;
-    border-top: 1px solid $accent-color;
-    text-align: center;
+    text-align: left;
+    font-family: $font-sans;
 
     h2 {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
+        font-size: 0.95rem;
+        margin: 0 0 0.85rem;
         color: $text-color;
-        text-align: center;
         text-transform: uppercase;
-        letter-spacing: 0.05rem;
-        border-bottom: 1px solid $accent-color;
-        display: inline-block;
-        padding-bottom: 0.5rem;
+        letter-spacing: 0.18em;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+        padding-bottom: 0.45rem;
     }
 
     ul {
         list-style: none;
         padding: 0;
-        margin: 0.5rem auto;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 1rem;
+        margin: 0;
+        display: grid;
+        gap: 0;
+    }
 
-        li {
-            flex: 1 1 calc(33.333% - 0.5rem);
-            max-width: calc(33.333% - 0.5rem);
-            padding: 0.2rem 0.5rem;
-            border-left: 2px solid $accent-color;
-            background-color: $background-color;
-            text-align: center;
-            transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
+    li {
+        display: grid;
+        grid-template-columns: 1.2rem minmax(0, 1fr);
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.45rem 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &::before {
+            content: "→";
+            color: $muted-color;
+            font-size: 0.85rem;
+            line-height: 1;
+        }
+
+        a {
+            color: $link-color;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.05rem 0.2rem;
+            transition: color 0.2s, border-color 0.2s, background-color 0.2s;
 
             &:hover {
-                border-left: 2px solid $link-hover-color;
-                background: color.scale($background-color, $lightness: -5%);
+                color: #000;
+                background-color: $text-color;
+                border-bottom-color: $text-color;
             }
 
-            a {
-                color: $link-color;
+            &:visited {
+                color: $link-visited-color;
                 text-decoration: none;
-                font-weight: bold;
-                border-bottom: 1px dotted $text-color;
-                transition: color 0.2s, background-color 0.2s;
-
-                &:hover {
-                    color: $link-hover-color;
-                    background-color: $link-hover-bg-color;
-                }
-
-                &:visited {
-                    color: $link-visited-color;
-                    text-decoration: none;
-                }
             }
         }
     }

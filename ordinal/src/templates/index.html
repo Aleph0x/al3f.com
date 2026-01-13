@@ -37,18 +37,6 @@
     </header>
 
     <main class="layout-shell">
-        <section class="panel about-panel" id="about">
-            <div class="panel-head">
-                <p class="eyebrow">About</p>
-                <h3>About This Site</h3>
-            </div>
-            <div class="about-copy">
-                {% if about_copy %}
-                {{ about_copy | safe }}
-                {% endif %}
-            </div>
-        </section>
-
         <section id="latest" class="panel latest-grid">
             <div class="panel-head">
                 <p class="eyebrow">Observed Entries</p>
@@ -142,7 +130,7 @@
 
         <section class="panel activity-panel" id="activity">
             <div class="panel-head">
-                <p class="eyebrow">Observed by Seraph</p>
+                <p class="eyebrow">Observed Changes</p>
                 <h3><a href="/revisions/index.html">Acitivty</a></h3>
             </div>
             <div class="commit-graph" title="Last 365 days of activity">
@@ -193,6 +181,7 @@
     <a href="#top" class="back-to-top" aria-label="Back to top">↑</a>
 
     <footer class="site-footer">
+        <p class="footer-note">This is a personal archive. Most of it was written for myself. Some of it is unfinished.</p>
         <p>&copy; 2025 Aleph. Ordinal</p>
     </footer>
 </body>

@@ -139,7 +139,7 @@
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
 
     &:hover {
         color: #000;
@@ -154,7 +154,7 @@
     gap: 0.35rem;
     padding: 0.22rem 0.5rem;
     border: 1px solid $accent-color;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-size: 0.72rem;
@@ -171,12 +171,13 @@
 .panel {
     border: 1px solid rgba(255, 255, 255, 0.6);
     padding: 1.5rem;
-    background: #050505;
+    background: $background-color;
     width: 100%;
     position: relative;
     overflow: hidden;
     isolation: isolate;
     box-shadow: none;
+    font-family: $font-mono;
 
     .panel-head {
         margin-bottom: 1rem;
@@ -279,7 +280,7 @@
 }
 
 .fp-line {
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     font-size: 0.8rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -377,7 +378,7 @@
         font-size: 0.8rem;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         color: rgba(255, 255, 255, 0.75);
         background: rgba(255, 255, 255, 0.02);
 
@@ -450,7 +451,7 @@
             gap: 0.35rem;
             padding: 0.25rem 0.45rem;
             border: 1px solid $accent-color;
-            font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+            font-family: $font-mono;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             font-size: 0.72rem;
@@ -494,7 +495,7 @@
     display: inline-flex;
     flex-direction: column;
     gap: 0.25rem;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.7);
     text-transform: uppercase;
@@ -539,7 +540,7 @@
 .domain-strip {
     display: grid;
     gap: 0.35rem;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     letter-spacing: 0.08em;
     font-size: 0.9rem;
 }
@@ -605,6 +606,7 @@
     font-size: 1.02rem;
     line-height: 1.75;
     color: rgba(255, 255, 255, 0.699);
+    font-family: $font-sans;
 
     p {
         text-indent: 0;
@@ -753,7 +755,191 @@
     letter-spacing: 0.12em;
     font-size: 0.8rem;
     color: $accent-color;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
+}
+
+.fingerprint-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.fingerprint-banner {
+    margin: 0;
+}
+
+.revision-spark {
+    display: inline-flex;
+    align-items: center;
+}
+
+.revision-spark svg {
+    height: 18px;
+    width: auto;
+    max-width: 300px;
+}
+
+.revision-spark .spark-line {
+    stroke: $accent-color;
+    stroke-width: 3;
+    shape-rendering: crispEdges;
+}
+
+.connections-panel {
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.changelog-panel {
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.connections-head {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    .eyebrow {
+        margin: 0;
+    }
+}
+
+.connections-bars {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.connections-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: $font-mono;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.78rem;
+    color: $accent-color;
+}
+
+.connections-label {
+    min-width: 92px;
+}
+
+.connections-blocks {
+    display: inline-flex;
+    gap: 0.2rem;
+}
+
+.connections-block {
+    width: 14px;
+    height: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: transparent;
+
+    &.filled {
+        background: $accent-color;
+        border-color: $accent-color;
+    }
+}
+
+.connections-count {
+    color: $muted-color;
+    letter-spacing: 0.08em;
+}
+
+.connections-group {
+    margin-top: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 0.85rem;
+    background: color.scale($background-color, $lightness: 4%);
+
+    &:first-of-type {
+        margin-top: 0;
+    }
+}
+
+.connections-group h3 {
+    margin: 0 0 0.65rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: $muted-color;
+    font-family: $font-sans;
+}
+
+.connections-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+    font-family: $font-sans;
+}
+
+.connections-list li {
+    display: grid;
+    grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.6rem;
+    color: $text-color;
+    padding: 0.45rem 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.connections-list .conn-arrow {
+    color: $muted-color;
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+
+.connections-list a {
+    font-weight: 600;
+    border-bottom: 1px solid transparent;
+
+    &:hover {
+        border-bottom-color: $accent-color;
+    }
+}
+
+.connections-list .conn-date {
+    color: $muted-color;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    letter-spacing: 0.08em;
+    padding: 0.1rem 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.connections-list .conn-more {
+    color: $muted-color;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-family: $font-sans;
+}
+
+.connections-list .conn-more-text {
+    color: $muted-color;
+}
+
+@media (max-width: 600px) {
+    .revision-spark svg {
+        max-width: 220px;
+    }
+
+    .connections-list li {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+    }
+
+    .connections-list .conn-date {
+        white-space: normal;
+    }
 }
 
 .filter-row {
@@ -809,7 +995,7 @@
         border: 1px solid rgba(255, 255, 255, 0.2);
         background: color.scale($background-color, $lightness: 10%);
         color: rgba(255, 255, 255, 0.8);
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         font-size: 0.6rem;
         line-height: 1;
         display: grid;
@@ -832,7 +1018,7 @@
 
 .activity-info {
     margin-top: 0.4rem;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     color: $accent-color;
@@ -860,6 +1046,7 @@
     display: grid;
     gap: 0.5rem;
     margin-top: 1rem;
+    font-family: $font-sans;
 
     .changelog-head {
         display: grid;
@@ -896,7 +1083,7 @@
     margin-top: 1.25rem;
     border: 1px solid rgba(245, 245, 245, 0.8);
     background: color.scale($background-color, $lightness: 1%);
-    font-family: "Roboto Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
 
     .grid {
         display: grid;
@@ -975,7 +1162,7 @@
 .mono-table .table-head {
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-size: 0.82rem;
@@ -1032,7 +1219,7 @@
     background: #e0e0e0;
     color: #000;
     text-decoration: none;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     letter-spacing: 0.08em;
     font-size: 0.8rem;
 
@@ -1105,6 +1292,7 @@
     padding-left: 0;
     max-height: 640px;
     overflow-y: auto;
+    font-family: $font-sans;
 }
 
 .commit-graph {
@@ -1142,7 +1330,7 @@
         background: #000;
         color: $accent-color;
         border: 1px solid rgba(255, 255, 255, 0.4);
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         font-size: 0.72rem;
         letter-spacing: 0.06em;
         white-space: nowrap;
@@ -1200,7 +1388,7 @@
     flex-wrap: wrap;
 
     .summary-label {
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-sans;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         font-size: 0.78rem;
@@ -1211,7 +1399,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-sans;
         font-size: 0.78rem;
         color: $text-color;
         border: none;
@@ -1240,7 +1428,7 @@
 .activity-summary .word-meta {
     display: inline-block;
     margin-top: 0.15rem;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-sans;
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     color: rgba(255, 255, 255, 0.78);
@@ -1256,7 +1444,7 @@
     flex-wrap: wrap;
     gap: 0.35rem;
     align-items: center;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-sans;
     letter-spacing: 0.08em;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.8);
@@ -1275,7 +1463,7 @@
     flex-wrap: wrap;
     gap: 0.35rem;
     align-items: center;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-sans;
     letter-spacing: 0.08em;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.8);
@@ -1287,7 +1475,7 @@
         background: #000;
         color: $accent-color;
         border: 1px solid rgba(255, 255, 255, 0.5);
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-sans;
         letter-spacing: 0.08em;
         font-size: 0.78rem;
     }
@@ -1302,7 +1490,7 @@
     display: flex;
     background: #000;
     color: $text-color;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-sans;
     letter-spacing: 0.08em;
     font-size: 1.2rem;
 
@@ -1329,7 +1517,7 @@
     display: flex;
     gap: 0.35rem;
     align-items: center;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-sans;
     letter-spacing: 0.08em;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.8);
@@ -1341,7 +1529,7 @@
     padding: 0.15rem 0.45rem;
     border: 1px solid rgba(255, 255, 255, 0.6);
     background: rgba(255, 255, 255, 0.08);
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-sans;
     letter-spacing: 0.08em;
     font-size: 0.78rem;
 }
@@ -1388,7 +1576,7 @@
     margin-bottom: 0.5rem;
 
     .log-time {
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         letter-spacing: 0.08em;
         color: $accent-color;
     }
@@ -1399,7 +1587,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 0.75rem;
     color: $text-color;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     font-size: 0.92rem;
     white-space: pre-wrap;
     line-height: 1.5;
@@ -1413,7 +1601,7 @@
     gap: 0.25rem;
 
     li {
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         color: rgba(255, 255, 255, 0.85);
     }
 
