@@ -248,8 +248,7 @@ def get_page_changelog(log_fp: str, page_path: str, limit: int = 20) -> list[dic
     try:
         filtered.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
     except Exception as err:
-        logger.warning(f"Error sorting changelog for {page_path}: {err}")
-        pass
+        logger.warning(f"Error sorting changelog for {page_path}: {err}", exc_info=True)
     return filtered[:limit]
 
 
