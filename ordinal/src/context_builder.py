@@ -84,8 +84,6 @@ class EntryContext(TypedDict, total=False):
     outgoing_links_more: int
     backlinks_links: list[ConnectionEntry]
     backlinks_more: int
-    nearby_in_time: list[ConnectionEntry]
-    nearby_window_days: int
     page_meta: PageMeta
     content: str
     articles: list[ArticleEntry]
@@ -183,10 +181,8 @@ def build_revision_spark(slug: str) -> list[dict[str, float]]:
     return output
 
 
-CONNECTIONS_NEARBY_DAYS = 14
 CONNECTIONS_OUTGOING_CAP = 25
 CONNECTIONS_BACKLINKS_CAP = 25
-CONNECTIONS_NEARBY_CAP = 10
 
 
 @lru_cache(maxsize=1)
@@ -203,15 +199,6 @@ def _load_entry_index() -> dict[str, dict[str, str | None]]:
             "last_modified": str(last_modified) if last_modified else None,
         }
     return entries
-
-
-def _parse_frontmatter_datetime(value: Any) -> datetime | None:
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(str(value))
-    except Exception:
-        return None
 
 
 def _build_connection_entries(
@@ -232,38 +219,6 @@ def _build_connection_entries(
         )
     entries.sort(key=lambda e: e["title"].lower())
     return entries
-
-
-def _build_nearby_entries(
-    slug: str,
-    entry_index: dict[str, dict[str, str | None]],
-    window_days: int,
-) -> list[ConnectionEntry]:
-    current = entry_index.get(slug, {})
-    current_dt = _parse_frontmatter_datetime(current.get("last_modified"))
-    if not current_dt:
-        return []
-
-    candidates: list[tuple[int, str, ConnectionEntry]] = []
-    for other_slug, meta in entry_index.items():
-        if other_slug == slug:
-            continue
-        other_dt = _parse_frontmatter_datetime(meta.get("last_modified"))
-        if not other_dt:
-            continue
-        delta_days = abs((other_dt - current_dt).days)
-        if delta_days <= window_days:
-            title = meta.get("title") or other_slug
-            last_modified = meta.get("last_modified")
-            entry: ConnectionEntry = {
-                "slug": other_slug,
-                "title": str(title),
-                "last_modified": str(last_modified) if last_modified else None,
-            }
-            candidates.append((delta_days, entry["title"].lower(), entry))
-
-    candidates.sort(key=lambda item: (item[0], item[1]))
-    return [entry for _, _, entry in candidates[:CONNECTIONS_NEARBY_CAP]]
 
 
 def build_entry_context(
@@ -348,10 +303,6 @@ def build_entry_context(
         backlink_entries = _build_connection_entries(backlink_slugs, entry_index)
         outgoing_more = max(0, len(outgoing_entries) - CONNECTIONS_OUTGOING_CAP)
         backlink_more = max(0, len(backlink_entries) - CONNECTIONS_BACKLINKS_CAP)
-        nearby_entries = _build_nearby_entries(
-            slug, entry_index, CONNECTIONS_NEARBY_DAYS
-        )
-
         context: EntryContext = {
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
@@ -367,8 +318,6 @@ def build_entry_context(
             "outgoing_links_more": outgoing_more,
             "backlinks_links": backlink_entries[:CONNECTIONS_BACKLINKS_CAP],
             "backlinks_more": backlink_more,
-            "nearby_in_time": nearby_entries,
-            "nearby_window_days": CONNECTIONS_NEARBY_DAYS,
             "page_meta": {
                 "created_val": created_val or "N/A",
                 "domain_val": domain_val or "N/A",
