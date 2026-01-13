@@ -78,7 +78,7 @@
                 </div>
             </div>
 
-            <div class="content-grid wiki-grid">
+            <div class="content-grid wiki-grid{% if not toc %} no-toc{% endif %}">
                 {% if toc %}
                 <aside class="toc sticky-toc">
                     <h2>Outline</h2>
