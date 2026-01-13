@@ -34,7 +34,7 @@ from src.file_manager import (
     merge_image_dir,
     merge_video_dir,
 )
-from src.markdown_parser import parse_frontmatter
+from src.markdown_parser import parse_frontmatter, parse_articles
 from src.revisions import (
     compute_fingerprint,
     get_article_cache,
@@ -166,6 +166,14 @@ def scan_public_files() -> dict:
     return public_files
 
 
+def build_link_graph(backlinks: dict, outgoing_links: dict) -> None:
+    for fp in _walk_files(CONTENT_PATH, suffixes=(".md",)):
+        parsed = parse_frontmatter(str(fp))
+        content = parsed.get("content", "") or ""
+        slug = fp.relative_to(CONTENT_PATH).with_suffix("").as_posix()
+        parse_articles(content, slug, backlinks, outgoing_links)
+
+
 def update_activity_log() -> tuple[list[dict], list[dict]]:
     """
     Track created/modified/deleted generated HTML files and record events.
@@ -250,6 +258,7 @@ def process_file(
     output_fp: str,
     default_template: str,
     backlinks: dict,
+    outgoing_links: dict,
     commit: bool = False,
     commit_context: dict | None = None,
 ) -> bool:
@@ -266,6 +275,7 @@ def process_file(
             md_fp,
             default_template,
             backlinks,
+            outgoing_links,
             parsed_data,
         )
         frontmatter = context.get("frontmatter", {})
@@ -347,6 +357,7 @@ def generate_static_site(
         logger.info("Starting site generation.")
         categories = get_categories()
         backlinks = {}
+        outgoing_links = {}
         init_db()
         commit_context = {"bundle": commit_all, "shared_summary": summary, "commits": 0}
 
@@ -359,7 +370,12 @@ def generate_static_site(
         logger.info("Checking and generating missing markdown files.")
         generate_missing()
 
-        stats["index"] = 1 if process_index(backlinks, commit, commit_context) else 0
+        logger.info("Building link graph for connections.")
+        build_link_graph(backlinks, outgoing_links)
+
+        stats["index"] = (
+            1 if process_index(backlinks, outgoing_links, commit, commit_context) else 0
+        )
         stats["total"] += stats["index"]
 
         if category != "all" and category not in categories:
@@ -368,7 +384,7 @@ def generate_static_site(
 
         cats = categories if category == "all" else [category]
         for cat in cats:
-            count = process_category(cat, backlinks, commit, commit_context)
+            count = process_category(cat, backlinks, outgoing_links, commit, commit_context)
             stats["categories"][cat] = count
             stats["total"] += count
 
@@ -471,6 +487,7 @@ def _print_hash_diffs(diffs: list[dict]) -> None:
 def process_category(
     category: str,
     backlinks: dict,
+    outgoing_links: dict,
     commit: bool = False,
     commit_context: dict | None = None,
 ) -> int:
@@ -495,6 +512,7 @@ def process_category(
                     output_fp,
                     default_template,
                     backlinks,
+                    outgoing_links,
                     commit,
                     commit_context,
                 ):
@@ -507,6 +525,7 @@ def process_category(
 
 def process_index(
     backlinks: dict,
+    outgoing_links: dict,
     commit: bool = False,
     commit_context: dict | None = None,
 ) -> bool:
@@ -524,6 +543,7 @@ def process_index(
             str(index_output_fp),
             "index.html",
             backlinks,
+            outgoing_links,
             commit,
             commit_context,
         )

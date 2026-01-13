@@ -38,6 +38,7 @@
         }
 
         .brand-text {
+            font-family: "JetBrains Mono";
             text-align: center;
 
             h1 {
@@ -71,7 +72,7 @@
             letter-spacing: 0.12em;
             font-size: 1rem;
             font-weight: 700;
-            font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+            font-family: $font-mono;
 
             &:hover {
                 background: transparent;
@@ -164,7 +165,7 @@
     margin-top: 0.35rem;
 
     a {
-        font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+        font-family: $font-mono;
         text-transform: uppercase;
         letter-spacing: 0.12em;
         font-size: 0.85rem;
@@ -193,7 +194,7 @@
     background: rgba(0, 0, 0, 0.8);
     color: $accent-color;
     text-decoration: none;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-family: $font-mono;
     letter-spacing: 0.08em;
     font-size: 1.1rem;
     z-index: 50;

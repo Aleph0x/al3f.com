@@ -32,7 +32,7 @@
         </nav>
         <div class="now-line">
             <span class="now-text">
-                I beheld all the <span class="frag frag-box">mirrors</span> of the Earth, and none of them <span class="frag frag-ghost">reflected<span> me. 
+                I saw all the <span class="frag frag-box">mirrors</span> on the Earth, and none of them <span class="frag frag-ghost">reflected<span> me. 
             </span>
         </div>
     </header>
@@ -107,6 +107,81 @@
             </div>
         </section>
 
+        {% if outgoing_links or backlinks_links %}
+        <section class="panel connections-panel">
+            {% set outbound_total = (outgoing_links|length) + (outgoing_links_more if outgoing_links_more is defined else 0) %}
+            {% set inbound_total = (backlinks_links|length) + (backlinks_more if backlinks_more is defined else 0) %}
+            {% set max_total = [outbound_total, inbound_total, 1] | max %}
+            {% set bar_total = 6 %}
+            {% set outbound_blocks = ((outbound_total / max_total) * bar_total) | round(0, 'ceil') | int %}
+            {% set inbound_blocks = ((inbound_total / max_total) * bar_total) | round(0, 'ceil') | int %}
+            {% if outbound_blocks == 0 and outbound_total > 0 %}{% set outbound_blocks = 1 %}{% endif %}
+            {% if inbound_blocks == 0 and inbound_total > 0 %}{% set inbound_blocks = 1 %}{% endif %}
+            <div class="connections-head">
+                <p class="eyebrow">Connections</p>
+                <div class="connections-bars" aria-label="Connection counts">
+                    <div class="connections-bar">
+                        <span class="connections-label">Outbound</span>
+                        <span class="connections-blocks" aria-hidden="true">
+                            {% for _ in range(outbound_blocks) %}<span class="connections-block filled"></span>{% endfor %}
+                            {% for _ in range(bar_total - outbound_blocks) %}<span class="connections-block"></span>{% endfor %}
+                        </span>
+                        <span class="connections-count">{{ outbound_total }}</span>
+                    </div>
+                    <div class="connections-bar">
+                        <span class="connections-label">Inbound</span>
+                        <span class="connections-blocks" aria-hidden="true">
+                            {% for _ in range(inbound_blocks) %}<span class="connections-block filled"></span>{% endfor %}
+                            {% for _ in range(bar_total - inbound_blocks) %}<span class="connections-block"></span>{% endfor %}
+                        </span>
+                        <span class="connections-count">{{ inbound_total }}</span>
+                    </div>
+                </div>
+            </div>
+            {% if outgoing_links %}
+            <div class="connections-group">
+                <h3>Outbound</h3>
+                <ul class="connections-list">
+                    {% for entry in outgoing_links %}
+                    <li>
+                        <span class="conn-arrow" aria-hidden="true">&rarr;</span>
+                        <a href="/{{ entry.slug }}.html">{{ entry.title }}</a>
+                        {% if entry.last_modified %}<span class="conn-date">{{ entry.last_modified }}</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                    {% if outgoing_links_more > 0 %}
+                    <li class="conn-more">
+                        <span class="conn-arrow" aria-hidden="true">&rarr;</span>
+                        <span class="conn-more-text">+{{ outgoing_links_more }} more</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if backlinks_links %}
+            <div class="connections-group">
+                <h3>Referenced by</h3>
+                <ul class="connections-list">
+                    {% for entry in backlinks_links %}
+                    <li>
+                        <span class="conn-arrow" aria-hidden="true">&rarr;</span>
+                        <a href="/{{ entry.slug }}.html">{{ entry.title }}</a>
+                        {% if entry.last_modified %}<span class="conn-date">{{ entry.last_modified }}</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                    {% if backlinks_more > 0 %}
+                    <li class="conn-more">
+                        <span class="conn-arrow" aria-hidden="true">&rarr;</span>
+                        <span class="conn-more-text">+{{ backlinks_more }} more</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
         {% if footnotes %}
         <section class="panel footnotes">
             <h2>Footnotes</h2>
@@ -124,7 +199,7 @@
 
         {% if related_articles %}
         <section class="panel related-articles">
-            <h2>Related</h2>
+            <p class="eyebrow">Related</p>
             <ul>
                 {% for article in related_articles %}
                 <li><a href="/{{ article['url'] }}">{{ article['title'] }}</a></li>
@@ -135,7 +210,7 @@
 
         {% if page_changelog %}
         <section class="panel changelog-panel">
-            <h2>REVISIONS</h2>
+            <p class="eyebrow">Revisions</p>
             <div class="activity-list changelog-table timeline-list">
                 {% for entry in page_changelog %}
                 {% set dt_parts = entry.timestamp.split('T') %}

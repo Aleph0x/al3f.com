@@ -151,12 +151,14 @@ def parse_images(
         return md_content
 
 
+def _normalize_slug(value: str) -> str:
+    return value.replace(" ", "-").lower()
+
+
 def parse_backlink(source: str, target: str, backlinks: Dict[str, List[str]]) -> None:
     try:
-        source_key = (
-            os.path.splitext(os.path.basename(source))[0].replace(" ", "-").lower()
-        )
-        target_key = target.replace(" ", "-").lower()
+        source_key = _normalize_slug(source)
+        target_key = _normalize_slug(target)
 
         if source_key == "index":
             if target_key not in backlinks:
@@ -178,7 +180,10 @@ def parse_backlink(source: str, target: str, backlinks: Dict[str, List[str]]) ->
 
 
 def parse_wikilinks(
-    source_page: str, text: str, backlinks: Dict[str, List[str]]
+    source_page: str,
+    text: str,
+    backlinks: Dict[str, List[str]],
+    outgoing_links: Dict[str, set[str]] | None = None,
 ) -> str:
     try:
         category_cache: Dict[str, str] = {}
@@ -200,7 +205,10 @@ def parse_wikilinks(
             display_text = parts[1] if len(parts) > 1 and parts[1] else link_text
             slug = link_text.replace(" ", "-").lower()
             category = resolve_category(slug)
-            parse_backlink(source_page, link_text, backlinks)
+            target_slug = f"{category}/{slug}"
+            parse_backlink(source_page, target_slug, backlinks)
+            if outgoing_links is not None:
+                outgoing_links.setdefault(source_page, set()).add(target_slug)
             return f'<a href="/{category}/{slug}.html">{display_text}</a>'
 
         # Do not replace wikilinks inside inline code spans!
@@ -244,7 +252,10 @@ def count_body_words(text: str) -> int:
 
 
 def parse_articles(
-    md_content: str, page_name: str, backlinks: Dict[str, List[str]]
+    md_content: str,
+    page_name: str,
+    backlinks: Dict[str, List[str]],
+    outgoing_links_map: Dict[str, set[str]] | None = None,
 ) -> dict:
     articles = []
     current_article = None
@@ -285,7 +296,9 @@ def parse_articles(
         processed_content = parse_tables(processed_content)
 
         def render_inline(text_line: str) -> str:
-            processed_line = parse_wikilinks(page_name, text_line, backlinks)
+            processed_line = parse_wikilinks(
+                page_name, text_line, backlinks, outgoing_links_map
+            )
             processed_line = parse_external_links(processed_line)
             for placeholder, html_snippet in code_placeholders.items():
                 processed_line = processed_line.replace(placeholder, html_snippet)

@@ -63,6 +63,12 @@ class RelatedEntry(TypedDict):
     url: str
 
 
+class ConnectionEntry(TypedDict):
+    slug: str
+    title: str
+    last_modified: str | None
+
+
 class EntryContext(TypedDict, total=False):
     title: str
     description: str
@@ -74,6 +80,12 @@ class EntryContext(TypedDict, total=False):
     entry_word_count: int | None
     entry_guid: str
     revision_spark: list[dict[str, float]]
+    outgoing_links: list[ConnectionEntry]
+    outgoing_links_more: int
+    backlinks_links: list[ConnectionEntry]
+    backlinks_more: int
+    nearby_in_time: list[ConnectionEntry]
+    nearby_window_days: int
     page_meta: PageMeta
     content: str
     articles: list[ArticleEntry]
@@ -171,10 +183,94 @@ def build_revision_spark(slug: str) -> list[dict[str, float]]:
     return output
 
 
+CONNECTIONS_NEARBY_DAYS = 14
+CONNECTIONS_OUTGOING_CAP = 25
+CONNECTIONS_BACKLINKS_CAP = 25
+CONNECTIONS_NEARBY_CAP = 10
+
+
+@lru_cache(maxsize=1)
+def _load_entry_index() -> dict[str, dict[str, str | None]]:
+    entries: dict[str, dict[str, str | None]] = {}
+    for md_path in CONTENT_PATH.rglob("*.md"):
+        slug = md_path.relative_to(CONTENT_PATH).with_suffix("").as_posix()
+        parsed = parse_frontmatter(str(md_path))
+        frontmatter = parsed.get("frontmatter", {}) or {}
+        title = frontmatter.get("title") or slug
+        last_modified = frontmatter.get("last_modified")
+        entries[slug] = {
+            "title": str(title),
+            "last_modified": str(last_modified) if last_modified else None,
+        }
+    return entries
+
+
+def _parse_frontmatter_datetime(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value))
+    except Exception:
+        return None
+
+
+def _build_connection_entries(
+    slugs: list[str],
+    entry_index: dict[str, dict[str, str | None]],
+) -> list[ConnectionEntry]:
+    entries: list[ConnectionEntry] = []
+    for slug in slugs:
+        meta = entry_index.get(slug, {})
+        title = meta.get("title") or slug
+        last_modified = meta.get("last_modified")
+        entries.append(
+            {
+                "slug": slug,
+                "title": str(title),
+                "last_modified": str(last_modified) if last_modified else None,
+            }
+        )
+    entries.sort(key=lambda e: e["title"].lower())
+    return entries
+
+
+def _build_nearby_entries(
+    slug: str,
+    entry_index: dict[str, dict[str, str | None]],
+    window_days: int,
+) -> list[ConnectionEntry]:
+    current = entry_index.get(slug, {})
+    current_dt = _parse_frontmatter_datetime(current.get("last_modified"))
+    if not current_dt:
+        return []
+
+    candidates: list[tuple[int, str, ConnectionEntry]] = []
+    for other_slug, meta in entry_index.items():
+        if other_slug == slug:
+            continue
+        other_dt = _parse_frontmatter_datetime(meta.get("last_modified"))
+        if not other_dt:
+            continue
+        delta_days = abs((other_dt - current_dt).days)
+        if delta_days <= window_days:
+            title = meta.get("title") or other_slug
+            last_modified = meta.get("last_modified")
+            entry: ConnectionEntry = {
+                "slug": other_slug,
+                "title": str(title),
+                "last_modified": str(last_modified) if last_modified else None,
+            }
+            candidates.append((delta_days, entry["title"].lower(), entry))
+
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    return [entry for _, _, entry in candidates[:CONNECTIONS_NEARBY_CAP]]
+
+
 def build_entry_context(
     md_fp: str,
     default_template: str,
     backlinks: dict,
+    outgoing_links: dict,
     parsed_data: dict,
 ) -> EntryContext:
     logger.info(f"Building context for {md_fp}")
@@ -204,7 +300,7 @@ def build_entry_context(
             entry_drift = "NULL"
 
         footnotes_content, footnotes = parse_footnotes(raw_content)
-        articles = parse_articles(footnotes_content, os.path.basename(md_fp), backlinks)
+        articles = parse_articles(footnotes_content, slug, backlinks, outgoing_links)
         related_raw = parse_related(frontmatter)
         related = cast(list[RelatedEntry], related_raw)
         template_name = frontmatter.get("template", default_template)
@@ -245,6 +341,17 @@ def build_entry_context(
         )
         domain_val = "N/A" if domain_val is None else domain_val
 
+        entry_index = _load_entry_index()
+        outgoing_slugs = sorted(set(outgoing_links.get(slug, [])))
+        backlink_slugs = sorted(set(backlinks.get(slug, [])))
+        outgoing_entries = _build_connection_entries(outgoing_slugs, entry_index)
+        backlink_entries = _build_connection_entries(backlink_slugs, entry_index)
+        outgoing_more = max(0, len(outgoing_entries) - CONNECTIONS_OUTGOING_CAP)
+        backlink_more = max(0, len(backlink_entries) - CONNECTIONS_BACKLINKS_CAP)
+        nearby_entries = _build_nearby_entries(
+            slug, entry_index, CONNECTIONS_NEARBY_DAYS
+        )
+
         context: EntryContext = {
             "title": frontmatter.get("title", "Untitled"),
             "description": frontmatter.get("description", ""),
@@ -256,6 +363,12 @@ def build_entry_context(
             "entry_word_count": word_count,
             "entry_guid": entry_guid,
             "revision_spark": build_revision_spark(slug),
+            "outgoing_links": outgoing_entries[:CONNECTIONS_OUTGOING_CAP],
+            "outgoing_links_more": outgoing_more,
+            "backlinks_links": backlink_entries[:CONNECTIONS_BACKLINKS_CAP],
+            "backlinks_more": backlink_more,
+            "nearby_in_time": nearby_entries,
+            "nearby_window_days": CONNECTIONS_NEARBY_DAYS,
             "page_meta": {
                 "created_val": created_val or "N/A",
                 "domain_val": domain_val or "N/A",
@@ -269,9 +382,7 @@ def build_entry_context(
             "articles": articles.get("articles", []),
             "footnotes": footnotes,
             "toc": articles["toc"],
-            "backlinks": backlinks.get(
-                os.path.splitext(os.path.basename(md_fp))[0], []
-            ),
+            "backlinks": backlinks.get(slug, []),
             "external_links": parsed_data.get("external_links", []),
             "related_articles": related,
             "hero_image": header_image,

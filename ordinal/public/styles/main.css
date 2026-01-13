@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   margin: 0;
   padding: 0;
@@ -66,7 +67,7 @@ pre code {
 body.theme-aleph {
   background: #000000;
   color: #e0e0e0;
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family: "IBM Plex Serif", serif;
   letter-spacing: 0;
   position: relative;
   overflow-x: hidden;
@@ -128,6 +129,7 @@ body.theme-aleph::after {
   height: auto;
 }
 .masthead .brand .brand-text {
+  font-family: "JetBrains Mono";
   text-align: center;
 }
 .masthead .brand .brand-text h1 {
@@ -295,7 +297,7 @@ body.theme-aleph::after {
 .panel {
   border: 1px solid rgba(255, 255, 255, 0.6);
   padding: 1.5rem;
-  background: #050505;
+  background: #000000;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -412,6 +414,7 @@ body.theme-aleph::after {
   flex-direction: column;
   gap: 0.6rem;
   background: rgb(5.1, 5.1, 5.1);
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   transition: border 0.2s, transform 0.2s;
 }
 .card:hover {
@@ -733,7 +736,7 @@ header#site-banner nav ul li a {
   padding: 1.25rem;
   overflow-y: auto;
   border-right: 2px solid #f5f5f5;
-  font-family: monospace;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -868,6 +871,7 @@ footer {
 }
 
 .site-footer .footer-note {
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   max-width: 38rem;
   margin: 0.5rem auto 1.5rem;
   padding-bottom: 0.75rem;
@@ -962,7 +966,7 @@ footer {
   flex: 1 1 calc(50% - 1.5rem);
   padding: 1.5rem;
   border-left: 2px solid #f5f5f5;
-  background: rgb(12.75, 12.75, 12.75);
+  background: rgb(2.55, 2.55, 2.55);
   transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
 }
 .articles-list .article-entry:hover {
@@ -1027,59 +1031,62 @@ figure figcaption {
 .related-articles {
   max-width: 110ch;
   margin: 0.5rem auto;
-  padding: 0.5rem;
-  background-color: #000000;
+  padding: 0.25rem 0;
   color: #e0e0e0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
-  border-top: 1px solid #f5f5f5;
-  text-align: center;
+  text-align: left;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 .related-articles h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  margin: 0 0 0.85rem;
   color: #e0e0e0;
-  text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.05rem;
-  border-bottom: 1px solid #f5f5f5;
-  display: inline-block;
-  padding-bottom: 0.5rem;
+  letter-spacing: 0.18em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  padding-bottom: 0.45rem;
 }
 .related-articles ul {
   list-style: none;
   padding: 0;
-  margin: 0.5rem auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
+  margin: 0;
+  display: grid;
+  gap: 0;
 }
-.related-articles ul li {
-  flex: 1 1 calc(33.333% - 0.5rem);
-  max-width: calc(33.333% - 0.5rem);
-  padding: 0.2rem 0.5rem;
-  border-left: 2px solid #f5f5f5;
-  background-color: #000000;
-  text-align: center;
-  transition: border 0.2s ease-in-out, background 0.2s ease-in-out;
+.related-articles li {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
 }
-.related-articles ul li:hover {
-  border-left: 2px solid #000000;
-  background: black;
+.related-articles li:last-child {
+  border-bottom: none;
 }
-.related-articles ul li a {
+.related-articles li::before {
+  content: "→";
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.related-articles li a {
   color: #e0e0e0;
   text-decoration: none;
-  font-weight: bold;
-  border-bottom: 1px dotted #e0e0e0;
-  transition: color 0.2s, background-color 0.2s;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.2rem;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
 }
-.related-articles ul li a:hover {
-  color: #000000;
-  background-color: #ffffff;
+.related-articles li a:hover {
+  color: #000;
+  background-color: #e0e0e0;
+  border-bottom-color: #e0e0e0;
 }
-.related-articles ul li a:visited {
+.related-articles li a:visited {
   color: #494949;
   text-decoration: none;
 }
@@ -1135,7 +1142,7 @@ figure figcaption {
 
 .entry-guid {
   margin-top: 1.25rem;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
   text-align: right;
@@ -1357,9 +1364,9 @@ figure figcaption {
 /* Ultra-compact mobile layout (e.g., iPhone SE) */
 @media (max-width: 520px) {
   .panel {
-    border: none;
-    background: transparent;
-    padding: 0 0 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: #000000;
+    padding: 0.85rem;
   }
   .panel .panel-head {
     padding: 0 0 0.5rem;
@@ -1544,19 +1551,13 @@ figure figcaption {
   }
   /* Related */
   .related-articles ul {
-    display: flex;
-    gap: 0.45rem;
+    display: grid;
+    gap: 0;
     padding-left: 0;
-    list-style: none;
-    justify-items: center;
   }
   .related-articles li {
-    display: block;
-    border-left: none;
-    border-left: 0px solid #f5f5f5;
-    color: #e0e0e0;
-    text-decoration: none;
-    text-align: center;
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+    text-align: left;
   }
   /* Changelog */
   .section-table {
@@ -1730,12 +1731,13 @@ figure figcaption {
 .panel {
   border: 1px solid rgba(255, 255, 255, 0.6);
   padding: 1.5rem;
-  background: #050505;
+  background: #000000;
   width: 100%;
   position: relative;
   overflow: hidden;
   isolation: isolate;
   box-shadow: none;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 }
 .panel .panel-head {
   margin-bottom: 1rem;
@@ -2129,6 +2131,7 @@ figure figcaption {
   font-size: 1.02rem;
   line-height: 1.75;
   color: rgba(255, 255, 255, 0.699);
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 .prose p {
   text-indent: 0;
@@ -2295,9 +2298,152 @@ figure figcaption {
   shape-rendering: crispEdges;
 }
 
+.connections-panel {
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.changelog-panel {
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.connections-head {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.connections-head .eyebrow {
+  margin: 0;
+}
+
+.connections-bars {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.connections-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  color: #f5f5f5;
+}
+
+.connections-label {
+  min-width: 92px;
+}
+
+.connections-blocks {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.connections-block {
+  width: 14px;
+  height: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+}
+.connections-block.filled {
+  background: #f5f5f5;
+  border-color: #f5f5f5;
+}
+
+.connections-count {
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.08em;
+}
+
+.connections-group {
+  margin-top: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 0.85rem;
+  background: rgb(10.2, 10.2, 10.2);
+}
+.connections-group:first-of-type {
+  margin-top: 0;
+}
+
+.connections-group h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.connections-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.connections-list li {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  color: #e0e0e0;
+  padding: 0.45rem 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+}
+.connections-list li:last-child {
+  border-bottom: none;
+}
+
+.connections-list .conn-arrow {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.connections-list a {
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+}
+.connections-list a:hover {
+  border-bottom-color: #f5f5f5;
+}
+
+.connections-list .conn-date {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  letter-spacing: 0.08em;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.connections-list .conn-more {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.connections-list .conn-more-text {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 @media (max-width: 600px) {
   .revision-spark svg {
     max-width: 220px;
+  }
+  .connections-list li {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+  .connections-list .conn-date {
+    white-space: normal;
   }
 }
 .filter-row {
@@ -2405,6 +2551,7 @@ figure figcaption {
   display: grid;
   gap: 0.5rem;
   margin-top: 1rem;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 .changelog .changelog-head {
   display: grid;
@@ -2436,7 +2583,7 @@ figure figcaption {
   margin-top: 1.25rem;
   border: 1px solid rgba(245, 245, 245, 0.8);
   background: rgb(2.55, 2.55, 2.55);
-  font-family: "Roboto Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
 }
 .section-table .grid {
   display: grid;
@@ -2622,6 +2769,7 @@ figure figcaption {
   padding-left: 0;
   max-height: 640px;
   overflow-y: auto;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
 .commit-graph {
@@ -2716,7 +2864,7 @@ figure figcaption {
   flex-wrap: wrap;
 }
 .activity-summary .summary-label {
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.78rem;
@@ -2726,7 +2874,7 @@ figure figcaption {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   font-size: 0.78rem;
   color: #e0e0e0;
   border: none;
@@ -2753,7 +2901,7 @@ figure figcaption {
 .activity-summary .word-meta {
   display: inline-block;
   margin-top: 0.15rem;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   font-size: 0.85rem;
   letter-spacing: 0.08em;
   color: rgba(255, 255, 255, 0.78);
@@ -2769,7 +2917,7 @@ figure figcaption {
   flex-wrap: wrap;
   gap: 0.35rem;
   align-items: center;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0.08em;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
@@ -2786,7 +2934,7 @@ figure figcaption {
   flex-wrap: wrap;
   gap: 0.35rem;
   align-items: center;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0.08em;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
@@ -2798,7 +2946,7 @@ figure figcaption {
   background: #000;
   color: #f5f5f5;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0.08em;
   font-size: 0.78rem;
 }
@@ -2812,7 +2960,7 @@ figure figcaption {
   display: flex;
   background: #000;
   color: #e0e0e0;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0.08em;
   font-size: 1.2rem;
 }
@@ -2837,7 +2985,7 @@ figure figcaption {
   display: flex;
   gap: 0.35rem;
   align-items: center;
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0.08em;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
@@ -2849,7 +2997,7 @@ figure figcaption {
   padding: 0.15rem 0.45rem;
   border: 1px solid rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.08);
-  font-family: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   letter-spacing: 0.08em;
   font-size: 0.78rem;
 }
