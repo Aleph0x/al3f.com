@@ -1,6 +1,10 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
 from typing import Any
 
 
+@dataclass(frozen=True)
 class CommitRecord:
     id: int
     hash: str
@@ -15,9 +19,13 @@ class CommitRecord:
     meta: dict[str, Any]
 
 
+@dataclass(frozen=True)
 class ArticleCacheRecord:
-    pass
+    # stub for now
+    slug: str
 
 
+@dataclass(frozen=True)
 class WorkStats:
-    pass
+    worked_total: float
+    worked_delta: float

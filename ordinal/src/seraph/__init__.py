@@ -1,4 +1,4 @@
-from .api import Seraph
-from .models import CommitRecord, ArticleCacheRecord
+from .api import get_latest_commit
+from .models import CommitRecord
 
-__all__ = ["Seraph", "CommitRecord", "ArticleCacheRecord"]
+__all__ = ["get_latest_commit", "CommitRecord"]
