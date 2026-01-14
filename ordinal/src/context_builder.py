@@ -7,13 +7,13 @@ from typing import Any, Dict, TypedDict, cast
 
 from src.base_utils import content_dir
 from src.revisions import (
-    get_latest_commit,
-    get_previous_commit,
     get_entry_guid,
     get_entry_fingerprint,
     get_changelog,
     get_global_changelog,
 )
+from src.seraph.api import get_latest_commit, get_previous_commit
+
 from src.file_manager import get_categories
 from src.media_helpers import derive_header_image, get_recent_media
 from src.activity_helpers import get_commit_activity
@@ -30,6 +30,7 @@ from src.base_utils import setup_logger
 
 logger = setup_logger("context_builder", "logs/context_builder.log")
 CONTENT_PATH = Path(content_dir)
+SERAPH_DB_PATH = str(CONTENT_PATH / ".revisions" / "revisions.db")
 
 
 class PageMeta(TypedDict):
@@ -236,11 +237,11 @@ def build_entry_context(
         slug = _slug_from_path(md_fp)
         entry_fingerprint = get_entry_fingerprint(slug) or ""
         entry_guid = get_entry_guid(slug)
-        latest_commit_row = get_latest_commit(slug)
-        prev_commit_row = get_previous_commit(slug)
+        latest_commit = get_latest_commit(SERAPH_DB_PATH, slug)
+        prev_commit = get_previous_commit(SERAPH_DB_PATH, slug)
 
         entry_drift = "—"
-        latest_cache_ts = latest_commit_row["timestamp"] if latest_commit_row else None
+        latest_cache_ts = latest_commit.timestamp if latest_commit else None
         if latest_cache_ts:
             try:
                 last_dt = datetime.fromisoformat(str(latest_cache_ts))
@@ -266,31 +267,26 @@ def build_entry_context(
         tags = normalize_tags(frontmatter.get("tags", []))
         header_image = derive_header_image(frontmatter, raw_content)
         worked_val, worked_delta = compute_worked(
-            frontmatter, latest_commit_row, prev_commit_row
+            frontmatter, latest_commit, prev_commit
         )
 
-        latest_meta_raw = (
-            latest_commit_row["meta_json"]
-            if latest_commit_row and latest_commit_row["meta_json"]
-            else None
-        )
-        latest_meta = json.loads(latest_meta_raw) if latest_meta_raw else {}
+        meta = latest_commit.meta if latest_commit else {}
         word_count = None
-        if latest_commit_row and latest_commit_row["word_count"] is not None:
+        if latest_commit and latest_commit.word_count is not None:
             try:
-                word_count = int(latest_commit_row["word_count"])
+                word_count = int(latest_commit.word_count)
             except Exception as err:
                 logger.error(
                     f"Failed parsing word_count for {slug}: {err}", exc_info=True
                 )
-        domain_val = frontmatter.get("domain", latest_meta.get("domain", "N/A"))
-        division_val = frontmatter.get("division", latest_meta.get("division", []))
+        domain_val = frontmatter.get("domain", meta.get("domain", "N/A"))
+        division_val = frontmatter.get("division", meta.get("division", []))
         if isinstance(division_val, str):
             division_val = [division_val]
         created_val = str(
             _first_nonempty(
                 frontmatter.get("created"),
-                latest_commit_row["created"] if latest_commit_row else None,
+                latest_commit.created if latest_commit else None,
                 "N/A",
             )
         )
