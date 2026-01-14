@@ -18,3 +18,12 @@ def fetch_latest_commit(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | No
     except Exception as e:
         logger.error("Failed to fetch latest commit for slug %s: %s", slug, e)
         return None
+
+
+def fetch_previous_commit(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | None:
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM commits WHERE slug = ? ORDER BY timestamp DESC LIMIT 1 OFFSET 1",
+        (slug,),
+    )
+    return cur.fetchone()

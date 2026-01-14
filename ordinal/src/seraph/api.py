@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from .db import connect
-from .queries import fetch_latest_commit
+from .queries import fetch_latest_commit, fetch_previous_commit
 from .convert import row_to_commit
 from .models import ArticleCacheRecord, CommitRecord, WorkStats
 
@@ -27,7 +27,9 @@ def list_articles(db_path: str) -> list[ArticleCacheRecord]:
 
 
 def get_previous_commit(db_path: str, slug: str) -> CommitRecord | None:
-    raise NotImplementedError
+    with connect(db_path) as conn:
+        row = fetch_previous_commit(conn, slug)
+        return row_to_commit(row) if row else None
 
 
 def get_changelog(

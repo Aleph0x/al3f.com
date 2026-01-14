@@ -5,6 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, TypedDict, cast
 
+
 from src.base_utils import content_dir
 from src.revisions import (
     get_entry_guid,
@@ -13,6 +14,7 @@ from src.revisions import (
     get_global_changelog,
 )
 from src.seraph.api import get_latest_commit, get_previous_commit
+from src.seraph.models import CommitRecord
 
 from src.file_manager import get_categories
 from src.media_helpers import derive_header_image, get_recent_media
@@ -122,37 +124,39 @@ def normalize_tags(tags):
     return tags if isinstance(tags, list) else []
 
 
-def compute_worked(frontmatter, latest_commit_row, prev_commit_row):
+def compute_worked(
+    latest_commit: CommitRecord | None,
+    prev_commit: CommitRecord | None,
+) -> tuple[float, float]:
     def _to_float(val):
         return _safe_float(val, default=0.0)
 
     try:
-        worked_val = _to_float(frontmatter.get("worked", 0))
+        latest_work = (
+            _to_float(latest_commit.worked_hours)
+            if latest_commit and latest_commit.worked_hours is not None
+            else 0.0
+        )
     except Exception as err:
         logger.error(
-            f"Failed to parse worked hours from frontmatter: {err}", exc_info=True
+            f"Failed to parse worked_hours from latest commit: {err}", exc_info=True
         )
-        worked_val = 0.0
+        latest_work = 0.0
 
-    if latest_commit_row is not None:
-        try:
-            worked_val = _to_float(latest_commit_row["worked_hours"] or 0.0)
-        except Exception as err:
-            logger.error(
-                f"Failed to parse worked_hours from latest commit: {err}", exc_info=True
-            )
+    try:
+        prev_work = (
+            _to_float(prev_commit.worked_hours)
+            if prev_commit and prev_commit.worked_hours is not None
+            else 0.0
+        )
+    except Exception as err:
+        logger.error(
+            f"Failed to parse worked_hours from previous commit: {err}", exc_info=True
+        )
+        prev_work = 0.0
 
-    worked_delta = 0.0
-    if latest_commit_row and prev_commit_row:
-        try:
-            latest_work = _to_float(latest_commit_row["worked_hours"] or 0)
-            prev_work = _to_float(prev_commit_row["worked_hours"] or 0)
-            worked_delta = latest_work - prev_work
-        except Exception as err:
-            logger.error(f"Failed computing worked delta: {err}", exc_info=True)
-            worked_delta = 0.0
-
-    return worked_val, worked_delta
+    worked_delta = latest_work - prev_work
+    return latest_work, worked_delta
 
 
 def build_revision_spark(slug: str) -> list[dict[str, float]]:
@@ -266,9 +270,7 @@ def build_entry_context(
 
         tags = normalize_tags(frontmatter.get("tags", []))
         header_image = derive_header_image(frontmatter, raw_content)
-        worked_val, worked_delta = compute_worked(
-            frontmatter, latest_commit, prev_commit
-        )
+        worked_val, worked_delta = compute_worked(latest_commit, prev_commit)
 
         meta = latest_commit.meta if latest_commit else {}
         word_count = None
