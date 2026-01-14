@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .db import connect
 
 import logging
 import sqlite3
@@ -21,9 +22,22 @@ def fetch_latest_commit(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | No
 
 
 def fetch_previous_commit(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | None:
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM commits WHERE slug = ? ORDER BY timestamp DESC LIMIT 1 OFFSET 1",
-        (slug,),
-    )
-    return cur.fetchone()
+    try:
+        logger.info("Fetching previous commit for slug=%s", slug)
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT *
+            FROM commits
+            WHERE slug = ?
+            ORDER BY timestamp DESC
+            LIMIT 1 OFFSET 1
+            """,
+            (slug,),
+        )
+        return cursor.fetchone()
+    except Exception as err:
+        logger.error(
+            "Error fetching previous commit for %s: %s", slug, err, exc_info=True
+        )
+        return None
