@@ -7,16 +7,17 @@ from typing import Any
 from src.base_utils import content_dir, setup_logger
 from src.markdown_parser import parse_frontmatter
 from src.media_helpers import derive_header_image
-from src.revisions import (
-    compute_fingerprint,
-    get_global_changelog,
-    get_latest_commit,
-    list_articles,
+from src.revisions import compute_fingerprint, get_global_changelog, list_articles
+from src.seraph import get_latest_commit
+
+
+logger = setup_logger(
+    "taxonomy", os.path.join(os.path.dirname(__file__), "..", "logs", "taxonomy.log")
 )
 
-
-logger = setup_logger("taxonomy", os.path.join(os.path.dirname(__file__), "..", "logs", "taxonomy.log"))
-ARTICLES_PATH = Path(content_dir) / "articles"
+CONTENT_PATH = Path(content_dir)
+SERAPH_DB_PATH = str(CONTENT_PATH / ".revisions" / "revisions.db")
+ARTICLES_PATH = CONTENT_PATH / "articles"
 
 
 def get_articles_list() -> dict:
@@ -32,7 +33,9 @@ def get_articles_list() -> dict:
         try:
             parsed_data = parse_frontmatter(str(md_path))
         except Exception as err:
-            logger.error(f"Error parsing frontmatter for {md_path}: {err}", exc_info=True)
+            logger.error(
+                f"Error parsing frontmatter for {md_path}: {err}", exc_info=True
+            )
             continue
 
         frontmatter = parsed_data.get("frontmatter", {}) or {}
@@ -40,14 +43,14 @@ def get_articles_list() -> dict:
 
         title = frontmatter.get("title", md_path.stem.replace("-", " ").title())
         description = frontmatter.get("description", "")
-        slug = md_path.stem
+        slug = md_path.relative_to(CONTENT_PATH).with_suffix("").as_posix()
         cache = cache_lookup.get(slug, {})
         domain = frontmatter.get("domain", "Miscellaneous")
         division_val = frontmatter.get("division", [])
         if isinstance(division_val, str):
             division_val = [division_val]
         division = division_val
-        url = f"/articles/{md_path.with_suffix('.html').name}"
+        url = f"/{slug}.html"
         header_image = derive_header_image(frontmatter, content)
         fingerprint = cache.get("last_hash")
         worked_hours = None
@@ -55,29 +58,32 @@ def get_articles_list() -> dict:
 
         latest_commit = None
         try:
-            latest_commit = get_latest_commit(slug)
+            latest_commit = get_latest_commit(SERAPH_DB_PATH, slug)
             if latest_commit:
-                worked_hours = _safe_float(latest_commit["worked_hours"], default=0.0)
-                if latest_commit["word_count"] is not None:
-                    word_count = int(latest_commit["word_count"])
+                worked_hours = _safe_float(latest_commit.worked_hours, default=0.0)
+                if latest_commit.word_count is not None:
+                    word_count = int(latest_commit.word_count)
         except Exception as err:
             logger.error(f"Error getting latest commit data for {slug}: {err}")
 
         last_modified = _first_nonempty(
-            latest_commit["timestamp"] if latest_commit else None,
+            latest_commit.timestamp if latest_commit else None,
             cache.get("last_timestamp"),
             cache.get("created"),
             frontmatter.get("last_modified"),
             frontmatter.get("created"),
             "",
         )
+
         if isinstance(last_modified, (datetime, date)):
             last_modified = last_modified.isoformat()
-        elif last_modified is None:
-            last_modified = ""
+        last_modified = _date_only(last_modified)
+
         entry_drift = (
-            _compute_drift(latest_commit["timestamp"])
-            if latest_commit and latest_commit["timestamp"]
+            _compute_drift(
+                latest_commit.timestamp if latest_commit else None,
+            )
+            if latest_commit and latest_commit.timestamp
             else None
         )
 
@@ -90,9 +96,14 @@ def get_articles_list() -> dict:
             try:
                 fingerprint = compute_fingerprint(str(md_path))
             except Exception as err:
-                logger.error(f"Error computing fallback fingerprint for {slug}: {err}", exc_info=True)
+                logger.error(
+                    f"Error computing fallback fingerprint for {slug}: {err}",
+                    exc_info=True,
+                )
 
-        is_recent_entry = _frontmatter_flag(frontmatter, "is_recent_entry", default=True)
+        is_recent_entry = _frontmatter_flag(
+            frontmatter, "is_recent_entry", default=True
+        )
 
         categorized_articles[domain].append(
             {
@@ -107,7 +118,7 @@ def get_articles_list() -> dict:
                 "entry_fingerprint": fingerprint,
                 "fingerprint": fingerprint,
                 "entry_drift": entry_drift,
-                "drift": cache.get("last_timestamp"),
+                "last_timestamp": cache.get("last_timestamp"),
                 "worked_hours": worked_hours,
                 "word_count": word_count,
                 "is_recent_entry": is_recent_entry,
@@ -132,10 +143,14 @@ def _compute_drift(last_ts: Any) -> str | None:
         return None
     try:
         last_dt = datetime.fromisoformat(str(last_ts))
-        now_dt = datetime.utcnow() if last_dt.tzinfo is None else datetime.now(timezone.utc)
+        now_dt = (
+            datetime.utcnow() if last_dt.tzinfo is None else datetime.now(timezone.utc)
+        )
         return f"{max((now_dt - last_dt).days, 0)}d"
     except Exception as err:
-        logger.error(f"Error computing drift for timestamp {last_ts}: {err}", exc_info=True)
+        logger.error(
+            f"Error computing drift for timestamp {last_ts}: {err}", exc_info=True
+        )
         return None
 
 
@@ -144,6 +159,13 @@ def _first_nonempty(*values: Any) -> Any:
         if val not in (None, "", "N/A"):
             return val
     return None
+
+
+def _date_only(value: Any) -> str:
+    if not value:
+        return ""
+    s = str(value)
+    return s.split("T", 1)[0].split(" ", 1)[0]
 
 
 def _safe_float(val: Any, default: float | None = 0.0) -> float | None:

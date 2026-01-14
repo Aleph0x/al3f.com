@@ -383,7 +383,9 @@ def generate_static_site(
 
         cats = categories if category == "all" else [category]
         for cat in cats:
-            count = process_category(cat, backlinks, outgoing_links, commit, commit_context)
+            count = process_category(
+                cat, backlinks, outgoing_links, commit, commit_context
+            )
             stats["categories"][cat] = count
             stats["total"] += count
 
